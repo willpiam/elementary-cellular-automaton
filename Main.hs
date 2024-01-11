@@ -3,10 +3,8 @@ module Main where
 import Control.Monad -- allows use of `when`
 import Numeric -- (showIntAtBase)
 import Data.Char -- (intToDigit)
-import qualified Data.Text as Text
 import Data.Time.Clock.POSIX (getPOSIXTime)
 
--- | Get the current system time in milliseconds.
 getCurrentTimeInMs :: IO Integer
 getCurrentTimeInMs = do
   now <- getPOSIXTime
@@ -57,13 +55,9 @@ generateLine prev rule making limit initialConditionLength =
     then
       padGen making (limit - 1 + initialConditionLength)
     else do
-      -- get substring of previous state
-      let substr = drop (length making - 1) (take ((length making - 1)+3) prev)
-      -- make sure its 3 chars long -- pad if needed 
-      let psubstr = ensureLengthThree substr making
-      -- grow 'making' by adding the result of 'calculate cell'
+      let substr = drop (length making - 1) (take ((length making - 1)+3) prev) -- get substring of previous state
+      let psubstr = ensureLengthThree substr making -- pad if needed to ensure length of three
       let newmaking = making ++ calculateCell psubstr rule
-      -- recursivly call generateLine
       generateLine prev rule newmaking limit initialConditionLength
 
 generate :: String -> String -> Int -> Int -> String -> Int -> String
@@ -72,9 +66,6 @@ generate prev rule count limit state initialConditionLength
   | otherwise = do
     let thisLine = generateLine prev rule "" limit initialConditionLength
     generate thisLine rule (count + 1) limit (state ++ "\n" ++ thisLine) initialConditionLength
-
-stringReplace :: String -> String -> String -> String
-stringReplace body old new = Text.unpack (Text.replace (Text.pack old) (Text.pack new) (Text.pack body))
 
 parseNumberWithDefault :: Integer -> String -> Integer
 parseNumberWithDefault def s
@@ -85,13 +76,6 @@ initialConditionsOrDefault :: String -> String
 initialConditionsOrDefault condition 
   | null condition = "010"
   | otherwise = condition
-
-inputYes :: String -> Bool
-inputYes input
-  | null input = False
-  | head input == 'y' = True
-  | head input == 'Y' = True
-  | otherwise = False
 
 -- Modified main function to read from a file
 main :: IO ()
