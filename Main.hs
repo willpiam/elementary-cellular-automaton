@@ -78,8 +78,9 @@ stringReplace :: String -> String -> String -> String
 stringReplace body old new = Text.unpack (Text.replace (Text.pack old) (Text.pack new) (Text.pack body))
 
 numOrDefault :: String -> Integer
-numOrDefault n = if null n then 30
-  else read n :: Integer
+numOrDefault n 
+  | null n = 30
+  | otherwise = read n :: Integer
 
 initialConditionsOrDefault :: String -> String
 initialConditionsOrDefault cond = if null cond then "010"

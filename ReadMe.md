@@ -53,6 +53,8 @@ Todo:
 
     [] ensure no memory leaks in C program
     [] ensure no memory leaks in C++ program
+    [] Write a script to run a subset of these programs with various inputs and record their times 
+
 ## Testing for memory leaks
 
 **C++** *with Valgrind*
