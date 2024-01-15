@@ -20,7 +20,7 @@ Run Python code:
 
 Run C# code:
 
-    mcs -out:results/csharpVersion Main.cs ; mono results/csharpVersion
+    mcs -out:results/programcsharp Main.cs ; mono results/programcsharp
 
 Notice:
 
