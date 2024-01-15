@@ -15,3 +15,6 @@ ghc -odir results -hidir results Main.hs -o results/programhaskell
 
 # Python implementation
 python3 Main.py 
+
+# C# implementation
+mcs -out:results/csharpVersion Main.cs ; mono results/csharpVersion

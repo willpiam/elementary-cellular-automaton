@@ -18,6 +18,10 @@ Run Python code:
 
     python3 Main.py 
 
+Run C# code:
+
+    mcs -out:results/csharpVersion Main.cs ; mono results/csharpVersion
+
 Notice:
 
     You may need to manually create the `results` directory.
