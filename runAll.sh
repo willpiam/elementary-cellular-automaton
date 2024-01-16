@@ -27,3 +27,6 @@ rustc Main.rs -o results/programrust
 # Scala 3 implementation
 scalac -d ./results Main.scala 
 scala -cp ./results CellularAutomaton
+
+# Go implementation
+go run Main.go
