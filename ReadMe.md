@@ -22,6 +22,10 @@ Run C# code:
 
     mcs -out:results/programcsharp Main.cs ; mono results/programcsharp
 
+Run Rust code:
+
+    rustc Main.rs -o results/programrust ; ./results/programrust 
+
 Notice:
 
     You may need to manually create the `results` directory.
@@ -72,3 +76,4 @@ Todo:
 ## Languages To Add
 
     [] Scala 3
+    [] Rust
