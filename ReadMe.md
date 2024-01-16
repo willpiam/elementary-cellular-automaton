@@ -30,6 +30,10 @@ Run Scala 3 code:
 
     scalac -d ./results Main.scala ; scala -cp ./results CellularAutomaton
 
+Run Go code:
+
+    go run Main.go
+
 Notice:
 
     You may need to manually create the `results` directory.
@@ -79,7 +83,6 @@ Todo:
 
 ## Languages To Add
 
-    [] Scala 3
     [] Java
     [] Lisp (common lisp)
     [] Go

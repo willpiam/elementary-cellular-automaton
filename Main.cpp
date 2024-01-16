@@ -9,9 +9,8 @@ std::vector<int> ruleToBinaryArray(const int ruleNumber) {
     std::bitset<8> binary(ruleNumber);
     std::vector<int> ruleBinary(8);
 
-    for (int i = 0; i < 8; i++) {
+    for (int i = 0; i < 8; i++) 
         ruleBinary[i] = binary[i];
-    }
 
     return ruleBinary;
 }
@@ -23,9 +22,8 @@ int calculateCell(const std::string &neighborhood, const std::vector<int> &ruleB
 
 std::vector<std::vector<int>> runCellularAutomaton(const int ruleNumber, const int generations, const std::string &initialConditions, const std::chrono::high_resolution_clock::time_point start) {
     std::vector<int> cells;
-    for (char bit : initialConditions) {
+    for (char bit : initialConditions) 
         cells.push_back(bit == '1' ? 1 : 0);
-    }
 
     std::vector<int> ruleBinary = ruleToBinaryArray(ruleNumber);
     int imageWidth = cells.size() + 2 * generations;
@@ -65,9 +63,8 @@ void outputToFile(const std::vector<std::vector<int>> &automatonData, const int 
     file << "P1\n" << imageWidth << " " << generations << "\n";
 
     for (const auto &row : automatonData) {
-        for (int cell : row) {
+        for (int cell : row) 
             file << (cell ? '1' : '0');
-        }
         file << '\n';
     }
 
