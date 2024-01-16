@@ -19,3 +19,11 @@ python3 Main.py
 # C# implementation
 mcs -out:results/programcsharp Main.cs 
 mono results/programcsharp
+
+# Rust implementation
+rustc Main.rs -o results/programrust
+./results/programrust 
+
+# Scala 3 implementation
+scalac -d ./results Main.scala 
+scala -cp ./results CellularAutomaton

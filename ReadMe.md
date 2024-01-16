@@ -26,6 +26,10 @@ Run Rust code:
 
     rustc Main.rs -o results/programrust ; ./results/programrust 
 
+Run Scala 3 code:
+
+    scalac -d ./results Main.scala ; scala -cp ./results CellularAutomaton
+
 Notice:
 
     You may need to manually create the `results` directory.
@@ -76,4 +80,16 @@ Todo:
 ## Languages To Add
 
     [] Scala 3
-    [] Rust
+    [] Java
+    [] Lisp (common lisp)
+    [] Go
+    [] Kotlin
+    [] Clojure
+    [] Wolfram Language
+    [] Lean (??)
+    [] Agda (??)
+    [] Idris (??)
+
+## Other variations
+
+    It might be fun to write another C++ version with a more functional style
