@@ -20,7 +20,7 @@ int calculateCell(const std::string &neighborhood, const std::vector<int> &ruleB
     return ruleBinary[index];
 }
 
-std::vector<std::vector<int>> runCellularAutomaton(const int ruleNumber, const int generations, const std::string &initialConditions, const std::chrono::high_resolution_clock::time_point start) {
+std::vector<std::vector<int>> runCellularAutomaton(const int ruleNumber, const int generations, const std::string &initialConditions) {
     std::vector<int> cells;
     for (char bit : initialConditions) 
         cells.push_back(bit == '1' ? 1 : 0);
@@ -49,9 +49,6 @@ std::vector<std::vector<int>> runCellularAutomaton(const int ruleNumber, const i
         cells = nextGeneration;
     }
 
-    auto end = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double, std::milli> duration = end - start;
-    std::cout << "Took " << duration.count() << "ms to generate " << generations << " generations of rule " << ruleNumber << std::endl;
 
     return automatonData;
 }
@@ -88,9 +85,14 @@ int main() {
 
     auto start = std::chrono::high_resolution_clock::now();
 
-    std::vector<std::vector<int>> automatonData = runCellularAutomaton(ruleNumber, generations, initialConditions, start);
-    outputToFile(automatonData, ruleNumber, generations, initialConditions);
+    std::vector<std::vector<int>> automatonData = runCellularAutomaton(ruleNumber, generations, initialConditions);
 
+    auto end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double, std::milli> duration = end - start;
+    std::cout << "Took " << duration.count() << "ms to generate " << generations << " generations of rule " << ruleNumber << std::endl;
+
+    outputToFile(automatonData, ruleNumber, generations, initialConditions);
+    
     std::cout << "Done!" << std::endl;
 
     return 0;
