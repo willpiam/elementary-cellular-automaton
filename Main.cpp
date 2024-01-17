@@ -87,12 +87,19 @@ int main() {
 
     std::vector<std::vector<int>> automatonData = runCellularAutomaton(ruleNumber, generations, initialConditions);
 
-    auto end = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double, std::milli> duration = end - start;
-    std::cout << "Took " << duration.count() << "ms to generate " << generations << " generations of rule " << ruleNumber << std::endl;
+    auto endCalculation = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double, std::milli> durationOfCalculation = endCalculation - start;
+    std::cout << "Took " << durationOfCalculation.count() << "ms to generate " << generations << " generations of rule " << ruleNumber << std::endl;
 
     outputToFile(automatonData, ruleNumber, generations, initialConditions);
     
+    auto endOutput = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double, std::milli> durationOfOutput = endOutput - endCalculation;
+    std::cout << "Took " << durationOfOutput.count() << "ms to save results" << std::endl; 
+
+    std::chrono::duration<double, std::milli> durationWhole = endOutput - start;
+    std::cout << "Took " << durationWhole.count() << "ms in total" << std::endl;
+
     std::cout << "Done!" << std::endl;
 
     return 0;
