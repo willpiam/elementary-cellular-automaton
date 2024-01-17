@@ -53,18 +53,35 @@ std::vector<std::vector<int>> runCellularAutomaton(const int ruleNumber, const i
     return automatonData;
 }
 
-void outputToFile(const std::vector<std::vector<int>> &automatonData, const int ruleNumber, const int generations, const std::string &initialConditions) {
-    int imageWidth = automatonData.empty() ? 0 : automatonData[0].size();
+// void outputToFile(const std::vector<std::vector<int>> &automatonData, const int ruleNumber, const int generations, const std::string &initialConditions) {
+//     int imageWidth = automatonData.empty() ? 0 : automatonData[0].size();
 
-    std::ofstream file("results/r" + std::to_string(ruleNumber) + "_g" + std::to_string(generations) + "_i" + initialConditions + "_cpp.pbm");
-    file << "P1\n" << imageWidth << " " << generations << "\n";
+//     std::ofstream file("results/r" + std::to_string(ruleNumber) + "_g" + std::to_string(generations) + "_i" + initialConditions + "_cpp.pbm");
+//     file << "P1\n" << imageWidth << " " << generations << "\n";
+
+//     for (const auto &row : automatonData) {
+//         for (int cell : row) 
+//             file << (cell ? '1' : '0');
+//         file << '\n';
+//     }
+
+//     file.close();
+// }
+void outputToFile(const std::vector<std::vector<int>> &automatonData, const int ruleNumber, const int generations, const std::string &initialConditions) {
+    if (automatonData.empty()) return;
+
+    int imageWidth = automatonData[0].size();
+    std::string output = "P1\n" + std::to_string(imageWidth) + " " + std::to_string(generations) + "\n";
 
     for (const auto &row : automatonData) {
-        for (int cell : row) 
-            file << (cell ? '1' : '0');
-        file << '\n';
+        for (int cell : row) {
+            output += (cell ? '1' : '0');
+        }
+        output += '\n';
     }
 
+    std::ofstream file("results/r" + std::to_string(ruleNumber) + "_g" + std::to_string(generations) + "_i" + initialConditions + "_cpp.pbm");
+    file << output;
     file.close();
 }
 
