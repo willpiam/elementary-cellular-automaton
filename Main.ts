@@ -21,10 +21,7 @@ function calculateCell(pState: string, rule: RuleArray): number {
 
 const startTimer = () => {
     const start = performance.now();
-    return () => {
-        const end = performance.now();
-        return end - start;
-    }
+    return () => performance.now() - start;
 }
 
 async function runCellularAutomaton(ruleNumber: number, generations: number, initialConditions: string): Promise<void> {
