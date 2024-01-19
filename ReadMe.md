@@ -34,6 +34,10 @@ Run Go code:
 
     go run Main.go
 
+Run Clojure code:
+
+    clojure Main.clj
+
 Notice:
 
     You may need to manually create the `results` directory.
@@ -83,15 +87,14 @@ Todo:
 
 ## Languages To Add
 
-    [] Java
-    [] Lisp (common lisp)
-    [] Go
-    [] Kotlin
-    [] Clojure
-    [] Wolfram Language
-    [] Lean (??)
-    [] Agda (??)
-    [] Idris (??)
+    [ ] Java
+    [ ] Lisp (common lisp)
+    [ ] Kotlin
+    [ ] Clojure
+    [ ] Wolfram Language
+    [ ] Lean (??)
+    [ ] Agda (??)
+    [ ] Idris (??)
 
 ## Other variations
 
