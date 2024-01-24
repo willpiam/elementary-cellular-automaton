@@ -1,8 +1,7 @@
 type RuleArray = [number, number, number, number, number, number, number, number];
 
 function ruleToBinaryArray(ruleNumber: number): RuleArray {
-    let binaryString = ruleNumber.toString(2).padStart(8, '0');
-    return binaryString.split('').map(bit => parseInt(bit, 10)) as RuleArray;
+    return ruleNumber.toString(2).padStart(8, '0').split('').map(bit => parseInt(bit, 10)) as RuleArray;
 }
 
 function calculateCell(pState: string, rule: RuleArray): number {
@@ -27,28 +26,28 @@ const startTimer = () => {
 async function runCellularAutomaton(ruleNumber: number, generations: number, initialConditions: string): Promise<void> {
     let cells = initialConditions.split('').map(bit => parseInt(bit, 10));
 
-    let ruleBinary = ruleToBinaryArray(ruleNumber);
+    const ruleBinary = ruleToBinaryArray(ruleNumber);
 
     // Calculate image width: initial conditions length + 2 cells for each generation
-    let imageWidth = cells.length + 2 * generations;
+    const imageWidth = cells.length + 2 * generations;
     let imageData = `P1\n${imageWidth} ${generations}\n`;
 
     const timer = startTimer();
 
     for (let i = 0; i < generations; i++) {
         // Calculate padding to center the cells
-        let paddingLength = Math.floor((imageWidth - cells.length) / 2);
-        let padding = Array(paddingLength).fill(0);
-        let extendedCells = [...padding, ...cells, ...padding];
+        const paddingLength = Math.floor((imageWidth - cells.length) / 2);
+        const padding = Array(paddingLength).fill(0);
+        const extendedCells = [...padding, ...cells, ...padding];
 
         imageData += extendedCells.map(cell => cell ? '1' : '0').join('') + '\n';
 
-        let nextGeneration: number[] = [];
+        const nextGeneration: number[] = [];
         for (let j = 1; j < extendedCells.length - 1; j++) {
-            let leftNeighbor = extendedCells[j - 1];
-            let currentCell = extendedCells[j];
-            let rightNeighbor = extendedCells[j + 1];
-            let neighborhood = '' + leftNeighbor + currentCell + rightNeighbor;
+            const leftNeighbor = extendedCells[j - 1];
+            const currentCell = extendedCells[j];
+            const rightNeighbor = extendedCells[j + 1];
+            const neighborhood = '' + leftNeighbor + currentCell + rightNeighbor;
             nextGeneration[j - 1] = calculateCell(neighborhood, ruleBinary);
         }
         cells = nextGeneration;

@@ -30,3 +30,6 @@ scala -cp ./results CellularAutomaton
 
 # Go implementation
 go run Main.go
+
+# Clojure implementation
+clojure Main.clj

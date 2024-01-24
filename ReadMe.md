@@ -99,3 +99,7 @@ Todo:
 ## Other variations
 
     It might be fun to write another C++ version with a more functional style
+
+## Tips for using these programs
+
+1. Use sha256sum to compare two generated images and ensure they are exactly the same
