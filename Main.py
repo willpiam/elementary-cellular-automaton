@@ -24,9 +24,6 @@ def run_cellular_automaton(rule_number, generations, initial_conditions):
     image_width = len(cells) + 2 * generations
     image_data = f'P1\n{image_width} {generations}\n'
 
-    import time
-    start_time = time.perf_counter()
-
     for i in range(generations):
         # Calculate padding to center the cells
         padding_length = (image_width - len(cells)) // 2
@@ -43,9 +40,6 @@ def run_cellular_automaton(rule_number, generations, initial_conditions):
             neighborhood = f'{left_neighbor}{current_cell}{right_neighbor}'
             next_generation.append(calculate_cell(neighborhood, rule_binary))
         cells = next_generation
-
-    end_time = time.perf_counter()
-    print(f'Took {end_time - start_time:.2f}ms to generate {generations} generations of rule {rule_number}')
 
     with open(f'results/r{rule_number}_g{generations}_i{initial_conditions}_python.pbm', 'w') as file:
         file.write(image_data)
@@ -64,8 +58,14 @@ def main():
     print(f'Rule Number: {rule_number}')
     print(f'Initial Conditions: {initial_conditions}')
     print(f'Generations: {generations}')
+    
+    import time
+    start_time = time.perf_counter()
 
     run_cellular_automaton(rule_number, generations, initial_conditions)
+    
+    end_time = time.perf_counter()
+    print(f'Took {end_time - start_time:.2f}s to generate {generations} generations of rule {rule_number}')
 
 if __name__ == "__main__":
     main()

@@ -38,10 +38,13 @@ Run Clojure code:
 
     clojure Main.clj
 
+Run Java code:
+
+    javac -d results Main.java ; java -cp results Main
+
 Notice:
 
     You may need to manually create the `results` directory.
-
 
 Input file format:
 
@@ -90,7 +93,6 @@ Todo:
     [ ] Java
     [ ] Lisp (common lisp)
     [ ] Kotlin
-    [ ] Clojure
     [ ] Wolfram Language
     [ ] Lean (??)
     [ ] Agda (??)
@@ -100,6 +102,6 @@ Todo:
 
     It might be fun to write another C++ version with a more functional style
 
-## Tips for using these programs
+## Tips 
 
 1. Use sha256sum to compare two generated images and ensure they are exactly the same

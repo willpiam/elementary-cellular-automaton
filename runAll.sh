@@ -33,3 +33,7 @@ go run Main.go
 
 # Clojure implementation
 clojure Main.clj
+
+# Java implementation
+javac -d results Main.java
+java -cp results Main
