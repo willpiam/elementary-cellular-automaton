@@ -72,10 +72,10 @@ parseNumberWithDefault def s
   | null s = def
   | otherwise = read s :: Integer
 
-initialConditionsOrDefault :: String -> String
-initialConditionsOrDefault condition 
-  | null condition = "010"
-  | otherwise = condition
+-- initialConditionsOrDefault :: String -> String
+-- initialConditionsOrDefault condition 
+--   | null condition = "010"
+--   | otherwise = condition
 
 -- Modified main function to read from a file
 main :: IO ()
@@ -85,17 +85,19 @@ main = do
   contents <- readFile "input.txt"
   let [sRule, incon, slines] = lines contents
   let rule = parseNumberWithDefault 30 sRule
-  let tempInitialConditions = initialConditionsOrDefault incon
-  let initialLength = length tempInitialConditions
+  -- let tempInitialConditions = initialConditionsOrDefault incon
+  -- let initialLength = length tempInitialConditions
+  let initialLength = length incon
   let nlines = fromIntegral (parseNumberWithDefault 12 slines)
 
-  let initialConditions = padGen tempInitialConditions (nlines + initialLength -1)
+  -- let initialConditions = padGen tempInitialConditions (nlines + initialLength -1)
+  let initialConditions = padGen incon (nlines + initialLength -1)
 
   putStrLn ("Rule " ++ show rule ++ " is \"" ++ binaryString rule ++ "\"")
 
   let lines = generate initialConditions (binaryString rule) 0 (nlines -1)  initialConditions initialLength
 
-  let fprefix = "results/r" ++ show rule ++ "_g" ++ slines ++ "_i" ++ tempInitialConditions ++ "_haskell"
+  let fprefix = "results/r" ++ show rule ++ "_g" ++ slines ++ "_i" ++ incon ++ "_haskell"
 
   -- WRITE TO FILE SYSTEM AS IMAGE
   let pbmText = "P1\n" ++ show (length initialConditions) ++ " " ++ show nlines ++ "\n" ++ lines ++ "\n"
