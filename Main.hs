@@ -50,11 +50,9 @@ padGen gen padTo = do
   zeros ++ gen ++ zeros
 
 generateLine :: String -> String -> String -> Int -> Int -> String
-generateLine prev rule making limit initialConditionLength =
-  if length making == length prev
-    then
-      padGen making (limit - 1 + initialConditionLength)
-    else do
+generateLine prev rule making limit initialConditionLength 
+  | length making == length prev = padGen making (limit - 1 + initialConditionLength)
+  | otherwise = do
       let substr = drop (length making - 1) (take ((length making - 1)+3) prev) -- get substring of previous state
       let psubstr = ensureLengthThree substr making -- pad if needed to ensure length of three
       let newmaking = making ++ calculateCell psubstr rule
@@ -72,11 +70,6 @@ parseNumberWithDefault def s
   | null s = def
   | otherwise = read s :: Integer
 
--- initialConditionsOrDefault :: String -> String
--- initialConditionsOrDefault condition 
---   | null condition = "010"
---   | otherwise = condition
-
 -- Modified main function to read from a file
 main :: IO ()
 main = do
@@ -85,12 +78,9 @@ main = do
   contents <- readFile "input.txt"
   let [sRule, incon, slines] = lines contents
   let rule = parseNumberWithDefault 30 sRule
-  -- let tempInitialConditions = initialConditionsOrDefault incon
-  -- let initialLength = length tempInitialConditions
   let initialLength = length incon
   let nlines = fromIntegral (parseNumberWithDefault 12 slines)
 
-  -- let initialConditions = padGen tempInitialConditions (nlines + initialLength -1)
   let initialConditions = padGen incon (nlines + initialLength -1)
 
   putStrLn ("Rule " ++ show rule ++ " is \"" ++ binaryString rule ++ "\"")
