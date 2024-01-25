@@ -94,7 +94,6 @@ int main() {
     fscanf(inputFile, "%d %s %d", &ruleNumber, initialConditions, &generations);
     fclose(inputFile);
 
-
     clock_t start = clock();
     int** automatonData = runCellularAutomaton(ruleNumber, generations, initialConditions, start);
     int imageWidth = strlen(initialConditions) + 2 * generations;

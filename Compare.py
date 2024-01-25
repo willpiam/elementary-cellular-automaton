@@ -9,9 +9,9 @@ command_sets = [
     ("Rust", "rustc Main.rs -o results/programrust", "./results/programrust"),
     ("Haskell", "ghc -odir results -hidir results Main.hs -o results/programhaskell", "./results/programhaskell" ),
     ("Java", "javac -d results Main.java", "java -cp results Main"),
-    ("Scala", "scalac -d ./results Main.scala", "scala -cp ./results CellularAutomaton"),
     ("Python", "", "python3 Main.py"),
     ("TypeScript", "", "deno run --allow-net --allow-read --allow-write Main.ts"),
+    ("Scala", "scalac -d ./results Main.scala", "scala -cp ./results CellularAutomaton"),
 ]
 
 # Function to execute a command (no timing)

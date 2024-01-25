@@ -61,20 +61,16 @@ generate prev rule count limit state initialConditionLength
     let thisLine = generateLine prev rule "" limit initialConditionLength
     generate thisLine rule (count + 1) limit (state ++ "\n" ++ thisLine) initialConditionLength
 
-parseNumberWithDefault :: Int -> String -> Int
-parseNumberWithDefault def s
-  | null s = def
-  | otherwise = read s :: Int
-
 main :: IO ()
 main = do
   time1 <- getCurrentTimeInMs
   contents <- readFile "input.txt"
   let [sRule, incon, slines] = lines contents -- how can we make this more robust?
 
-  let rule = parseNumberWithDefault 30 sRule
+  let rule = read sRule :: Int
   let initialLength = length incon
-  let nlines = fromIntegral (parseNumberWithDefault 12 slines)
+  -- let nlines = fromIntegral (read slines :: Int)
+  let nlines = read slines :: Int
 
   let initialConditions = padGen incon (nlines + initialLength -1)
 
