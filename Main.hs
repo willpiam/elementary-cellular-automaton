@@ -4,6 +4,7 @@ import Control.Monad -- allows use of `when`
 import Numeric -- (showIntAtBase)
 import Data.Char -- (intToDigit)
 import Data.Time.Clock.POSIX (getPOSIXTime)
+import Text.XHtml (target)
 
 getCurrentTimeInMs :: IO Integer
 getCurrentTimeInMs = do
@@ -22,11 +23,14 @@ calculateCell pState rule =
     "001" -> [rule !! 6]
     "000" -> [rule !! 7]
 
-padZeros :: String -> Int -> String
-padZeros rval targetDepth
+padZeros' :: String -> Int -> String
+padZeros' rval targetDepth
   |  targetDepth < 1 = ""
   |  length rval == targetDepth = rval
-  |  otherwise = padZeros (rval ++ "0") targetDepth
+  |  otherwise = padZeros' (rval ++ "0") targetDepth
+
+padZeros :: Int -> String 
+padZeros = padZeros' "" 
 
 binaryString :: Integer -> String
 binaryString x = do
@@ -35,18 +39,18 @@ binaryString x = do
     else do
       -- pad the string with zeros
       let missingZeros = 8 - length bs
-      padZeros "" missingZeros ++ bs
+      padZeros missingZeros ++ bs
 
 ensureLengthThree :: String -> String -> String
 ensureLengthThree s making
  | length s == 3 = s
  | null making = "0" ++ s
- | otherwise = s ++ padZeros "" (3 - length s)
+ | otherwise = s ++ padZeros (3 - length s)
 
 padGen :: String -> Int -> String
 padGen gen padTo = do
   let missingZeros = padTo - (length gen `quot` 2)
-  let zeros = padZeros "" missingZeros
+  let zeros = padZeros missingZeros
   zeros ++ gen ++ zeros
 
 generateLine :: String -> String -> String -> Int -> Int -> String
@@ -76,7 +80,8 @@ main = do
   time1 <- getCurrentTimeInMs
   -- Read contents from file
   contents <- readFile "input.txt"
-  let [sRule, incon, slines] = lines contents
+  let [sRule, incon, slines] = lines contents -- how can we make this more robust?
+
   let rule = parseNumberWithDefault 30 sRule
   let initialLength = length incon
   let nlines = fromIntegral (parseNumberWithDefault 12 slines)
