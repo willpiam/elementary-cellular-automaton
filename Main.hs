@@ -1,10 +1,8 @@
 module Main where
 
-import Control.Monad -- allows use of `when`
 import Numeric -- (showIntAtBase)
 import Data.Char -- (intToDigit)
 import Data.Time.Clock.POSIX (getPOSIXTime)
-import Text.XHtml (target)
 
 getCurrentTimeInMs :: IO Integer
 getCurrentTimeInMs = do
@@ -26,7 +24,7 @@ calculateCell pState rule =
 padZeros :: Int -> String 
 padZeros n = concat ["0" | _ <- [1..n]]
 
-binaryString :: Integer -> String
+binaryString :: Int -> String
 binaryString x = do
   let bs = showIntAtBase 2 intToDigit x ""
   if length bs >= 8 then bs
@@ -63,16 +61,14 @@ generate prev rule count limit state initialConditionLength
     let thisLine = generateLine prev rule "" limit initialConditionLength
     generate thisLine rule (count + 1) limit (state ++ "\n" ++ thisLine) initialConditionLength
 
-parseNumberWithDefault :: Integer -> String -> Integer
+parseNumberWithDefault :: Int -> String -> Int
 parseNumberWithDefault def s
   | null s = def
-  | otherwise = read s :: Integer
+  | otherwise = read s :: Int
 
--- Modified main function to read from a file
 main :: IO ()
 main = do
   time1 <- getCurrentTimeInMs
-  -- Read contents from file
   contents <- readFile "input.txt"
   let [sRule, incon, slines] = lines contents -- how can we make this more robust?
 

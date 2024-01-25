@@ -97,6 +97,7 @@ Todo:
     [ ] Lean (??)
     [ ] Agda (??)
     [ ] Idris (??)
+    [ ] bash
 
 ## Other variations
 
