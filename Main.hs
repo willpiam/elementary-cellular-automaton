@@ -23,14 +23,8 @@ calculateCell pState rule =
     "001" -> [rule !! 6]
     "000" -> [rule !! 7]
 
-padZeros' :: String -> Int -> String
-padZeros' rval targetDepth
-  |  targetDepth < 1 = ""
-  |  length rval == targetDepth = rval
-  |  otherwise = padZeros' (rval ++ "0") targetDepth
-
 padZeros :: Int -> String 
-padZeros = padZeros' "" 
+padZeros n = concat ["0" | _ <- [1..n]]
 
 binaryString :: Integer -> String
 binaryString x = do
