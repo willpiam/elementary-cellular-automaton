@@ -69,7 +69,6 @@ main = do
 
   let rule = read sRule :: Int
   let initialLength = length incon
-  -- let nlines = fromIntegral (read slines :: Int)
   let nlines = read slines :: Int
 
   let initialConditions = padGen incon (nlines + initialLength -1)

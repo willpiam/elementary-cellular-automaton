@@ -1,3 +1,5 @@
+# elementry cellular automiton
+
 Run TypeScript code:
 
     deno run --allow-net --allow-read --allow-write Main.ts
