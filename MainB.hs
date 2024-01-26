@@ -5,6 +5,16 @@ import Data.Char -- (intToDigit)
 import qualified Data.ByteString.Char8 as BC
 
 calculateCell :: BC.ByteString -> BC.ByteString -> Char
+-- calculateCell pState rule 
+--     | pState == BC.pack "111" = BC.head rule
+--     | pState == BC.pack "110" = rule `BC.index` 1
+--     | pState == BC.pack "101" = rule `BC.index` 2
+--     | pState == BC.pack "100" = rule `BC.index` 3
+--     | pState == BC.pack "011" = rule `BC.index` 4
+--     | pState == BC.pack "010" = rule `BC.index` 5
+--     | pState == BC.pack "001" = rule `BC.index` 6
+--     | pState == BC.pack "000" = rule `BC.index` 7
+--     | otherwise = '0'
 calculateCell pState rule =
   case BC.unpack pState of
     "111" -> BC.head rule
@@ -15,7 +25,7 @@ calculateCell pState rule =
     "010" -> rule `BC.index` 5
     "001" -> rule `BC.index` 6
     "000" -> rule `BC.index` 7
-
+    
 padZeros :: Int -> BC.ByteString 
 padZeros n = BC.concat [BC.pack "0" | _ <- [1..n]]
 
@@ -68,9 +78,9 @@ main = do
 
   let lines = generate initialConditions (binaryString rule) 0 (nlines -1) initialConditions initialLength
 
-  let fprefix = BC.concat [BC.pack "results/r", BC.pack $ show rule, BC.pack "_g", slines, BC.pack "_i", incon, BC.pack "_haskell_B"]
+  let fileNamePrefix = BC.concat [BC.pack "results/r", BC.pack $ show rule, BC.pack "_g", slines, BC.pack "_i", incon, BC.pack "_haskell_B"]
 
   -- WRITE TO FILE SYSTEM AS IMAGE
   let pbmText = BC.concat [BC.pack "P1\n", BC.pack $ show (BC.length initialConditions), BC.pack " ", BC.pack $ show nlines, BC.pack "\n", lines, BC.pack "\n"]
 
-  BC.writeFile (BC.unpack (BC.append fprefix (BC.pack ".pbm"))) pbmText
+  BC.writeFile (BC.unpack (BC.append fileNamePrefix (BC.pack ".pbm"))) pbmText
