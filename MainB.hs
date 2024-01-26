@@ -2,13 +2,7 @@ module Main where
 
 import Numeric -- (showIntAtBase)
 import Data.Char -- (intToDigit)
-import Data.Time.Clock.POSIX (getPOSIXTime)
 import qualified Data.ByteString.Char8 as BC
-
-getCurrentTimeInMs :: IO Integer
-getCurrentTimeInMs = do
-  now <- getPOSIXTime
-  return $ round (now * 1000)
 
 calculateCell :: BC.ByteString -> BC.ByteString -> Char
 calculateCell pState rule =
@@ -63,17 +57,14 @@ generate prev rule count limit state initialConditionLength
 
 main :: IO ()
 main = do
-  time1 <- getCurrentTimeInMs
   contents <- BC.readFile "input.txt"
-  let [sRule, incon, slines] = BC.lines contents -- how can we make this more robust?
+  let [sRule, incon, slines] = BC.lines contents 
 
   let rule = read (BC.unpack sRule) :: Int
   let initialLength = BC.length incon
   let nlines = read (BC.unpack slines) :: Int
 
   let initialConditions = padGen incon (nlines + initialLength -1)
-
-  BC.putStrLn (BC.append (BC.pack "Rule ") (BC.append (BC.pack $ show rule) (BC.append (BC.pack " is \"") (binaryString rule))))
 
   let lines = generate initialConditions (binaryString rule) 0 (nlines -1) initialConditions initialLength
 
@@ -83,7 +74,3 @@ main = do
   let pbmText = BC.concat [BC.pack "P1\n", BC.pack $ show (BC.length initialConditions), BC.pack " ", BC.pack $ show nlines, BC.pack "\n", lines, BC.pack "\n"]
 
   BC.writeFile (BC.unpack (BC.append fprefix (BC.pack ".pbm"))) pbmText
-  time2 <- getCurrentTimeInMs
-
-  let timeDelta = time2 - time1
-  BC.putStrLn (BC.concat [BC.pack "Time taken: ", BC.pack $ show timeDelta, BC.pack "ms"])

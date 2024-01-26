@@ -3,15 +3,15 @@ import time
 
 # Define the sets of commands with labels. Each set contains a label, a compile command, and a run command.
 command_sets = [
-    ("C++", "g++ Main.cpp -o results/programcpp", "./results/programcpp"),  
-    ("C", "gcc Main.c -o results/programc", "./results/programc"), 
-    ("Go", "", "go run Main.go") , 
+    # ("C++", "g++ Main.cpp -o results/programcpp", "./results/programcpp"),  
+    # ("C", "gcc Main.c -o results/programc", "./results/programc"), 
+    # ("Go", "", "go run Main.go") , 
     # ("Rust", "rustc Main.rs -o results/programrust", "./results/programrust"),
-    # ("Haskell", "ghc -odir results -hidir results Main.hs -o results/programhaskell", "./results/programhaskell" ),
+    # ("Haskell (slow)", "ghc -odir results -hidir results Main.hs -o results/programhaskell", "./results/programhaskell" ),
     ("Haskell*", "ghc -odir results -hidir results MainB.hs -o results/programhaskell_B", "./results/programhaskell_B"),
-    ("Java", "javac -d results Main.java", "java -cp results Main"),
+    # ("Java", "javac -d results Main.java", "java -cp results Main"),
     # ("Python", "", "python3 Main.py"),
-    ("TypeScript", "", "deno run --allow-net --allow-read --allow-write Main.ts"),
+    # ("TypeScript", "", "deno run --allow-net --allow-read --allow-write Main.ts"),
     # ("Scala", "scalac -d ./results Main.scala", "scala -cp ./results CellularAutomaton")
 ]
 
@@ -38,4 +38,4 @@ sorted_execution_times = sorted(execution_times.items(), key=lambda x: x[1])
 
 # Print the sorted execution times
 for cmd, duration in sorted_execution_times:
-    print(f"{f'{cmd} '.ljust(15, '.')} {duration:.4f} seconds")
+    print(f"{f'{cmd} '.ljust(20, '.')} {duration:.4f} seconds")
