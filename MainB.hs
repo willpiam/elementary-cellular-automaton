@@ -27,10 +27,9 @@ binaryString x = do
       let missingZeros = 8 - BC.length bs
       BC.append (padZeros missingZeros) bs
 
-ensureLengthThree :: BC.ByteString -> BC.ByteString -> BC.ByteString
-ensureLengthThree s making
+ensureLengthThree :: BC.ByteString -> BC.ByteString
+ensureLengthThree s 
  | BC.length s == 3 = s
- | BC.null making = BC.append (BC.pack "0") s
  | otherwise = BC.append s (padZeros (3 - BC.length s))
 
 padGen :: BC.ByteString -> Int -> BC.ByteString
@@ -44,8 +43,9 @@ generateLine prev rule making limit initialConditionLength
   | BC.length making == BC.length prev = padGen making (limit - 1 + initialConditionLength)
   | otherwise = do
       let substr = BC.drop (BC.length making - 1) (BC.take ((BC.length making - 1)+3) prev) -- get substring of previous state
-      let psubstr = ensureLengthThree substr making -- pad if needed to ensure length of three
-      let newmaking = BC.append making (BC.singleton $ calculateCell psubstr rule)
+      let psubstr = ensureLengthThree substr-- pad if needed to ensure length of three
+      let calulatedCell = calculateCell psubstr rule
+      let newmaking = BC.append making (BC.singleton calulatedCell)
       generateLine prev rule newmaking limit initialConditionLength
 
 generate :: BC.ByteString -> BC.ByteString -> Int -> Int -> BC.ByteString -> Int -> BC.ByteString

@@ -90,9 +90,12 @@ Todo:
 
     gcc -g Main.c -o results/programc ; valgrind --leak-check=full ./results/programc
 
+**Haskell** *with profiling on version B*
+
+    ghc -O2 -prof -fprof-auto -rtsopts -odir results -hidir results MainB.hs -o results/programhaskell_B ; ./results/programhaskell_B +RTS -p -poresults/programhaskell_B  -RTS
+
 ## Languages To Add
 
-    [ ] Java
     [ ] Lisp (common lisp)
     [ ] Kotlin
     [ ] Wolfram Language

@@ -33,10 +33,9 @@ binaryString x = do
       let missingZeros = 8 - length bs
       padZeros missingZeros ++ bs
 
-ensureLengthThree :: String -> String -> String
-ensureLengthThree s making
+ensureLengthThree :: String -> String 
+ensureLengthThree s
  | length s == 3 = s
- | null making = "0" ++ s
  | otherwise = s ++ padZeros (3 - length s)
 
 padGen :: String -> Int -> String
@@ -50,7 +49,7 @@ generateLine prev rule making limit initialConditionLength
   | length making == length prev = padGen making (limit - 1 + initialConditionLength)
   | otherwise = do
       let substr = drop (length making - 1) (take ((length making - 1)+3) prev) -- get substring of previous state
-      let psubstr = ensureLengthThree substr making -- pad if needed to ensure length of three
+      let psubstr = ensureLengthThree substr -- pad if needed to ensure length of three
       let newmaking = making ++ calculateCell psubstr rule
       generateLine prev rule newmaking limit initialConditionLength
 
