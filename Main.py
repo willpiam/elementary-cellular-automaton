@@ -1,5 +1,3 @@
-import math
-
 def rule_to_binary_array(rule_number):
     binary_string = bin(rule_number)[2:].zfill(8)
     return [int(bit) for bit in binary_string]
@@ -17,31 +15,31 @@ def calculate_cell(p_state, rule):
     }
     return rule_map[p_state]
 
-def run_cellular_automaton(rule: list[int], generations : int, initial_cells : list[int]) -> list[list[int]] :
+def run_cellular_automaton(rule: list[int], generations: int, initial_cells: list[int]) -> list[list[int]]:
     cells = initial_cells.copy()
+    image_data: list[list[int]] = []
 
-    # Calculate image width: initial conditions length + 2 cells for each generation
-    image_width = len(cells) + 2 * generations
-    image_data : list[list[int]] = []
-
-    for i in range(generations):
-        # Calculate padding to center the cells
-        padding_length = (image_width - len(cells)) // 2
-        padding = [0] * padding_length
-        extended_cells = padding + cells + padding
-
-        image_data.append([cell if cell else 0 for cell in extended_cells])
+    for _ in range(generations):
+        # Add limited padding of 2 zeros to each side
+        extended_cells = [0, 0] + cells + [0, 0]
+        image_data.append(cells)  # Store the current generation
 
         next_generation = []
         for j in range(1, len(extended_cells) - 1):
-            left_neighbor = extended_cells[j - 1]
-            current_cell = extended_cells[j]
-            right_neighbor = extended_cells[j + 1]
-            neighborhood = f'{left_neighbor}{current_cell}{right_neighbor}'
+            neighborhood = ''.join(str(extended_cells[j + k]) for k in range(-1, 2))
             next_generation.append(calculate_cell(neighborhood, rule))
         cells = next_generation
 
     return image_data
+
+def pad_image_data(image_data: list[list[int]], total_width: int) -> list[list[int]]:
+    padded_data = []
+    for row in image_data:
+        padding_length = (total_width - len(row)) // 2
+        padding = [0] * padding_length
+        padded_row = padding + row + padding
+        padded_data.append(padded_row)
+    return padded_data
 
 def read_inputs_from_file(file_path):
     with open(file_path, 'r') as file:
@@ -51,7 +49,6 @@ def read_inputs_from_file(file_path):
         generations = int(lines[2].strip())
     return rule_number, initial_conditions, generations
 
-# Main function to run the program
 def main():
     rule_number, initial_conditions, generations = read_inputs_from_file('input.txt')
     print(f'Rule Number: {rule_number}')
@@ -59,20 +56,25 @@ def main():
     print(f'Generations: {generations}')
 
     rule_binary = rule_to_binary_array(rule_number)
+    cells = [int(bit) for bit in initial_conditions]
 
     import time
     start_time = time.perf_counter()
 
-    cells = [int(bit) for bit in initial_conditions]
     ca = run_cellular_automaton(rule_binary, generations, cells)
-    image_data = f'P1\n{len(ca[len(ca) -1])} {generations}\n'
-    ca_as_string = '\n'.join(''.join(str(num) for num in sublist) for sublist in ca)
-    image_data += ca_as_string
+    
+    # Determine the total width for the final padding
+    final_width = len(initial_conditions) + 2 * generations
+    padded_ca = pad_image_data(ca, final_width)
 
+    image_data = f'P1\n{final_width} {generations}\n'
+    ca_as_string = '\n'.join(''.join(str(num) for num in row) for row in padded_ca)
+    image_data += ca_as_string
+    image_data += '\n'
     
     with open(f'results/r{rule_number}_g{generations}_i{initial_conditions}_python.pbm', 'w') as file:
         file.write(image_data)
-    
+
     end_time = time.perf_counter()
     print(f'Took {end_time - start_time:.2f}s to generate {generations} generations of rule {rule_number}')
 
