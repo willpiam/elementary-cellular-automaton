@@ -1,16 +1,19 @@
 import subprocess
 import time
+import json
+import os
+import sys
 
 # Define the sets of commands with labels. Each set contains a label, a compile command, and a run command.
 command_sets = [
-    # ("C++", "g++ Main.cpp -o results/programcpp", "./results/programcpp"),  
+    ("C++", "g++ Main.cpp -o results/programcpp", "./results/programcpp"),  
     ("C", "gcc Main.c -o results/programc", "./results/programc"), 
     # ("Go", "", "go run Main.go") , 
     # ("Rust", "rustc Main.rs -o results/programrust", "./results/programrust"),
     # ("Haskell (slow)", "ghc -odir results -hidir results Main.hs -o results/programhaskell", "./results/programhaskell" ),
-    ("Haskell*", "ghc -odir results -hidir results MainB.hs -o results/programhaskell_B", "./results/programhaskell_B"),
+    # ("Haskell*", "ghc -odir results -hidir results MainB.hs -o results/programhaskell_B", "./results/programhaskell_B"),
     # ("Java", "javac -d results Main.java", "java -cp results Main"),
-    ("Python", "", "python3 Main.py"),
+    # ("Python", "", "python3 Main.py"),
     # ("TypeScript", "", "deno run --allow-net --allow-read --allow-write Main.ts"),
     # ("Scala", "scalac -d ./results Main.scala", "scala -cp ./results CellularAutomaton")
 ]
@@ -27,15 +30,87 @@ def time_command(command):
     end_time = time.time()
     return end_time - start_time
 
+# def read_inputs_from_file(file_path):
+#     with open(file_path, 'r') as file:
+#         lines = file.readlines()
+#         rule_number = int(lines[0].strip())
+#         initial_conditions = lines[1].strip()
+#         generations = int(lines[2].strip())
+#     return rule_number, initial_conditions, generations
+
+# # Execute and time each set of commands
+# execution_times = {}
+# for label, compile_cmd, run_cmd in command_sets:
+#     execute_command(compile_cmd)  # Compile without timing
+#     execution_times[label] = time_command(run_cmd)  # Run with timing
+
+# # Sort the execution times by their duration
+# sorted_execution_times = sorted(execution_times.items(), key=lambda x: x[1])
+
+# # Print the sorted execution times
+# for cmd, duration in sorted_execution_times:
+#     print(f"{f'{cmd} '.ljust(20, '.')} {duration:.4f} seconds")
+
+
+def read_inputs_from_file(file_path):
+    with open(file_path, 'r') as file:
+        lines = file.readlines()
+        rule_number = int(lines[0].strip())
+        initial_conditions = lines[1].strip()
+        generations = int(lines[2].strip())
+    return rule_number, initial_conditions, generations
+
+# Read inputs from the file
+rule_number, initial_conditions, generations = read_inputs_from_file("input.txt")
+
+# Function to get the path to the results file
+def get_results_file_path():
+    results_directory = "results"
+    return os.path.join(results_directory, "run_data.json")
+
+# Function to read existing data from the results file
+def read_existing_data(file_path):
+    if os.path.exists(file_path):
+        with open(file_path, "r") as file:
+            return json.load(file)
+    return []
+
+# Function to write data to the results file
+def write_data_to_file(file_path, data):
+    with open(file_path, "w") as file:
+        json.dump(data, file, indent=4)
+
+# List to store all runs
+existing_runs = read_existing_data(get_results_file_path())
+
+current_runs = []
+
 # Execute and time each set of commands
-execution_times = {}
 for label, compile_cmd, run_cmd in command_sets:
     execute_command(compile_cmd)  # Compile without timing
-    execution_times[label] = time_command(run_cmd)  # Run with timing
+    run_time = time_command(run_cmd)  # Run with timing
 
-# Sort the execution times by their duration
-sorted_execution_times = sorted(execution_times.items(), key=lambda x: x[1])
+    # Create a Run dictionary and add it to the list
+    run = {
+        "label": label,
+        "rule_number": rule_number,
+        "initial_conditions": initial_conditions,
+        "generations": generations,
+        "run_time": run_time
+    }
+    existing_runs.append(run)
+    current_runs.append(run)
+
+# Write the updated data to the file
+write_data_to_file(get_results_file_path(), existing_runs)
+
+def runsToProcess () : 
+    if '-a' in sys.argv or '--all' in sys.argv:
+        return existing_runs
+    else:
+        return current_runs
 
 # Print the sorted execution times
-for cmd, duration in sorted_execution_times:
-    print(f"{f'{cmd} '.ljust(20, '.')} {duration:.4f} seconds")
+for run in sorted(runsToProcess(), key=lambda x: x['run_time']):
+    lbl = "label"
+    print(f"{f'{run[lbl]} '.ljust(20, '.')} {run['run_time']:.4f} seconds")
