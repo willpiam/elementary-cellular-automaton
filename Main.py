@@ -17,10 +17,8 @@ def calculate_cell(p_state, rule):
     }
     return rule_map[p_state]
 
-def run_cellular_automaton(rule_number : int, generations : int, initial_conditions : str) -> str :
-    cells = [int(bit) for bit in initial_conditions]
-
-    rule_binary = rule_to_binary_array(rule_number)
+def run_cellular_automaton(rule: list[int], generations : int, initial_cells : list[int]) -> str :
+    cells = initial_cells.copy()
 
     # Calculate image width: initial conditions length + 2 cells for each generation
     image_width = len(cells) + 2 * generations
@@ -40,7 +38,8 @@ def run_cellular_automaton(rule_number : int, generations : int, initial_conditi
             current_cell = extended_cells[j]
             right_neighbor = extended_cells[j + 1]
             neighborhood = f'{left_neighbor}{current_cell}{right_neighbor}'
-            next_generation.append(calculate_cell(neighborhood, rule_binary))
+            next_generation.append(calculate_cell(neighborhood, rule))
+        print(f'Next Generation: {next_generation}')
         cells = next_generation
 
     return image_data
@@ -59,12 +58,14 @@ def main():
     print(f'Rule Number: {rule_number}')
     print(f'Initial Conditions: {initial_conditions}')
     print(f'Generations: {generations}')
-    
+
+    rule_binary = rule_to_binary_array(rule_number)
+
     import time
     start_time = time.perf_counter()
 
     cells = [int(bit) for bit in initial_conditions]
-    ca = run_cellular_automaton(rule_number, generations, initial_conditions)
+    ca = run_cellular_automaton(rule_binary, generations, [int(bit) for bit in initial_conditions])
     image_data = f'P1\n{(len(ca) -1)//generations} {generations}\n'
     image_data += ca
     
