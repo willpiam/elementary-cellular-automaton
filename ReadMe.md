@@ -112,6 +112,5 @@ Todo:
 
 1. Use sha256sum to compare two generated images and ensure they are exactly the same
 
-## Improvments
-
-    I think we are processing more cells than we have to
+## Improvements 
+1. Some versions of the program are doing more computations than necessary as they are computing cells which are unaffected by the initial conditions. The current python implementation does not have the flaw. Because of this all other versions need to be updated to reflect the logic of the python implementation. 
