@@ -17,20 +17,21 @@ def calculate_cell(p_state, rule):
 
 def run_cellular_automaton(rule: list[int], generations: int, initial_cells: list[int]) -> list[list[int]]:
     cells = initial_cells.copy()
-    image_data: list[list[int]] = []
+    ca: list[list[int]] = []
 
-    for _ in range(generations):
+    for _ in range(generations - 1):
         # Add limited padding of 2 zeros to each side
         extended_cells = [0, 0] + cells + [0, 0]
-        image_data.append(cells)  # Store the current generation
+        ca.append(cells)  # Store the current generation
 
         next_generation = []
         for j in range(1, len(extended_cells) - 1):
             neighborhood = ''.join(str(extended_cells[j + k]) for k in range(-1, 2))
             next_generation.append(calculate_cell(neighborhood, rule))
         cells = next_generation
-
-    return image_data
+    
+    ca.append(cells) 
+    return ca
 
 def pad_image_data(image_data: list[list[int]], total_width: int) -> list[list[int]]:
     padded_data = []
