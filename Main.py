@@ -1,3 +1,5 @@
+import math
+
 def rule_to_binary_array(rule_number):
     binary_string = bin(rule_number)[2:].zfill(8)
     return [int(bit) for bit in binary_string]
@@ -15,14 +17,14 @@ def calculate_cell(p_state, rule):
     }
     return rule_map[p_state]
 
-def run_cellular_automaton(rule_number, generations, initial_conditions):
+def run_cellular_automaton(rule_number : int, generations : int, initial_conditions : str) -> str :
     cells = [int(bit) for bit in initial_conditions]
 
     rule_binary = rule_to_binary_array(rule_number)
 
     # Calculate image width: initial conditions length + 2 cells for each generation
     image_width = len(cells) + 2 * generations
-    image_data = f'P1\n{image_width} {generations}\n'
+    image_data = ''
 
     for i in range(generations):
         # Calculate padding to center the cells
@@ -61,7 +63,10 @@ def main():
     import time
     start_time = time.perf_counter()
 
-    image_data = run_cellular_automaton(rule_number, generations, initial_conditions)
+    cells = [int(bit) for bit in initial_conditions]
+    ca = run_cellular_automaton(rule_number, generations, initial_conditions)
+    image_data = f'P1\n{(len(ca) -1)//generations} {generations}\n'
+    image_data += ca
     
     with open(f'results/r{rule_number}_g{generations}_i{initial_conditions}_python.pbm', 'w') as file:
         file.write(image_data)
