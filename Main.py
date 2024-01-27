@@ -41,8 +41,7 @@ def run_cellular_automaton(rule_number, generations, initial_conditions):
             next_generation.append(calculate_cell(neighborhood, rule_binary))
         cells = next_generation
 
-    with open(f'results/r{rule_number}_g{generations}_i{initial_conditions}_python.pbm', 'w') as file:
-        file.write(image_data)
+    return image_data
 
 def read_inputs_from_file(file_path):
     with open(file_path, 'r') as file:
@@ -62,7 +61,10 @@ def main():
     import time
     start_time = time.perf_counter()
 
-    run_cellular_automaton(rule_number, generations, initial_conditions)
+    image_data = run_cellular_automaton(rule_number, generations, initial_conditions)
+    
+    with open(f'results/r{rule_number}_g{generations}_i{initial_conditions}_python.pbm', 'w') as file:
+        file.write(image_data)
     
     end_time = time.perf_counter()
     print(f'Took {end_time - start_time:.2f}s to generate {generations} generations of rule {rule_number}')

@@ -5,16 +5,6 @@ import Data.Char -- (intToDigit)
 import qualified Data.ByteString.Char8 as BC
 
 calculateCell :: BC.ByteString -> BC.ByteString -> Char
--- calculateCell pState rule 
---     | pState == BC.pack "111" = BC.head rule
---     | pState == BC.pack "110" = rule `BC.index` 1
---     | pState == BC.pack "101" = rule `BC.index` 2
---     | pState == BC.pack "100" = rule `BC.index` 3
---     | pState == BC.pack "011" = rule `BC.index` 4
---     | pState == BC.pack "010" = rule `BC.index` 5
---     | pState == BC.pack "001" = rule `BC.index` 6
---     | pState == BC.pack "000" = rule `BC.index` 7
---     | otherwise = '0'
 calculateCell pState rule =
   case BC.unpack pState of
     "111" -> BC.head rule

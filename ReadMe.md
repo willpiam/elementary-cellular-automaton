@@ -111,3 +111,7 @@ Todo:
 ## Tips 
 
 1. Use sha256sum to compare two generated images and ensure they are exactly the same
+
+## Improvments
+
+    I think we are processing more cells than we have to
