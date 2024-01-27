@@ -30,28 +30,6 @@ def time_command(command):
     end_time = time.time()
     return end_time - start_time
 
-# def read_inputs_from_file(file_path):
-#     with open(file_path, 'r') as file:
-#         lines = file.readlines()
-#         rule_number = int(lines[0].strip())
-#         initial_conditions = lines[1].strip()
-#         generations = int(lines[2].strip())
-#     return rule_number, initial_conditions, generations
-
-# # Execute and time each set of commands
-# execution_times = {}
-# for label, compile_cmd, run_cmd in command_sets:
-#     execute_command(compile_cmd)  # Compile without timing
-#     execution_times[label] = time_command(run_cmd)  # Run with timing
-
-# # Sort the execution times by their duration
-# sorted_execution_times = sorted(execution_times.items(), key=lambda x: x[1])
-
-# # Print the sorted execution times
-# for cmd, duration in sorted_execution_times:
-#     print(f"{f'{cmd} '.ljust(20, '.')} {duration:.4f} seconds")
-
-
 def read_inputs_from_file(file_path):
     with open(file_path, 'r') as file:
         lines = file.readlines()
