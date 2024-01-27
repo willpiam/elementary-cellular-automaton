@@ -104,6 +104,30 @@ Todo:
     [ ] Idris (??)
     [ ] bash
 
+## Compare.py
+
+This program allows you to run multiple versions of the CA program and compare runs. There are three ways to run the program.
+
+With no flags:
+
+    python3 Compare.py
+
+With the average flag:
+
+    python3 Compare.py -avg
+
+Or with the all flag:
+
+    python3 Compare.py --all
+
+When no arguments are supplied the program will run the programs and print how long they each took. It will also save the runs to a file. 
+
+The average flag causes the program to forgo running any of the CA programs and simply display the average execution time of each language. 
+
+The all command causes the program to print all run times found in the file. It will still execute the CAs and those runs will be included in the output. 
+
+
+
 ## Other variations
 
     It might be fun to write another C++ version with a more functional style
