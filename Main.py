@@ -17,12 +17,12 @@ def calculate_cell(p_state, rule):
     }
     return rule_map[p_state]
 
-def run_cellular_automaton(rule: list[int], generations : int, initial_cells : list[int]) -> str :
+def run_cellular_automaton(rule: list[int], generations : int, initial_cells : list[int]) -> list[list[int]] :
     cells = initial_cells.copy()
 
     # Calculate image width: initial conditions length + 2 cells for each generation
     image_width = len(cells) + 2 * generations
-    image_data = ''
+    image_data : list[list[int]] = []
 
     for i in range(generations):
         # Calculate padding to center the cells
@@ -30,7 +30,7 @@ def run_cellular_automaton(rule: list[int], generations : int, initial_cells : l
         padding = [0] * padding_length
         extended_cells = padding + cells + padding
 
-        image_data += ''.join([str(cell) if cell else '0' for cell in extended_cells]) + '\n'
+        image_data.append([cell if cell else 0 for cell in extended_cells])
 
         next_generation = []
         for j in range(1, len(extended_cells) - 1):
@@ -39,7 +39,6 @@ def run_cellular_automaton(rule: list[int], generations : int, initial_cells : l
             right_neighbor = extended_cells[j + 1]
             neighborhood = f'{left_neighbor}{current_cell}{right_neighbor}'
             next_generation.append(calculate_cell(neighborhood, rule))
-        print(f'Next Generation: {next_generation}')
         cells = next_generation
 
     return image_data
@@ -65,9 +64,11 @@ def main():
     start_time = time.perf_counter()
 
     cells = [int(bit) for bit in initial_conditions]
-    ca = run_cellular_automaton(rule_binary, generations, [int(bit) for bit in initial_conditions])
-    image_data = f'P1\n{(len(ca) -1)//generations} {generations}\n'
-    image_data += ca
+    ca = run_cellular_automaton(rule_binary, generations, cells)
+    image_data = f'P1\n{len(ca[len(ca) -1])} {generations}\n'
+    ca_as_string = '\n'.join(''.join(str(num) for num in sublist) for sublist in ca)
+    image_data += ca_as_string
+
     
     with open(f'results/r{rule_number}_g{generations}_i{initial_conditions}_python.pbm', 'w') as file:
         file.write(image_data)
