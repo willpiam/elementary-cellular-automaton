@@ -16,7 +16,7 @@ int calculateCell(const char *neighborhood, const int *ruleBinary) {
     return ruleBinary[index];
 }
 
-int** runCellularAutomaton(const int ruleNumber, const int generations, const char *initialConditions, clock_t start) {
+int** runCellularAutomaton(const int ruleNumber, const int generations, const char *initialConditions) {
     int length = strlen(initialConditions);
     int* cells = (int*)malloc(length * sizeof(int));
     for (int i = 0; i < length; i++) {
@@ -52,11 +52,6 @@ int** runCellularAutomaton(const int ruleNumber, const int generations, const ch
             free(nextGeneration);
         }
     }
-
-
-    clock_t end = clock();
-    double duration = ((double)(end - start)) / CLOCKS_PER_SEC * 1000;
-    printf("Took %fms to generate %d generations of rule %d\n", duration, generations, ruleNumber);
 
     free(ruleBinary);
     return automatonData;
@@ -95,9 +90,14 @@ int main() {
     fclose(inputFile);
 
     clock_t start = clock();
-    int** automatonData = runCellularAutomaton(ruleNumber, generations, initialConditions, start);
+    int** automatonData = runCellularAutomaton(ruleNumber, generations, initialConditions);
     int imageWidth = strlen(initialConditions) + 2 * generations;
     outputToFile(automatonData, ruleNumber, generations, initialConditions, imageWidth);
+    
+    clock_t end = clock();
+    double duration = ((double)(end - start)) / CLOCKS_PER_SEC * 1000;
+    printf("Took %fms to generate %d generations of rule %d\n", duration, generations, ruleNumber);
+    
     free(automatonData);
 
     printf("Done!\n");

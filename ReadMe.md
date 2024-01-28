@@ -80,7 +80,7 @@ Todo:
     [] ensure no memory leaks in C++ program
     [] Write a script to run a subset of these programs with various inputs and record their times 
 
-## Testing for memory leaks
+## Testing
 
 **C++** *with Valgrind*
     
