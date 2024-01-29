@@ -106,7 +106,6 @@
 
 //     return 0;
 // }
- // below works but is too slow
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -124,9 +123,11 @@ std::vector<int> rule_to_binary_array(int rule_number) {
 }
 
 int calculate_cell(const std::string& p_state, const std::vector<int>& rule) {
-    std::vector<std::string> states = {"111", "110", "101", "100", "011", "010", "001", "000"};
-    for (size_t i = 0; i < states.size(); ++i) {
-        if (p_state == states[i]) {
+    static const std::vector<std::string> patterns = {
+        "111", "110", "101", "100", "011", "010", "001", "000"
+    };
+    for (size_t i = 0; i < patterns.size(); ++i) {
+        if (p_state == patterns[i]) {
             return rule[i];
         }
     }
@@ -150,8 +151,10 @@ std::vector<std::vector<int>> run_cellular_automaton(const std::vector<int>& rul
             std::string neighborhood = std::to_string(extended_cells[j - 1]) + std::to_string(extended_cells[j]) + std::to_string(extended_cells[j + 1]);
             next_generation.push_back(calculate_cell(neighborhood, rule));
         }
+
         cells = next_generation;
     }
+
     ca.push_back(cells);
     return ca;
 }
@@ -179,15 +182,16 @@ void read_inputs_from_file(const std::string& file_path, int& rule_number, std::
 }
 
 int main() {
-    int rule_number, generations;
+    int rule_number;
     std::string initial_conditions;
+    int generations;
     read_inputs_from_file("input.txt", rule_number, initial_conditions, generations);
 
     std::cout << "Rule Number: " << rule_number << std::endl;
     std::cout << "Initial Conditions: " << initial_conditions << std::endl;
     std::cout << "Generations: " << generations << std::endl;
 
-    std::vector<int> rule_binary = rule_to_binary_array(rule_number);
+    auto rule_binary = rule_to_binary_array(rule_number);
     std::vector<int> cells;
     for (char c : initial_conditions) {
         cells.push_back(c - '0');
@@ -195,27 +199,24 @@ int main() {
 
     auto start_time = std::chrono::high_resolution_clock::now();
 
-    std::vector<std::vector<int>> ca = run_cellular_automaton(rule_binary, generations, cells);
-
-    int final_width = initial_conditions.length() + 2 * generations;
-    std::vector<std::vector<int>> padded_ca = pad_image_data(ca, final_width);
-
-    std::string image_data = "P1\n" + std::to_string(final_width) + " " + std::to_string(generations) + "\n";
-    for (const auto& row : padded_ca) {
-        for (int num : row) {
-            image_data += std::to_string(num);
-        }
-        image_data += "\n";
-    }
+    auto ca = run_cellular_automaton(rule_binary, generations, cells);
+    int final_width = initial_conditions.size() + 2 * generations;
+    auto padded_ca = pad_image_data(ca, final_width);
 
     std::ofstream file("results/r" + std::to_string(rule_number) + "_g" + std::to_string(generations) + "_i" + initial_conditions + "_cpp.pbm");
     if (file.is_open()) {
-        file << image_data;
+        file << "P1\n" << final_width << " " << generations << "\n";
+        for (const auto& row : padded_ca) {
+            for (int cell : row) {
+                file << cell;
+            }
+            file << "\n";
+        }
     }
 
     auto end_time = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> elapsed = end_time - start_time;
-    std::cout << "Took " << elapsed.count() << "s to generate " << generations << " generations of rule " << rule_number << std::endl;
+    std::chrono::duration<double> elapsed_seconds = end_time - start_time;
+    std::cout << "Took " << elapsed_seconds.count() << "s to generate " << generations << " generations of rule " << rule_number << std::endl;
 
     return 0;
 }
