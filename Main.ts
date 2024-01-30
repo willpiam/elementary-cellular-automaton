@@ -24,32 +24,26 @@ const startTimer = () => {
 }
 
 async function runCellularAutomaton(rule: RuleArray, generations: number, initialCells: number[]): Promise<number[][]> {
-    let cells = JSON.parse(JSON.stringify(initialCells));
+    let cells : number[] = JSON.parse(JSON.stringify(initialCells));
 
-    // Calculate image width: initial conditions length + 2 cells for each generation
-    const imageWidth = cells.length + 2 * generations;
-    let imageData: number[][] = [];
+    let ca: number[][] = [];
+    const padding = Array(2).fill(0);
 
-    for (let i = 0; i < generations; i++) {
-        // Calculate padding to center the cells
-        const paddingLength = Math.floor((imageWidth - cells.length) / 2);
-        const padding = Array(paddingLength).fill(0);
+    for (let i = 0; i < generations -1; i++) {
         const extendedCells = [...padding, ...cells, ...padding];
-
-        imageData.push(extendedCells.map(cell => cell ? 1 : 0));
+        ca.push(extendedCells);
 
         const nextGeneration: number[] = [];
+
         for (let j = 1; j < extendedCells.length - 1; j++) {
-            const leftNeighbor = extendedCells[j - 1];
-            const currentCell = extendedCells[j];
-            const rightNeighbor = extendedCells[j + 1];
-            const neighborhood = '' + leftNeighbor + currentCell + rightNeighbor;
-            nextGeneration[j - 1] = calculateCell(neighborhood, rule);
+            const neighborhood = '' + extendedCells[j - 1] + extendedCells[j] + extendedCells[j + 1];
+            nextGeneration.push(calculateCell(neighborhood, rule));
         }
         cells = nextGeneration;
     }
 
-    return imageData;
+    ca.push(cells);
+    return ca;
 }
 
 async function readInputsFromFile(filePath: string): Promise<[number, string, number]> {
@@ -76,11 +70,12 @@ async function main() {
 
     const timer = startTimer();
 
-    const finalWidth = initialConditions.length + 2 * generations;
     const initialCells = initialConditions.split('').map(bit => parseInt(bit, 10));
-
     const rule = ruleToBinaryArray(ruleNumber);
+
     const ca: number[][] = await runCellularAutomaton(rule, generations, initialCells);
+
+    const finalWidth = initialConditions.length + 2 * generations;
     const paddedCA = padCellularAutomaton(ca, finalWidth);
     const ca_body = paddedCA.map(row => row.join('')).join('\n');
     const imageData = `P1\n${finalWidth} ${generations}\n${ca_body}\n`;

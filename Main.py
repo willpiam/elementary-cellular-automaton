@@ -28,7 +28,6 @@ def run_cellular_automaton(rule: list[int], generations: int, initial_cells: lis
         for j in range(1, len(extended_cells) - 1):
             neighborhood = ''.join(str(extended_cells[j + k]) for k in range(-1, 2))
             next_generation.append(calculate_cell(neighborhood, rule))
-        print(len(next_generation))
         cells = next_generation
     
     ca.append(cells) 
