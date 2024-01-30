@@ -23,10 +23,8 @@ const startTimer = () => {
     return () => performance.now() - start;
 }
 
-async function runCellularAutomaton(ruleNumber: number, generations: number, initialCells: number[]): Promise<number[][]> {
+async function runCellularAutomaton(rule: RuleArray, generations: number, initialCells: number[]): Promise<number[][]> {
     let cells = JSON.parse(JSON.stringify(initialCells));
-
-    const ruleBinary = ruleToBinaryArray(ruleNumber);
 
     // Calculate image width: initial conditions length + 2 cells for each generation
     const imageWidth = cells.length + 2 * generations;
@@ -46,7 +44,7 @@ async function runCellularAutomaton(ruleNumber: number, generations: number, ini
             const currentCell = extendedCells[j];
             const rightNeighbor = extendedCells[j + 1];
             const neighborhood = '' + leftNeighbor + currentCell + rightNeighbor;
-            nextGeneration[j - 1] = calculateCell(neighborhood, ruleBinary);
+            nextGeneration[j - 1] = calculateCell(neighborhood, rule);
         }
         cells = nextGeneration;
     }
@@ -81,7 +79,8 @@ async function main() {
     const finalWidth = initialConditions.length + 2 * generations;
     const initialCells = initialConditions.split('').map(bit => parseInt(bit, 10));
 
-    const ca: number[][] = await runCellularAutomaton(ruleNumber, generations, initialCells);
+    const rule = ruleToBinaryArray(ruleNumber);
+    const ca: number[][] = await runCellularAutomaton(rule, generations, initialCells);
     const paddedCA = padCellularAutomaton(ca, finalWidth);
     const ca_body = paddedCA.map(row => row.join('')).join('\n');
     const imageData = `P1\n${finalWidth} ${generations}\n${ca_body}\n`;
