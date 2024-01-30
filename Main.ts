@@ -23,8 +23,8 @@ const startTimer = () => {
     return () => performance.now() - start;
 }
 
-async function runCellularAutomaton(ruleNumber: number, generations: number, initialConditions: string): Promise<number[][]> {
-    let cells = initialConditions.split('').map(bit => parseInt(bit, 10));
+async function runCellularAutomaton(ruleNumber: number, generations: number, initialCells: number[]): Promise<number[][]> {
+    let cells = JSON.parse(JSON.stringify(initialCells));
 
     const ruleBinary = ruleToBinaryArray(ruleNumber);
 
@@ -79,7 +79,9 @@ async function main() {
     const timer = startTimer();
 
     const finalWidth = initialConditions.length + 2 * generations;
-    const ca: number[][] = await runCellularAutomaton(ruleNumber, generations, initialConditions);
+    const initialCells = initialConditions.split('').map(bit => parseInt(bit, 10));
+
+    const ca: number[][] = await runCellularAutomaton(ruleNumber, generations, initialCells);
     const paddedCA = padCellularAutomaton(ca, finalWidth);
     const ca_body = paddedCA.map(row => row.join('')).join('\n');
     const imageData = `P1\n${finalWidth} ${generations}\n${ca_body}\n`;
