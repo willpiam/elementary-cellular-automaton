@@ -30,7 +30,7 @@ async function runCellularAutomaton(ruleNumber: number, generations: number, ini
 
     // Calculate image width: initial conditions length + 2 cells for each generation
     const imageWidth = cells.length + 2 * generations;
-    let imageData : number[][]  = [];
+    let imageData: number[][] = [];
 
     for (let i = 0; i < generations; i++) {
         // Calculate padding to center the cells
@@ -63,20 +63,27 @@ async function readInputsFromFile(filePath: string): Promise<[number, string, nu
     return [ruleNumber, initialConditions, generations];
 }
 
+const padCellularAutomaton = (ca: number[][], totalWidth: number): number[][] => ca.map(row => {
+    const paddingLength = Math.floor((totalWidth - row.length) / 2);
+    const padding = Array(paddingLength).fill(0);
+    return [...padding, ...row, ...padding];
+});
+
 // Main function to run the program
 async function main() {
     const [ruleNumber, initialConditions, generations] = await readInputsFromFile('input.txt');
     console.log(`Rule Number: ${ruleNumber}`);
     console.log(`Initial Conditions: ${initialConditions}`);
     console.log(`Generations: ${generations}`);
-    
+
     const timer = startTimer();
 
     const finalWidth = initialConditions.length + 2 * generations;
-    const ca = await runCellularAutomaton(ruleNumber, generations, initialConditions);
-    const ca_body = ca.map(row => row.join('')).join('\n');
+    const ca: number[][] = await runCellularAutomaton(ruleNumber, generations, initialConditions);
+    const paddedCA = padCellularAutomaton(ca, finalWidth);
+    const ca_body = paddedCA.map(row => row.join('')).join('\n');
     const imageData = `P1\n${finalWidth} ${generations}\n${ca_body}\n`;
-    
+
     console.log(`Took ${timer().toFixed(2)}ms to generate ${generations} generations of rule ${ruleNumber}`);
 
     await Deno.writeTextFile(`results/r${ruleNumber}_g${generations}_i${initialConditions}_typescript.pbm`, imageData);
