@@ -23,16 +23,14 @@ const startTimer = () => {
     return () => performance.now() - start;
 }
 
-// async function runCellularAutomaton(ruleNumber: number, generations: number, initialConditions: string): Promise<string> {
-async function runCellularAutomaton(ruleNumber: number, generations: number, initialConditions: string): Promise<string[]> {
+async function runCellularAutomaton(ruleNumber: number, generations: number, initialConditions: string): Promise<number[][]> {
     let cells = initialConditions.split('').map(bit => parseInt(bit, 10));
 
     const ruleBinary = ruleToBinaryArray(ruleNumber);
 
     // Calculate image width: initial conditions length + 2 cells for each generation
     const imageWidth = cells.length + 2 * generations;
-    // let imageData = ``;
-    let imageData : string[]  = [];
+    let imageData : number[][]  = [];
 
     for (let i = 0; i < generations; i++) {
         // Calculate padding to center the cells
@@ -40,8 +38,7 @@ async function runCellularAutomaton(ruleNumber: number, generations: number, ini
         const padding = Array(paddingLength).fill(0);
         const extendedCells = [...padding, ...cells, ...padding];
 
-        // imageData += extendedCells.map(cell => cell ? '1' : '0').join('') + '\n';
-        imageData.push(extendedCells.map(cell => cell ? '1' : '0').join(''));
+        imageData.push(extendedCells.map(cell => cell ? 1 : 0));
 
         const nextGeneration: number[] = [];
         for (let j = 1; j < extendedCells.length - 1; j++) {
@@ -56,7 +53,6 @@ async function runCellularAutomaton(ruleNumber: number, generations: number, ini
 
     return imageData;
 }
-
 
 async function readInputsFromFile(filePath: string): Promise<[number, string, number]> {
     const text = await Deno.readTextFile(filePath);
@@ -78,7 +74,7 @@ async function main() {
 
     const finalWidth = initialConditions.length + 2 * generations;
     const ca = await runCellularAutomaton(ruleNumber, generations, initialConditions);
-    const ca_body = ca.join('\n');
+    const ca_body = ca.map(row => row.join('')).join('\n');
     const imageData = `P1\n${finalWidth} ${generations}\n${ca_body}\n`;
     
     console.log(`Took ${timer().toFixed(2)}ms to generate ${generations} generations of rule ${ruleNumber}`);
