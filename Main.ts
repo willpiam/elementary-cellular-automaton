@@ -23,16 +23,16 @@ const startTimer = () => {
     return () => performance.now() - start;
 }
 
-async function runCellularAutomaton(ruleNumber: number, generations: number, initialConditions: string): Promise<string> {
+// async function runCellularAutomaton(ruleNumber: number, generations: number, initialConditions: string): Promise<string> {
+async function runCellularAutomaton(ruleNumber: number, generations: number, initialConditions: string): Promise<string[]> {
     let cells = initialConditions.split('').map(bit => parseInt(bit, 10));
 
     const ruleBinary = ruleToBinaryArray(ruleNumber);
 
     // Calculate image width: initial conditions length + 2 cells for each generation
     const imageWidth = cells.length + 2 * generations;
-    // let imageData = `P1\n${imageWidth} ${generations}\n`;
-    let imageData = ``;
-
+    // let imageData = ``;
+    let imageData : string[]  = [];
 
     for (let i = 0; i < generations; i++) {
         // Calculate padding to center the cells
@@ -40,7 +40,8 @@ async function runCellularAutomaton(ruleNumber: number, generations: number, ini
         const padding = Array(paddingLength).fill(0);
         const extendedCells = [...padding, ...cells, ...padding];
 
-        imageData += extendedCells.map(cell => cell ? '1' : '0').join('') + '\n';
+        // imageData += extendedCells.map(cell => cell ? '1' : '0').join('') + '\n';
+        imageData.push(extendedCells.map(cell => cell ? '1' : '0').join(''));
 
         const nextGeneration: number[] = [];
         for (let j = 1; j < extendedCells.length - 1; j++) {
@@ -54,10 +55,6 @@ async function runCellularAutomaton(ruleNumber: number, generations: number, ini
     }
 
     return imageData;
-
-    // console.log(`Took ${timer().toFixed(2)}ms to generate ${generations} generations of rule ${ruleNumber}`);
-
-    // await Deno.writeTextFile(`results/r${ruleNumber}_g${generations}_i${initialConditions}_typescript.pbm`, imageData);
 }
 
 
@@ -81,7 +78,8 @@ async function main() {
 
     const finalWidth = initialConditions.length + 2 * generations;
     const ca = await runCellularAutomaton(ruleNumber, generations, initialConditions);
-    const imageData = `P1\n${finalWidth} ${generations}\n${ca}`;
+    const ca_body = ca.join('\n');
+    const imageData = `P1\n${finalWidth} ${generations}\n${ca_body}\n`;
     
     console.log(`Took ${timer().toFixed(2)}ms to generate ${generations} generations of rule ${ruleNumber}`);
 
