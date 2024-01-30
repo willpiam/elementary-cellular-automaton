@@ -15,7 +15,7 @@ command_sets = [
 #     ("Haskell*", "ghc -odir results -hidir results MainB.hs -o results/programhaskell_B", "./results/programhaskell_B"),
 #     ("Java", "javac -d results Main.java", "java -cp results Main"),
     # ("Python", "", "python3 Main.py"),
-#     ("TypeScript", "", "deno run --allow-net --allow-read --allow-write Main.ts"),
+    ("TypeScript", "", "deno run --allow-net --allow-read --allow-write Main.ts"),
 #     ("Scala", "scalac -d ./results Main.scala", "scala -cp ./results CellularAutomaton")
 ]
 

@@ -23,16 +23,16 @@ const startTimer = () => {
     return () => performance.now() - start;
 }
 
-async function runCellularAutomaton(ruleNumber: number, generations: number, initialConditions: string): Promise<void> {
+async function runCellularAutomaton(ruleNumber: number, generations: number, initialConditions: string): Promise<string> {
     let cells = initialConditions.split('').map(bit => parseInt(bit, 10));
 
     const ruleBinary = ruleToBinaryArray(ruleNumber);
 
     // Calculate image width: initial conditions length + 2 cells for each generation
     const imageWidth = cells.length + 2 * generations;
-    let imageData = `P1\n${imageWidth} ${generations}\n`;
+    // let imageData = `P1\n${imageWidth} ${generations}\n`;
+    let imageData = ``;
 
-    const timer = startTimer();
 
     for (let i = 0; i < generations; i++) {
         // Calculate padding to center the cells
@@ -53,9 +53,11 @@ async function runCellularAutomaton(ruleNumber: number, generations: number, ini
         cells = nextGeneration;
     }
 
-    console.log(`Took ${timer().toFixed(2)}ms to generate ${generations} generations of rule ${ruleNumber}`);
+    return imageData;
 
-    await Deno.writeTextFile(`results/r${ruleNumber}_g${generations}_i${initialConditions}_typescript.pbm`, imageData);
+    // console.log(`Took ${timer().toFixed(2)}ms to generate ${generations} generations of rule ${ruleNumber}`);
+
+    // await Deno.writeTextFile(`results/r${ruleNumber}_g${generations}_i${initialConditions}_typescript.pbm`, imageData);
 }
 
 
@@ -74,8 +76,16 @@ async function main() {
     console.log(`Rule Number: ${ruleNumber}`);
     console.log(`Initial Conditions: ${initialConditions}`);
     console.log(`Generations: ${generations}`);
+    
+    const timer = startTimer();
 
-    runCellularAutomaton(ruleNumber, generations, initialConditions);
+    const finalWidth = initialConditions.length + 2 * generations;
+    const ca = await runCellularAutomaton(ruleNumber, generations, initialConditions);
+    const imageData = `P1\n${finalWidth} ${generations}\n${ca}`;
+    
+    console.log(`Took ${timer().toFixed(2)}ms to generate ${generations} generations of rule ${ruleNumber}`);
+
+    await Deno.writeTextFile(`results/r${ruleNumber}_g${generations}_i${initialConditions}_typescript.pbm`, imageData);
 }
 
 main();
