@@ -56,20 +56,27 @@ char** runCellularAutomaton(const int* rule, const int generations, const char *
     return automatonData;
 }
 
-// int** padCellularAutomata(char** automatonData, int generations, int initialConditionsLength) {
-//     int** paddedCA = (int**)malloc(generations * sizeof(int*));
+// char** padCellularAutomata(char** automatonData, int generations, int initialConditionsLength) {
+//     char** paddedCA = (char**)malloc(generations * sizeof(char*));
 //     int totalWidth = initialConditionsLength + 2 * generations;
 
 //     for (int i = 0; i < generations; i++) {
-//         paddedCA[i] = (int*)malloc(totalWidth * sizeof(int));
+//         paddedCA[i] = (char*)malloc(totalWidth * sizeof(char));
         
-//         int paddingLength = (totalWidth - strlen(automatonData[i])) / 2;
+//         // int generationSize = strlen(automatonData[i]) + 2 *( i + 1);
+//         int generationSize = strlen(automatonData[i]);
+//         printf("generationSize: %d\n", generationSize);
+//         int paddingLength = (totalWidth - generationSize) / 2;
+//         // printf("paddingLength: %d\n", paddingLength);
 
-//         // insert the data directly into the padded array
-//         int cellsThisGeneration = initialConditionsLength + 2 * generations;
+//         // // insert the data directly into the padded array
+//         int cellsThisGeneration = initialConditionsLength + 2 * i;
         
 //         for (int j = 0; j < cellsThisGeneration; j++) {
-//             paddedCA[i][paddingLength + j] = automatonData[i][j];
+//             printf("\ti: %d, j: %d\n", i, j);
+//             // paddedCA[i][paddingLength + j] = automatonData[i][j];
+//             paddedCA[i][paddingLength + j] = 0;
+//             // paddedCA[i][j] = automatonData[i][j];
 //         }
 
 //     }
@@ -113,7 +120,9 @@ int main() {
     int* rule = ruleToBinaryArray(ruleNumber);
     char** automatonData = runCellularAutomaton(rule, generations, initialConditions);
 
-    // int** paddedCA = padCellularAutomata(automatonData, generations, strlen(initialConditions));
+    int initialConditionsLength = strlen(initialConditions);
+    printf("Initial conditions length: %d\n", initialConditionsLength);
+    // char** paddedCA = padCellularAutomata(automatonData, generations, initialConditionsLength);
 
     int imageWidth = strlen(initialConditions) + 2 * generations;
     outputToFile(automatonData, ruleNumber, generations, initialConditions, imageWidth);
