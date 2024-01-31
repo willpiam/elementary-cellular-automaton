@@ -33,20 +33,36 @@ char** runCellularAutomaton(const int* rule, const int generations, const char *
         memset(extendedCells, 0, imageWidth * sizeof(char));
         memcpy(extendedCells + paddingLength, cells, length * sizeof(char));
 
+        // char* extendedCells = (char*)malloc((length + 4) * sizeof(char));
+        // extendedCells[0] = 0;
+        // extendedCells[1] = 0;
+        // strcpy(extendedCells + 2, cells);
+        // extendedCells[length + 2] = 0;
+        // extendedCells[length + 3] = 0;
+        
+        printf("extendedCells: %s\n", extendedCells);
+
         automatonData[i] = extendedCells;
 
         char* nextGeneration = (char*)malloc(imageWidth * sizeof(char));
+        // char* nextGeneration = (char*)malloc((length + 2) * sizeof(char));
+
+        // for (int j = 0; j < (length + 4) -1; j++) {
         for (int j = 0; j < imageWidth; j++) {
-            int leftNeighbor = j > 0 ? extendedCells[j - 1] : 0;
-            int currentCell = extendedCells[j];
-            int rightNeighbor = j < imageWidth - 1 ? extendedCells[j + 1] : 0;
+            char leftNeighbor = j > 0 ? extendedCells[j - 1] : 0;
+            char currentCell = extendedCells[j];
+            char rightNeighbor = j < imageWidth - 1 ? extendedCells[j + 1] : 0;
             char neighborhood[4];
             sprintf(neighborhood, "%d%d%d", leftNeighbor, currentCell, rightNeighbor);
+            // for (int k = -1; k < 2; k++) {
+            //     neighborhood[k] = extendedCells[j + k];
+            // }
             nextGeneration[j] = calculateCell(neighborhood, rule);
         }
         free(cells);
         cells = nextGeneration;
         length = imageWidth; // Update the length of cells array
+        // length += 2;
 
         if (i + 1 == generations) {
             free(nextGeneration);
@@ -95,6 +111,7 @@ void outputToFile(char** automatonData, int ruleNumber, int generations, const c
 
     fprintf(file, "P1\n%d %d\n", imageWidth, generations);
     for (int i = 0; i < generations; i++) {
+        int generationSize = strlen(automatonData[i]);
         for (int j = 0; j < imageWidth; j++) {
             fprintf(file, "%d", automatonData[i][j]);
         }
