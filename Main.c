@@ -16,26 +16,26 @@ int calculateCell(const char *neighborhood, const int *ruleBinary) {
     return ruleBinary[index];
 }
 
-int** runCellularAutomaton(const int* rule, const int generations, const char *initialConditions) {
+char** runCellularAutomaton(const int* rule, const int generations, const char *initialConditions) {
     int length = strlen(initialConditions);
-    int* cells = (int*)malloc(length * sizeof(int));
+    char* cells = (char*)malloc(length * sizeof(char));
 
     for (int i = 0; i < length; i++) {
         cells[i] = initialConditions[i] == '1' ? 1 : 0;
     }
 
     int imageWidth = length + 2 * generations;
-    int** automatonData = (int**)malloc(generations * sizeof(int*));
+    char** automatonData = (char**)malloc(generations * sizeof(char*));
 
     for (int i = 0; i < generations; i++) {
         int paddingLength = (imageWidth - length) / 2;
-        int* extendedCells = (int*)malloc(imageWidth * sizeof(int));
-        memset(extendedCells, 0, imageWidth * sizeof(int));
-        memcpy(extendedCells + paddingLength, cells, length * sizeof(int));
+        char* extendedCells = (char*)malloc(imageWidth * sizeof(char));
+        memset(extendedCells, 0, imageWidth * sizeof(char));
+        memcpy(extendedCells + paddingLength, cells, length * sizeof(char));
 
         automatonData[i] = extendedCells;
 
-        int* nextGeneration = (int*)malloc(imageWidth * sizeof(int));
+        char* nextGeneration = (char*)malloc(imageWidth * sizeof(char));
         for (int j = 0; j < imageWidth; j++) {
             int leftNeighbor = j > 0 ? extendedCells[j - 1] : 0;
             int currentCell = extendedCells[j];
@@ -56,8 +56,28 @@ int** runCellularAutomaton(const int* rule, const int generations, const char *i
     return automatonData;
 }
 
+// int** padCellularAutomata(char** automatonData, int generations, int initialConditionsLength) {
+//     int** paddedCA = (int**)malloc(generations * sizeof(int*));
+//     int totalWidth = initialConditionsLength + 2 * generations;
 
-void outputToFile(int** automatonData, int ruleNumber, int generations, const char *initialConditions, int imageWidth) {
+//     for (int i = 0; i < generations; i++) {
+//         paddedCA[i] = (int*)malloc(totalWidth * sizeof(int));
+        
+//         int paddingLength = (totalWidth - strlen(automatonData[i])) / 2;
+
+//         // insert the data directly into the padded array
+//         int cellsThisGeneration = initialConditionsLength + 2 * generations;
+        
+//         for (int j = 0; j < cellsThisGeneration; j++) {
+//             paddedCA[i][paddingLength + j] = automatonData[i][j];
+//         }
+
+//     }
+
+//     return paddedCA;
+// }
+
+void outputToFile(char** automatonData, int ruleNumber, int generations, const char *initialConditions, int imageWidth) {
     char filename[100];
     sprintf(filename, "results/r%d_g%d_i%s_c.pbm", ruleNumber, generations, initialConditions);
     FILE *file = fopen(filename, "w");
@@ -91,14 +111,24 @@ int main() {
 
     clock_t start = clock();
     int* rule = ruleToBinaryArray(ruleNumber);
-    int** automatonData = runCellularAutomaton(rule, generations, initialConditions);
+    char** automatonData = runCellularAutomaton(rule, generations, initialConditions);
+
+    // int** paddedCA = padCellularAutomata(automatonData, generations, strlen(initialConditions));
+
     int imageWidth = strlen(initialConditions) + 2 * generations;
     outputToFile(automatonData, ruleNumber, generations, initialConditions, imageWidth);
+    // outputToFile(paddedCA, ruleNumber, generations, initialConditions, imageWidth);
     
     clock_t end = clock();
     double duration = ((double)(end - start)) / CLOCKS_PER_SEC * 1000;
     printf("Took %fms to generate %d generations of rule %d\n", duration, generations, ruleNumber);
-    
+
+    // free paddedCA and its contents
+    // for (int i = 0; i < generations; i++) {
+    //     free(paddedCA[i]);
+    // }
+    // free(paddedCA);
+
     free(rule);
     free(automatonData);
 
