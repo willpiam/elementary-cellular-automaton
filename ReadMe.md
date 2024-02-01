@@ -137,16 +137,20 @@ The all command causes the program to print all run times found in the file. It 
 1. Use sha256sum to compare two generated images and ensure they are exactly the same
 
 ## Improvements 
-1. Some versions of the program are doing more computations than necessary as they are computing cells which are unaffected by the initial conditions. The current python implementation does not have the flaw. Because of this all other versions need to be updated to reflect the logic of the python implementation. (fixed versions include: Python, C++, TypeScript) 
+1. Some versions of the program are doing more computations than necessary as they are computing cells which are unaffected by the initial conditions. The current python implementation does not have the flaw. Because of this all other versions need to be updated to reflect the logic of the python implementation. 
 
-
+    A checklist of languages to update:
+    - [x] Python
+    - [x] C++
+    - [x] TypeScript
+    - [ ] C
+    - [ ] Haskell
+    - [ ] Go
+    - [ ] Scala
+    - [ ] Rust
+    - [ ] Java
+    - [ ] Clojure
+    - [ ] C#
 
 2. Both haskell versions produce to much padding when given initial conditions of size three or larger
 
-- [ ] this is a 
-- [x] markdown checklist
-- [ ] it does not 
-- [ ] work 
-- [x] in VS code
-- [ ] but I think it'll work fine
-- [ ] on github
