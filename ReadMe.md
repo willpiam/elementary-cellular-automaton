@@ -96,13 +96,13 @@ Todo:
 
 ## Languages To Add
 
-    [ ] Lisp (common lisp)
-    [ ] Kotlin
-    [ ] Wolfram Language
-    [ ] Lean (??)
-    [ ] Agda (??)
-    [ ] Idris (??)
-    [ ] bash
+- [ ] Lisp (common lisp)
+- [ ] Kotlin
+- [ ] Wolfram Language
+- [ ] Lean (??)
+- [ ] Agda (??)
+- [ ] Idris (??)
+- [ ] bash
 
 ## Compare.py
 
