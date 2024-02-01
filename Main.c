@@ -7,9 +7,8 @@
 
 char* ruleToBinaryArray(char ruleNumber) {
     char* ruleBinary = (char*)malloc(8 * sizeof(char));
-    for (char i = 0; i < 8; i++) {
+    for (char i = 0; i < 8; i++) 
         ruleBinary[i] = (ruleNumber >> i) & 1;
-    }
     return ruleBinary;
 }
 
@@ -19,11 +18,9 @@ char calculateCell(const char *neighborhood, const char* ruleBinary) {
 }
 
 void printBinaryString(const char* data, size_t length) {
-    for (size_t i = 0; i < length; i++) {
-        // Check if the value is 1 or 0 and print the corresponding ASCII character.
+    for (size_t i = 0; i < length; i++) 
         printf("%c", data[i] ? '1' : '0');
-    }
-    printf("\n"); // Print a newline at the end for readability.
+    printf("\n");
 }
 
 #ifdef EXPERIMENTAL
@@ -33,7 +30,7 @@ char** runCellularAutomaton(const char* rule, const int generations, const char 
     char* cells = (char*)malloc(length * sizeof(char));
 
     for (int i = 0; i < length; i++) {
-        cells[i] = initialConditions[i] == '1' ? 1 : 0;
+        cells[i] = initialConditions[i] - '0';
     }
 
     const int imageWidth = length + 2 * generations;
@@ -75,7 +72,6 @@ char** runCellularAutomaton(const char* rule, const int generations, const char 
     char* cells = (char*)malloc(length * sizeof(char));
 
     for (int i = 0; i < length; i++) {
-        // cells[i] = initialConditions[i] == '1' ? 1 : 0;
         cells[i] = initialConditions[i] - '0';
     }
 
