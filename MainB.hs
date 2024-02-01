@@ -39,21 +39,21 @@ padGen gen padTo = do
   BC.concat [zeros, gen, zeros]
 
 generateLine :: BC.ByteString -> BC.ByteString -> BC.ByteString -> Int -> Int -> BC.ByteString
-generateLine prev rule making limit initialConditionLength 
-  | BC.length making == BC.length prev = padGen making (limit - 1 + initialConditionLength)
+generateLine previousLine rule currentLine numberOfGenerations initialConditionLength 
+  | BC.length currentLine == BC.length previousLine = padGen currentLine (numberOfGenerations - 1 + initialConditionLength)
   | otherwise = do
-      let substr = BC.drop (BC.length making - 1) (BC.take ((BC.length making - 1)+3) prev) -- get substring of previous state
+      let substr = BC.drop (BC.length currentLine - 1) (BC.take ((BC.length currentLine - 1)+3) previousLine) -- get substring of previous state
       let psubstr = ensureLengthThree substr-- pad if needed to ensure length of three
       let calulatedCell = calculateCell psubstr rule
-      let newmaking = BC.append making (BC.singleton calulatedCell)
-      generateLine prev rule newmaking limit initialConditionLength
+      let currentLineExtended = BC.append currentLine (BC.singleton calulatedCell)
+      generateLine previousLine rule currentLineExtended numberOfGenerations initialConditionLength
 
 generate :: BC.ByteString -> BC.ByteString -> Int -> Int -> BC.ByteString -> Int -> BC.ByteString
-generate prev rule count limit state initialConditionLength 
-  | count >= limit = state
+generate previousLine rule generationCounter numberOfGenerations cellularAutomaton initialConditionLength 
+  | generationCounter >= numberOfGenerations = cellularAutomaton
   | otherwise = do
-    let thisLine = generateLine prev rule BC.empty limit initialConditionLength
-    generate thisLine rule (count + 1) limit (BC.append state (BC.append (BC.pack "\n") thisLine)) initialConditionLength
+    let thisLine = generateLine previousLine rule BC.empty numberOfGenerations initialConditionLength
+    generate thisLine rule (generationCounter + 1) numberOfGenerations (BC.append cellularAutomaton (BC.append (BC.pack "\n") thisLine)) initialConditionLength
 
 main :: IO ()
 main = do

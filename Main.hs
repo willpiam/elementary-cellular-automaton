@@ -45,20 +45,20 @@ padGen gen padTo = do
   zeros ++ gen ++ zeros
 
 generateLine :: String -> String -> String -> Int -> Int -> String
-generateLine prev rule making limit initialConditionLength 
-  | length making == length prev = padGen making (limit - 1 + initialConditionLength)
+generateLine previousLine rule currentLine numberOfGenerations initialConditionLength 
+  | length currentLine == length previousLine = padGen currentLine (numberOfGenerations - 1 + initialConditionLength)
   | otherwise = do
-      let substr = drop (length making - 1) (take ((length making - 1)+3) prev) -- get substring of previous state
+      let substr = drop (length currentLine - 1) (take ((length currentLine - 1)+3) previousLine) -- get substring of previous state
       let psubstr = ensureLengthThree substr -- pad if needed to ensure length of three
-      let newmaking = making ++ calculateCell psubstr rule
-      generateLine prev rule newmaking limit initialConditionLength
+      let currentLineExtended = currentLine ++ calculateCell psubstr rule
+      generateLine previousLine rule currentLineExtended numberOfGenerations initialConditionLength
 
 generate :: String -> String -> Int -> Int -> String -> Int -> String
-generate prev rule count limit state initialConditionLength 
-  | count >= limit = state
+generate previousLine rule generationCounter numberOfGenerations cellularAutomaton initialConditionLength 
+  | generationCounter >= numberOfGenerations = cellularAutomaton
   | otherwise = do
-    let thisLine = generateLine prev rule "" limit initialConditionLength
-    generate thisLine rule (count + 1) limit (state ++ "\n" ++ thisLine) initialConditionLength
+    let thisLine = generateLine previousLine rule "" numberOfGenerations initialConditionLength
+    generate thisLine rule (generationCounter + 1) numberOfGenerations (cellularAutomaton ++ "\n" ++ thisLine) initialConditionLength
 
 main :: IO ()
 main = do
