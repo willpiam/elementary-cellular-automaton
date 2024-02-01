@@ -16,6 +16,14 @@ int calculateCell(const char *neighborhood, const int *ruleBinary) {
     return ruleBinary[index];
 }
 
+void printBinaryString(const char* data, size_t length) {
+    for (size_t i = 0; i < length; i++) {
+        // Check if the value is 1 or 0 and print the corresponding ASCII character.
+        printf("%c", data[i] ? '1' : '0');
+    }
+    printf("\n"); // Print a newline at the end for readability.
+}
+
 char** runCellularAutomaton(const int* rule, const int generations, const char *initialConditions) {
     int length = strlen(initialConditions);
     char* cells = (char*)malloc(length * sizeof(char));
@@ -25,21 +33,21 @@ char** runCellularAutomaton(const int* rule, const int generations, const char *
     }
 
     const int imageWidth = length + 2 * generations;
-    char** automatonData = (char**)malloc(generations * sizeof(char*));
-
+    char** automatonData = (char**)malloc((generations + 1) * sizeof(char*));
 
     for (int gen = 0; gen < generations; gen++) {
-        const int paddingLength = (imageWidth - length) / 2;                                // number of zeros before first potentially active cell
+        const int paddingLength = ((imageWidth - length) / 2);                              // number of zeros before first potentially active cell
         char* extendedCells = (char*)malloc(imageWidth * sizeof(char));                     // allocate memory for a full row (not just the active cells)
-        memset(extendedCells, 0, imageWidth * sizeof(char));                                // fill the row with zeros
+        memset(extendedCells, 2, imageWidth * sizeof(char));                                // fill the row with zeros
         memcpy(extendedCells + paddingLength, cells, length * sizeof(char));                // copy the active cells into the middle of the row
 
+        printBinaryString(extendedCells, imageWidth);
         automatonData[gen] = extendedCells;                                                 // point to the row from the CA
 
         char* nextGeneration = (char*)malloc(length + 2 * sizeof(char));                    // allocate memory for the next generation (each generation is 2 cells longer than the previous one)
         memset(nextGeneration, 0, (length + 2) * sizeof(char));                             // fill the active cells with zeros
 
-        for (int j = 0; j < length; j++) {
+        for (int j = 0; j < length; j++) {                                                  // iterate over the active cells
             char leftNeighbor = j > 0 ? cells[j - 1] : 0;
             char currentCell = cells[j];
             char rightNeighbor = j < length - 1 ? cells[j + 1] : 0;
@@ -47,11 +55,11 @@ char** runCellularAutomaton(const int* rule, const int generations, const char *
             sprintf(neighborhood, "%d%d%d", leftNeighbor, currentCell, rightNeighbor);
             nextGeneration[j + 1] = calculateCell(neighborhood, rule); // Shift by 1 to account for padding on the left
         }
-
         free(cells);
         cells = nextGeneration;
         length += 2; // Update the length for the next iteration
     }
+
  
     return automatonData;
 }
