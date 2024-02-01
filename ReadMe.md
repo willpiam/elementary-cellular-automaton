@@ -143,13 +143,10 @@ The all command causes the program to print all run times found in the file. It 
 
 2. Both haskell versions produce to much padding when given initial conditions of size three or larger
 
-[ ] this
-[x] is
-[ ] a 
-[x] markdown
-[ ] checklist
-[ ] it does not 
-[ ] work 
-[x] in VS code
-[ ] but I think it'll work fine
-[ ] on github
+- [ ] this is a 
+- [x] markdown checklist
+- [ ] it does not 
+- [ ] work 
+- [x] in VS code
+- [ ] but I think it'll work fine
+- [ ] on github
