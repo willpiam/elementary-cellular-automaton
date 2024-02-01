@@ -46,7 +46,9 @@ padGen gen padTo = do
 
 generateLine :: String -> String -> String -> Int -> Int -> String
 generateLine previousLine rule currentLine numberOfGenerations initialConditionLength 
-  | length currentLine == length previousLine = padGen currentLine (numberOfGenerations - 1 + initialConditionLength)
+  -- | length currentLine == length previousLine = padGen currentLine (numberOfGenerations - 1 + initialConditionLength)
+  -- | length currentLine == length previousLine = padGen currentLine ((((numberOfGenerations * 2) + initialConditionLength) - length currentLine))
+  | length currentLine == length previousLine = currentLine
   | otherwise = do
       let substr = drop (length currentLine - 1) (take ((length currentLine - 1)+3) previousLine) -- get substring of previous state
       let psubstr = ensureLengthThree substr -- pad if needed to ensure length of three

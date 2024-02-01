@@ -40,7 +40,8 @@ padGen gen padTo = do
 
 generateLine :: BC.ByteString -> BC.ByteString -> BC.ByteString -> Int -> Int -> BC.ByteString
 generateLine previousLine rule currentLine numberOfGenerations initialConditionLength 
-  | BC.length currentLine == BC.length previousLine = padGen currentLine (numberOfGenerations - 1 + initialConditionLength)
+  -- | BC.length currentLine == BC.length previousLine = padGen currentLine (numberOfGenerations - 1 + initialConditionLength)
+  | BC.length currentLine == BC.length previousLine = currentLine
   | otherwise = do
       let substr = BC.drop (BC.length currentLine - 1) (BC.take ((BC.length currentLine - 1)+3) previousLine) -- get substring of previous state
       let psubstr = ensureLengthThree substr-- pad if needed to ensure length of three
