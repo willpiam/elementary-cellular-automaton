@@ -18,11 +18,6 @@ function calculateCell(pState: string, rule: RuleArray): number {
     return ruleMap[pState];
 }
 
-const startTimer = () => {
-    const start = performance.now();
-    return () => performance.now() - start;
-}
-
 async function runCellularAutomaton(rule: RuleArray, generations: number, initialCells: number[]): Promise<number[][]> {
     let cells : number[] = JSON.parse(JSON.stringify(initialCells));
 
@@ -64,11 +59,7 @@ const padCellularAutomaton = (ca: number[][], totalWidth: number): number[][] =>
 // Main function to run the program
 async function main() {
     const [ruleNumber, initialConditions, generations] = await readInputsFromFile('input.txt');
-    console.log(`Rule Number: ${ruleNumber}`);
-    console.log(`Initial Conditions: ${initialConditions}`);
-    console.log(`Generations: ${generations}`);
 
-    const timer = startTimer();
 
     const initialCells = initialConditions.split('').map(bit => parseInt(bit, 10));
     const rule = ruleToBinaryArray(ruleNumber);
@@ -79,9 +70,7 @@ async function main() {
     const paddedCA = padCellularAutomaton(ca, finalWidth);
     const ca_body = paddedCA.map(row => row.join('')).join('\n');
     const imageData = `P1\n${finalWidth} ${generations}\n${ca_body}\n`;
-
-    console.log(`Took ${timer().toFixed(2)}ms to generate ${generations} generations of rule ${ruleNumber}`);
-
+    
     await Deno.writeTextFile(`results/r${ruleNumber}_g${generations}_i${initialConditions}_typescript.pbm`, imageData);
 }
 

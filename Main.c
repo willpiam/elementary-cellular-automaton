@@ -1,9 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
-
-// #define EXPERIMENTAL
 
 char* ruleToBinaryArray(char ruleNumber) {
     char* ruleBinary = (char*)malloc(8 * sizeof(char));
@@ -12,6 +9,7 @@ char* ruleToBinaryArray(char ruleNumber) {
     return ruleBinary;
 }
 
+// the neighborhood must be an actual string, with ascii values of 0 and 1 and a null terminator
 char calculateCell(const char *neighborhood, const char* ruleBinary) {
     char index = strtol(neighborhood, NULL, 2);
     return ruleBinary[index];
@@ -23,8 +21,6 @@ void printBinaryString(const char* data, size_t length) {
     printf("\n");
 }
 
-#ifdef EXPERIMENTAL
-
 char** runCellularAutomaton(const char* rule, const int generations, char* cells, int initialConditionsLength) {
     const int imageWidth = initialConditionsLength + 2 * generations;
     char** automatonData = (char**)malloc(generations * sizeof(char*));
@@ -34,6 +30,7 @@ char** runCellularAutomaton(const char* rule, const int generations, char* cells
     // allocate memory for the entire Cellular Automaton
     for (int i = 0; i < generations; i++) {
         char* row = (char*)malloc((imageWidth + 1)* sizeof(char));
+        memset(row, 0, (imageWidth + 1) * sizeof(char));
         row[imageWidth] = '\0';
 
         if (i == 0) {
@@ -46,66 +43,25 @@ char** runCellularAutomaton(const char* rule, const int generations, char* cells
 
     length += 2;
 
+    char neighborhood[4];
 
     for (int i = 1; i < generations; i++) {
         const int paddingOffset = (imageWidth - length) / 2;
 
         for (int j = paddingOffset; j < paddingOffset + length; j++) {
-            // automatonData[i][j] = 1;
+            neighborhood[0] = automatonData[i - 1][j - 1] + '0';
+            neighborhood[1] = automatonData[i - 1][j] + '0';
+            neighborhood[2] = automatonData[i - 1][j + 1] + '0';
+            neighborhood[3] = '\0'; 
 
-            automatonData[i][j] = calculateCell(automatonData[i - 1] + j - 1, rule);
-
-
+            automatonData[i][j] = calculateCell(neighborhood, rule);
         }
 
         length += 2; 
-
     }
 
     return automatonData;
 }
-
-#else
-
-char** runCellularAutomaton(const char* rule, const int generations, char* cells, int initialConditionsLength) {
-    const int imageWidth = initialConditionsLength + 2 * generations;
-    char** automatonData = (char**)malloc(generations * sizeof(char*));
-    
-    int length = initialConditionsLength;
-
-    for (int i = 0; i < generations; i++) {
-        int paddingLength = (imageWidth - length) / 2;
-        // char* extendedCells = (char*)malloc(imageWidth * sizeof(char));
-        char* extendedCells = (char*)malloc((imageWidth + 1)* sizeof(char));
-        extendedCells[imageWidth] = '\0';
-        memset(extendedCells, 0, imageWidth * sizeof(char));
-        memcpy(extendedCells + paddingLength, cells, length * sizeof(char));
-
-        automatonData[i] = extendedCells;
-
-        char* nextGeneration = (char*)malloc((imageWidth + 1) * sizeof(char));
-        nextGeneration[imageWidth] = '\0';
-        for (int j = 0; j < imageWidth; j++) {
-            int leftNeighbor = j > 0 ? extendedCells[j - 1] : 0;
-            int currentCell = extendedCells[j];
-            int rightNeighbor = j < imageWidth - 1 ? extendedCells[j + 1] : 0;
-            char neighborhood[4];
-            sprintf(neighborhood, "%d%d%d", leftNeighbor, currentCell, rightNeighbor);
-            nextGeneration[j] = calculateCell(neighborhood, rule);
-        }
-        free(cells);
-        cells = nextGeneration;
-        length = imageWidth; // Update the length of cells array
-
-        if (i + 1 == generations) {
-            free(nextGeneration);
-        }
-    }
-
-    return automatonData;
-}
-
-#endif
 
 void outputToFile(char** automatonData, int ruleNumber, int generations, const char *initialConditions, int imageWidth) {
     char filename[100];
@@ -123,7 +79,6 @@ void outputToFile(char** automatonData, int ruleNumber, int generations, const c
             fprintf(file, "%d", automatonData[i][j]);
         }
         fprintf(file, "\n");
-        free(automatonData[i]);
     }
     fclose(file);
 }
@@ -140,7 +95,6 @@ int main() {
     fscanf(inputFile, "%d %s %d", &ruleNumber, initialConditions, &generations);
     fclose(inputFile);
 
-    clock_t start = clock();
     char* rule = ruleToBinaryArray(ruleNumber);
     int initialConditionsLength = strlen(initialConditions);
 
@@ -156,15 +110,12 @@ int main() {
     int imageWidth = strlen(initialConditions) + 2 * generations;
     outputToFile(automatonData, ruleNumber, generations, initialConditions, imageWidth);
     
-    clock_t end = clock();
-    double duration = ((double)(end - start)) / CLOCKS_PER_SEC * 1000;
-    printf("Took %fms to generate %d generations of rule %d\n", duration, generations, ruleNumber);
+    for (int i = 0; i < generations; i++)
+        free(automatonData[i]);
 
-    free(rule);
     free(automatonData);
-
-
-    printf("Done!\n");
+    free(rule);
+    free(cells);
 
     return 0;
 }

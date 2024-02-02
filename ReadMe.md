@@ -140,13 +140,15 @@ An example of how this program can be chained with Compare.py to rapidly test ch
 
     python3 Compare.py ; bash compareResults.sh results/r30_g50_i1_c.pbm results/r30_g50_i1_cpp.pbm 
 
+This becomes clunky and annoying when you are testing different inputs (by altering inputs.txt) and need to modify the command each time you change the inputs. It would be better to include this functionality in the Compare.py program.
+
 ## Other variations
 
     It might be fun to write another C++ version with a more functional style
 
 ## Tips 
 
-1. Use sha256sum to compare two generated images and ensure they are exactly the same
+1. Use sha256sum or compareResults.sh to compare two generated images and ensure they are exactly the same
 
 ## Improvements 
 1. Some versions of the program are doing more computations than necessary as they are computing cells which are unaffected by the initial conditions. The current python implementation does not have the flaw. Because of this all other versions need to be updated to reflect the logic of the python implementation. 
@@ -155,6 +157,21 @@ An example of how this program can be chained with Compare.py to rapidly test ch
     - [x] Python
     - [x] C++
     - [x] TypeScript
+    - [x] C
+    - [ ] Haskell
+    - [ ] Go
+    - [ ] Scala
+    - [ ] Rust
+    - [ ] Java
+    - [ ] Clojure
+    - [ ] C#
+
+2. Remove timer from every version of the program and simply rely on the Compare.py program to time the runs. Programs should have no output except for the image file.
+
+    Versions to update:
+    - [ ] Python
+    - [ ] C++
+    - [ ] TypeScript
     - [ ] C
     - [ ] Haskell
     - [ ] Go

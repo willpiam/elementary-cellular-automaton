@@ -14,8 +14,8 @@ command_sets = [
     # ("Haskell (slow)", "ghc -odir results -hidir results Main.hs -o results/programhaskell", "./results/programhaskell" ),
     # ("Haskell*", "ghc -odir results -hidir results MainB.hs -o results/programhaskell_B", "./results/programhaskell_B"),
     # ("Java", "javac -d results Main.java", "java -cp results Main"),
-    # ("Python", "", "python3 Main.py"),
-    # ("TypeScript", "", "deno run --allow-net --allow-read --allow-write Main.ts"),
+    ("Python", "", "python3 Main.py"),
+    ("TypeScript", "", "deno run --allow-net --allow-read --allow-write Main.ts"),
     # ("Scala", "scalac -d ./results Main.scala", "scala -cp ./results CellularAutomaton")
 ]
 
@@ -89,6 +89,7 @@ def main():
 
     # Execute and time each set of commands
     for label, compile_cmd, run_cmd in command_sets:
+        print(f"Running {label}...")
         execute_command(compile_cmd)  # Compile without timing
         run_time = time_command(run_cmd)  # Run with timing
 

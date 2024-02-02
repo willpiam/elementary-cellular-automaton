@@ -52,15 +52,9 @@ def read_inputs_from_file(file_path):
 
 def main():
     rule_number, initial_conditions, generations = read_inputs_from_file('input.txt')
-    print(f'Rule Number: {rule_number}')
-    print(f'Initial Conditions: {initial_conditions}')
-    print(f'Generations: {generations}')
 
     rule_binary = rule_to_binary_array(rule_number)
     cells = [int(bit) for bit in initial_conditions]
-
-    import time
-    start_time = time.perf_counter()
 
     ca = run_cellular_automaton(rule_binary, generations, cells)
     
@@ -76,8 +70,6 @@ def main():
     with open(f'results/r{rule_number}_g{generations}_i{initial_conditions}_python.pbm', 'w') as file:
         file.write(image_data)
 
-    end_time = time.perf_counter()
-    print(f'Took {end_time - start_time:.2f}s to generate {generations} generations of rule {rule_number}')
 
 if __name__ == "__main__":
     main()

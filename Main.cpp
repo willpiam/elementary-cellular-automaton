@@ -3,7 +3,6 @@
 #include <vector>
 #include <string>
 #include <bitset>
-#include <chrono>
 
 std::vector<int> rule_to_binary_array(int rule_number) {
     std::bitset<8> binary(rule_number);
@@ -79,17 +78,11 @@ int main() {
     int generations;
     read_inputs_from_file("input.txt", rule_number, initial_conditions, generations);
 
-    std::cout << "Rule Number: " << rule_number << std::endl;
-    std::cout << "Initial Conditions: " << initial_conditions << std::endl;
-    std::cout << "Generations: " << generations << std::endl;
-
     auto rule_binary = rule_to_binary_array(rule_number);
     std::vector<int> cells;
     for (char c : initial_conditions) {
         cells.push_back(c - '0');
     }
-
-    auto start_time = std::chrono::high_resolution_clock::now();
 
     auto ca = run_cellular_automaton(rule_binary, generations, cells);
     int final_width = initial_conditions.size() + 2 * generations;
@@ -105,10 +98,6 @@ int main() {
             file << "\n";
         }
     }
-
-    auto end_time = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> elapsed_seconds = end_time - start_time;
-    std::cout << "Took " << elapsed_seconds.count() << "s to generate " << generations << " generations of rule " << rule_number << std::endl;
 
     return 0;
 }
