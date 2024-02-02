@@ -74,8 +74,6 @@ main = do
 
   -- let initialConditions = padGen initialConditionsRaw (nlines + initialLength -1)
   let initialConditions = padGen initialConditionsRaw (nlines + (initialLength `div` 2))
-  putStrLn ("Initial Conditions raw: " ++ initialConditionsRaw)
-  putStrLn ("Initial Conditions: " ++ initialConditions)
 
   putStrLn ("Rule " ++ show rule ++ " is \"" ++ binaryString rule ++ "\"")
 

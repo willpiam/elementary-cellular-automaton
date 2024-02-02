@@ -8,15 +8,15 @@ from collections import defaultdict
 # Define the sets of commands with labels. Each set contains a label, a compile command, and a run command.
 command_sets = [
     ("C++", "g++ Main.cpp -o results/programcpp", "./results/programcpp"),  
-    # ("C", "gcc Main.c -o results/programc", "./results/programc"), 
+    ("C", "gcc Main.c -o results/programc", "./results/programc"), 
     # ("Go", "", "go run Main.go") , 
     # ("Rust", "rustc Main.rs -o results/programrust", "./results/programrust"),
-    ("Haskell (slow)", "ghc -odir results -hidir results Main.hs -o results/programhaskell", "./results/programhaskell" ),
+    # ("Haskell (slow)", "ghc -odir results -hidir results Main.hs -o results/programhaskell", "./results/programhaskell" ),
     ("Haskell*", "ghc -odir results -hidir results MainB.hs -o results/programhaskell_B", "./results/programhaskell_B"),
     # ("Java", "javac -d results Main.java", "java -cp results Main"),
     # ("Python", "", "python3 Main.py"),
     # ("TypeScript", "", "deno run --allow-net --allow-read --allow-write Main.ts"),
-#     ("Scala", "scalac -d ./results Main.scala", "scala -cp ./results CellularAutomaton")
+    # ("Scala", "scalac -d ./results Main.scala", "scala -cp ./results CellularAutomaton")
 ]
 
 # Function to execute a command (no timing)
@@ -61,26 +61,25 @@ def calculate_average_run_times(runs):
     for run in runs:
         run_times[run['label']].append(run['run_time'])
     
-    averages = {}
+    aggregateData = {}
     for label, times in run_times.items():
-        averages[label] = sum(times) / len(times)
+        aggregateData[label] = (sum(times) / len(times) , len(times))
     
-    return averages
+    return aggregateData
 
 def display_average_run_times(averages):
     print("\nAverage Run Times:")
-    print(f"{'Language'.ljust(20, ' ')}Average Time (s)")
-    for label, avg_time in sorted(averages.items(), key=lambda x: x[1]):
-        print(f"{label.ljust(20, ' ')}{avg_time:.4f}")
-
-
+    print(f"{'Language'.ljust(20, ' ')}{'Average Time (s)'.ljust(20, ' ')}{'Number of Runs'}")
+    for label, (avg_time, num_runs) in sorted(averages.items(), key=lambda x: x[1]):
+        print(f"{label.ljust(20, ' ')}{f'{avg_time:.4f}'.ljust(20, ' ')}{str(num_runs).ljust(20, ' ')}")
+    
 def main():
     # List to store all runs
     existing_runs = read_existing_data(get_results_file_path())
 
     if '--average' in sys.argv or '-avg' in sys.argv:
-        averages = calculate_average_run_times(existing_runs)
-        display_average_run_times(averages)
+        aggregateData = calculate_average_run_times(existing_runs)
+        display_average_run_times(aggregateData)
         return
 
     # Read inputs from the file
@@ -107,8 +106,6 @@ def main():
     # Write the updated data to the file
     write_data_to_file(get_results_file_path(), existing_runs)
 
-   
-    
     # Decide which runs to process based on command line arguments
     def runsToProcess():
         if '-a' in sys.argv or '--all' in sys.argv:
