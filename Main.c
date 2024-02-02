@@ -29,33 +29,43 @@ char** runCellularAutomaton(const char* rule, const int generations, char* cells
     const int imageWidth = initialConditionsLength + 2 * generations;
     char** automatonData = (char**)malloc(generations * sizeof(char*));
 
+    int length = initialConditionsLength;
+
     // allocate memory for the entire Cellular Automaton
     for (int i = 0; i < generations; i++) {
         char* row = (char*)malloc(imageWidth * sizeof(char));
+
+        if (i == 0) {
+            // copy the initial conditions to the first row
+            int offset = (imageWidth - initialConditionsLength) / 2;
+            // for (int j = 0; j < initialConditionsLength; j++) {
+            //     row[offset + j] = cells[j];
+            // }
+            memcpy(row + offset, cells, initialConditionsLength * sizeof(char));
+        }
         automatonData[i] = row;
     }
 
-    // for each generation
-    //  -> compute the amount of padding per side
-    //  -> jump to the end of the first set of padding (the start of the potentially active cells for that generation)
+    length += 2;
 
-    int length = initialConditionsLength;
 
-    for (int i = 0; i < generations; i++) {
+    for (int i = 1; i < generations; i++) {
         const int paddingOffset = (imageWidth - length) / 2;
 
         for (int j = paddingOffset; j < paddingOffset + length; j++) {
             automatonData[i][j] = 1;
+
+
+            // automatonData[i][j] = calculateCell(cells + j - 1, rule);
+
+
+
         }
 
         length += 2; 
 
     }
 
-
-
-
-    
     return automatonData;
 }
 
