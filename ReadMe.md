@@ -126,7 +126,15 @@ The average flag causes the program to forgo running any of the CA programs and 
 
 The all command causes the program to print all run times found in the file. It will still execute the CAs and those runs will be included in the output. 
 
+## compareResults.sh
 
+This program takes two files and returns true if they hash to the same value. This is useful for comparing the output of two different implementations of the same cellular automaton program.
+
+To run the program:
+
+    bash compareResults.sh <file1> <file2>
+
+The program will either print "same" or "different" to the terminal.
 
 ## Other variations
 
