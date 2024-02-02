@@ -136,6 +136,10 @@ To run the program:
 
 The program will either print "same" or "different" to the terminal.
 
+An example of how this program can be chained with Compare.py to rapidly test changes against another implementation:
+
+    python3 Compare.py ; bash compareResults.sh results/r30_g50_i1_c.pbm results/r30_g50_i1_cpp.pbm 
+
 ## Other variations
 
     It might be fun to write another C++ version with a more functional style

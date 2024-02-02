@@ -3,7 +3,7 @@
 #include <string.h>
 #include <time.h>
 
-// #define EXPERIMENTAL
+#define EXPERIMENTAL
 
 char* ruleToBinaryArray(char ruleNumber) {
     char* ruleBinary = (char*)malloc(8 * sizeof(char));
@@ -27,35 +27,35 @@ void printBinaryString(const char* data, size_t length) {
 
 char** runCellularAutomaton(const char* rule, const int generations, char* cells, int initialConditionsLength) {
     const int imageWidth = initialConditionsLength + 2 * generations;
-    char** automatonData = (char**)malloc((generations + 1) * sizeof(char*));
+    char** automatonData = (char**)malloc(generations * sizeof(char*));
+
+    // allocate memory for the entire Cellular Automaton
+    for (int i = 0; i < generations; i++) {
+        char* row = (char*)malloc(imageWidth * sizeof(char));
+        automatonData[i] = row;
+    }
+
+    // for each generation
+    //  -> compute the amount of padding per side
+    //  -> jump to the end of the first set of padding (the start of the potentially active cells for that generation)
+
     int length = initialConditionsLength;
 
-    for (int gen = 0; gen <= generations; gen++) {
-        char* nextGeneration = (char*)malloc(length + 2 * sizeof(char));                    // allocate memory for the next generation (each generation is 2 cells longer than the previous one)
-        memset(nextGeneration, 0, (length + 2) * sizeof(char));                             // fill the active cells with zeros
+    for (int i = 0; i < generations; i++) {
+        const int paddingOffset = (imageWidth - length) / 2;
 
-        for (int j = 0; j < length; j++) {                                                  // iterate over the active cells
-            char leftNeighbor = j > 0 ? cells[j - 1] : 0;
-            char currentCell = cells[j];
-            char rightNeighbor = j < length - 1 ? cells[j + 1] : 0;
-            char neighborhood[4];
-            sprintf(neighborhood, "%d%d%d", leftNeighbor, currentCell, rightNeighbor);
-            nextGeneration[j + 1] = calculateCell(neighborhood, rule); // Shift by 1 to account for padding on the left
+        for (int j = paddingOffset; j < paddingOffset + length; j++) {
+            automatonData[i][j] = 1;
         }
 
-        length += 2; // Update the length for the next iteration
-        const int paddingLength = ((imageWidth - length) / 2);                              // number of zeros before first potentially active cell
-        char* extendedCells = (char*)malloc(imageWidth * sizeof(char));                     // allocate memory for a full row (not just the active cells)
-        memset(extendedCells, 0, imageWidth * sizeof(char));                                // fill the row with zeros
-        memcpy(extendedCells + paddingLength, nextGeneration, length * sizeof(char));                // copy the active cells into the middle of the row
+        length += 2; 
 
-        printf("%d. ", gen);                                                                // print the generation number (for debugging purposes
-        printBinaryString(extendedCells, imageWidth);
-        automatonData[gen] = extendedCells;                                                 // point to the row from the CA
-        free(cells);
-        cells = nextGeneration;
     }
- 
+
+
+
+
+    
     return automatonData;
 }
 
