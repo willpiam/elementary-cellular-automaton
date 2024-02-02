@@ -25,16 +25,10 @@ void printBinaryString(const char* data, size_t length) {
 
 #ifdef EXPERIMENTAL
 
-char** runCellularAutomaton(const char* rule, const int generations, const char *initialConditions) {
-    int length = strlen(initialConditions);
-    char* cells = (char*)malloc(length * sizeof(char));
-
-    for (int i = 0; i < length; i++) {
-        cells[i] = initialConditions[i] - '0';
-    }
-
-    const int imageWidth = length + 2 * generations;
+char** runCellularAutomaton(const char* rule, const int generations, char* cells, int initialConditionsLength) {
+    const int imageWidth = initialConditionsLength + 2 * generations;
     char** automatonData = (char**)malloc((generations + 1) * sizeof(char*));
+    int length = initialConditionsLength;
 
     for (int gen = 0; gen <= generations; gen++) {
         char* nextGeneration = (char*)malloc(length + 2 * sizeof(char));                    // allocate memory for the next generation (each generation is 2 cells longer than the previous one)
@@ -67,16 +61,11 @@ char** runCellularAutomaton(const char* rule, const int generations, const char 
 
 #else
 
-char** runCellularAutomaton(const char* rule, const int generations, const char *initialConditions) {
-    int length = strlen(initialConditions);
-    char* cells = (char*)malloc(length * sizeof(char));
-
-    for (int i = 0; i < length; i++) {
-        cells[i] = initialConditions[i] - '0';
-    }
-
-    const int imageWidth = length + 2 * generations;
+char** runCellularAutomaton(const char* rule, const int generations, char* cells, int initialConditionsLength) {
+    const int imageWidth = initialConditionsLength + 2 * generations;
     char** automatonData = (char**)malloc(generations * sizeof(char*));
+    
+    int length = initialConditionsLength;
 
     for (int i = 0; i < generations; i++) {
         int paddingLength = (imageWidth - length) / 2;
@@ -144,7 +133,15 @@ int main() {
 
     clock_t start = clock();
     char* rule = ruleToBinaryArray(ruleNumber);
-    char** automatonData = runCellularAutomaton(rule, generations, initialConditions);
+    int initialConditionsLength = strlen(initialConditions);
+
+    char* cells = (char*)malloc(initialConditionsLength * sizeof(char));
+
+    for (int i = 0; i < initialConditionsLength; i++) {
+        cells[i] = initialConditions[i] - '0';
+    }
+    
+    char** automatonData = runCellularAutomaton(rule, generations, cells, initialConditionsLength);
 
     int imageWidth = strlen(initialConditions) + 2 * generations;
     outputToFile(automatonData, ruleNumber, generations, initialConditions, imageWidth);

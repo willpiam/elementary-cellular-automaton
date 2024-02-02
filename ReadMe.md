@@ -151,6 +151,3 @@ The all command causes the program to print all run times found in the file. It 
     - [ ] Java
     - [ ] Clojure
     - [ ] C#
-
-2. Both haskell versions produce to much padding when given initial conditions of size three or larger
-
