@@ -59,19 +59,23 @@ generate previousLine rule generationCounter numberOfGenerations cellularAutomat
 main :: IO ()
 main = do
   contents <- BC.readFile "input.txt"
-  let [sRule, incon, slines] = BC.lines contents 
+  let [sRule, initialConditionsRaw, slines] = BC.lines contents 
 
   let rule = read (BC.unpack sRule) :: Int
-  let initialLength = BC.length incon
+  let initialLength = BC.length initialConditionsRaw
   let nlines = read (BC.unpack slines) :: Int
 
-  let initialConditions = padGen incon (nlines + initialLength -1)
+  let initialConditions = padGen initialConditionsRaw (nlines + (initialLength `div` 2))
+  -- let initialConditions = padGen initialConditionsRaw (nlines + initialLength -1)
 
   let lines = generate initialConditions (binaryString rule) 0 (nlines -1) initialConditions initialLength
 
-  let fileNamePrefix = BC.concat [BC.pack "results/r", BC.pack $ show rule, BC.pack "_g", slines, BC.pack "_i", incon, BC.pack "_haskell_B"]
+  let fileNamePrefix = BC.concat [BC.pack "results/r", BC.pack $ show rule, BC.pack "_g", slines, BC.pack "_i", initialConditionsRaw, BC.pack "_haskell_B"]
 
   -- WRITE TO FILE SYSTEM AS IMAGE
   let pbmText = BC.concat [BC.pack "P1\n", BC.pack $ show (BC.length initialConditions), BC.pack " ", BC.pack $ show nlines, BC.pack "\n", lines, BC.pack "\n"]
 
   BC.writeFile (BC.unpack (BC.append fileNamePrefix (BC.pack ".pbm"))) pbmText
+
+
+  

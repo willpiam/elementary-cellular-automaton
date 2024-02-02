@@ -66,19 +66,22 @@ main :: IO ()
 main = do
   time1 <- getCurrentTimeInMs
   contents <- readFile "input.txt"
-  let [sRule, incon, slines] = lines contents -- how can we make this more robust?
+  let [sRule, initialConditionsRaw, slines] = lines contents -- how can we make this more robust?
 
   let rule = read sRule :: Int
-  let initialLength = length incon
+  let initialLength = length initialConditionsRaw
   let nlines = read slines :: Int
 
-  let initialConditions = padGen incon (nlines + initialLength -1)
+  -- let initialConditions = padGen initialConditionsRaw (nlines + initialLength -1)
+  let initialConditions = padGen initialConditionsRaw (nlines + (initialLength `div` 2))
+  putStrLn ("Initial Conditions raw: " ++ initialConditionsRaw)
+  putStrLn ("Initial Conditions: " ++ initialConditions)
 
   putStrLn ("Rule " ++ show rule ++ " is \"" ++ binaryString rule ++ "\"")
 
   let lines = generate initialConditions (binaryString rule) 0 (nlines -1)  initialConditions initialLength
 
-  let fprefix = "results/r" ++ show rule ++ "_g" ++ slines ++ "_i" ++ incon ++ "_haskell"
+  let fprefix = "results/r" ++ show rule ++ "_g" ++ slines ++ "_i" ++ initialConditionsRaw ++ "_haskell"
 
   -- WRITE TO FILE SYSTEM AS IMAGE
   let pbmText = "P1\n" ++ show (length initialConditions) ++ " " ++ show nlines ++ "\n" ++ lines ++ "\n"
