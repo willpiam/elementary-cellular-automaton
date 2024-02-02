@@ -3,7 +3,7 @@
 #include <string.h>
 #include <time.h>
 
-#define EXPERIMENTAL
+// #define EXPERIMENTAL
 
 char* ruleToBinaryArray(char ruleNumber) {
     char* ruleBinary = (char*)malloc(8 * sizeof(char));
@@ -33,14 +33,12 @@ char** runCellularAutomaton(const char* rule, const int generations, char* cells
 
     // allocate memory for the entire Cellular Automaton
     for (int i = 0; i < generations; i++) {
-        char* row = (char*)malloc(imageWidth * sizeof(char));
+        char* row = (char*)malloc((imageWidth + 1)* sizeof(char));
+        row[imageWidth] = '\0';
 
         if (i == 0) {
             // copy the initial conditions to the first row
             int offset = (imageWidth - initialConditionsLength) / 2;
-            // for (int j = 0; j < initialConditionsLength; j++) {
-            //     row[offset + j] = cells[j];
-            // }
             memcpy(row + offset, cells, initialConditionsLength * sizeof(char));
         }
         automatonData[i] = row;
@@ -53,11 +51,9 @@ char** runCellularAutomaton(const char* rule, const int generations, char* cells
         const int paddingOffset = (imageWidth - length) / 2;
 
         for (int j = paddingOffset; j < paddingOffset + length; j++) {
-            automatonData[i][j] = 1;
+            // automatonData[i][j] = 1;
 
-
-            // automatonData[i][j] = calculateCell(cells + j - 1, rule);
-
+            automatonData[i][j] = calculateCell(automatonData[i - 1] + j - 1, rule);
 
 
         }
@@ -79,13 +75,16 @@ char** runCellularAutomaton(const char* rule, const int generations, char* cells
 
     for (int i = 0; i < generations; i++) {
         int paddingLength = (imageWidth - length) / 2;
-        char* extendedCells = (char*)malloc(imageWidth * sizeof(char));
+        // char* extendedCells = (char*)malloc(imageWidth * sizeof(char));
+        char* extendedCells = (char*)malloc((imageWidth + 1)* sizeof(char));
+        extendedCells[imageWidth] = '\0';
         memset(extendedCells, 0, imageWidth * sizeof(char));
         memcpy(extendedCells + paddingLength, cells, length * sizeof(char));
 
         automatonData[i] = extendedCells;
 
-        char* nextGeneration = (char*)malloc(imageWidth * sizeof(char));
+        char* nextGeneration = (char*)malloc((imageWidth + 1) * sizeof(char));
+        nextGeneration[imageWidth] = '\0';
         for (int j = 0; j < imageWidth; j++) {
             int leftNeighbor = j > 0 ? extendedCells[j - 1] : 0;
             int currentCell = extendedCells[j];
@@ -145,7 +144,8 @@ int main() {
     char* rule = ruleToBinaryArray(ruleNumber);
     int initialConditionsLength = strlen(initialConditions);
 
-    char* cells = (char*)malloc(initialConditionsLength * sizeof(char));
+    char* cells = (char*)malloc((initialConditionsLength + 1) * sizeof(char));
+    cells[initialConditionsLength] = '\0';
 
     for (int i = 0; i < initialConditionsLength; i++) {
         cells[i] = initialConditions[i] - '0';
