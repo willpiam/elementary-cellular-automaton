@@ -15,17 +15,12 @@ char calculateCell(const char *neighborhood, const char* ruleBinary) {
     return ruleBinary[index];
 }
 
-void printBinaryString(const char* data, size_t length) {
-    for (size_t i = 0; i < length; i++) 
-        printf("%c", data[i] ? '1' : '0');
-    printf("\n");
-}
-
 char** runCellularAutomaton(const char* rule, const int generations, char* cells, int initialConditionsLength) {
     const int imageWidth = initialConditionsLength + 2 * generations;
     char** automatonData = (char**)malloc(generations * sizeof(char*));
 
     int length = initialConditionsLength;
+    int initialOffset = (imageWidth - initialConditionsLength) / 2;
 
     // allocate memory for the entire Cellular Automaton
     for (int i = 0; i < generations; i++) {
@@ -33,26 +28,24 @@ char** runCellularAutomaton(const char* rule, const int generations, char* cells
         memset(row, 0, (imageWidth + 1) * sizeof(char));
         row[imageWidth] = '\0';
 
-        if (i == 0) {
-            // copy the initial conditions to the first row
-            int offset = (imageWidth - initialConditionsLength) / 2;
-            memcpy(row + offset, cells, initialConditionsLength * sizeof(char));
-        }
+        if (i == 0) 
+            memcpy(row + initialOffset, cells, initialConditionsLength * sizeof(char));
+
         automatonData[i] = row;
     }
 
     length += 2;
 
     char neighborhood[4];
+    neighborhood[3] = '\0'; 
 
     for (int i = 1; i < generations; i++) {
-        const int paddingOffset = (imageWidth - length) / 2;
+        int paddingOffset = initialOffset - i;
 
         for (int j = paddingOffset; j < paddingOffset + length; j++) {
             neighborhood[0] = automatonData[i - 1][j - 1] + '0';
             neighborhood[1] = automatonData[i - 1][j] + '0';
             neighborhood[2] = automatonData[i - 1][j + 1] + '0';
-            neighborhood[3] = '\0'; 
 
             automatonData[i][j] = calculateCell(neighborhood, rule);
         }
@@ -75,9 +68,9 @@ void outputToFile(char** automatonData, int ruleNumber, int generations, const c
     fprintf(file, "P1\n%d %d\n", imageWidth, generations);
     for (int i = 0; i < generations; i++) {
         int generationSize = strlen(automatonData[i]);
-        for (int j = 0; j < imageWidth; j++) {
+        for (int j = 0; j < imageWidth; j++) 
             fprintf(file, "%d", automatonData[i][j]);
-        }
+        
         fprintf(file, "\n");
     }
     fclose(file);
