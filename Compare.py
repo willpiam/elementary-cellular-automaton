@@ -8,7 +8,7 @@ from collections import defaultdict
 
 # Define the sets of commands with labels. Each set contains a label, a compile command, and a run command.
 command_sets = [
-    # ("C++", "g++ Main.cpp -o results/programcpp", "./results/programcpp"),  
+    ("C++", "g++ Main.cpp -o results/programcpp", "./results/programcpp"),  
     ("C", "gcc Main.c -o results/programc", "./results/programc"), 
     # ("Go", "", "go run Main.go") , 
     # ("Rust", "rustc Main.rs -o results/programrust", "./results/programrust"),
@@ -96,20 +96,8 @@ def generate_and_save_graph(data):
     # Save the plot in the results directory
     plt.savefig(os.path.join("results", "generations_vs_runtime.png"))
     print("Graph has been saved.")
-    
-def main():
-    # List to store all runs
-    existing_runs = read_existing_data(get_results_file_path())
 
-    if '--graph' in sys.argv or '-g' in sys.argv:
-        generate_and_save_graph(existing_runs)
-        return
-
-    if '--average' in sys.argv or '-avg' in sys.argv:
-        aggregateData = calculate_average_run_times(existing_runs)
-        display_average_run_times(aggregateData)
-        return
-
+def run_each_command_set(existing_runs):
     # Read inputs from the file
     rule_number, initial_conditions, generations = read_inputs_from_file("input.txt")
 
@@ -147,6 +135,23 @@ def main():
     for run in sorted(runs_to_display, key=lambda x: x['run_time']):
         label = "label"
         print(f"{f'{run[label]} '.ljust(20, '.')} {run['run_time']:.4f} seconds")
+
+def main():
+    # List to store all runs
+    existing_runs = read_existing_data(get_results_file_path())
+
+    if '--graph' in sys.argv or '-g' in sys.argv:
+        generate_and_save_graph(existing_runs)
+        return
+
+    if '--average' in sys.argv or '-avg' in sys.argv:
+        aggregateData = calculate_average_run_times(existing_runs)
+        display_average_run_times(aggregateData)
+        return
+
+    run_each_command_set(existing_runs)
+    return
+
 
 if __name__ == "__main__":
     main()
