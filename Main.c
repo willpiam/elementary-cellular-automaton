@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define MAX_LENGTH_INITIAL_CONDITIONS 100
+
 char* ruleToBinaryArray(char ruleNumber) {
     char* ruleBinary = (char*)malloc(8 * sizeof(char));
     for (char i = 0; i < 8; i++) 
@@ -43,9 +45,11 @@ char** runCellularAutomaton(const char* rule, const int generations, char* cells
         int paddingOffset = initialOffset - i;
 
         for (int j = paddingOffset; j < paddingOffset + length; j++) {
-            neighborhood[0] = automatonData[i - 1][j - 1] + '0';
-            neighborhood[1] = automatonData[i - 1][j] + '0';
-            neighborhood[2] = automatonData[i - 1][j + 1] + '0';
+            char* previousRow = automatonData[i - 1];
+
+            neighborhood[0] = previousRow[j - 1] + '0';
+            neighborhood[1] = previousRow[j] + '0';
+            neighborhood[2] = previousRow[j + 1] + '0';
 
             automatonData[i][j] = calculateCell(neighborhood, rule);
         }
@@ -57,7 +61,7 @@ char** runCellularAutomaton(const char* rule, const int generations, char* cells
 }
 
 void outputToFile(char** automatonData, int ruleNumber, int generations, const char *initialConditions, int imageWidth) {
-    char filename[100];
+    char filename[MAX_LENGTH_INITIAL_CONDITIONS + 50];
     sprintf(filename, "results/r%d_g%d_i%s_c.pbm", ruleNumber, generations, initialConditions);
     FILE *file = fopen(filename, "w");
     if (!file) {
@@ -84,7 +88,7 @@ int main() {
     }
 
     int ruleNumber, generations;
-    char initialConditions[100];
+    char initialConditions[MAX_LENGTH_INITIAL_CONDITIONS];
     fscanf(inputFile, "%d %s %d", &ruleNumber, initialConditions, &generations);
     fclose(inputFile);
 
@@ -102,7 +106,7 @@ int main() {
 
     int imageWidth = strlen(initialConditions) + 2 * generations;
     outputToFile(automatonData, ruleNumber, generations, initialConditions, imageWidth);
-    
+
     for (int i = 0; i < generations; i++)
         free(automatonData[i]);
 
