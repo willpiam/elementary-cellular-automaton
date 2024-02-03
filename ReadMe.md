@@ -126,6 +126,16 @@ The average flag causes the program to forgo running any of the CA programs and 
 
 The all command causes the program to print all run times found in the file. It will still execute the CAs and those runs will be included in the output. 
 
+### Graphing
+
+To enable the graphing functionalities you must have matplotlib installed. You can install it with the following command:
+
+    pip3 install matplotlib
+
+### Run time 
+
+![A graph depicting the relationship between the number of generations and the run time of the program](media/generations_vs_runtime.png)
+
 ## compareResults.sh
 
 This program takes two files and returns true if they hash to the same value. This is useful for comparing the output of two different implementations of the same cellular automaton program.

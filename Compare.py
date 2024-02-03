@@ -3,11 +3,12 @@ import time
 import json
 import os
 import sys
+import matplotlib.pyplot as plt 
 from collections import defaultdict
 
 # Define the sets of commands with labels. Each set contains a label, a compile command, and a run command.
 command_sets = [
-    ("C++", "g++ Main.cpp -o results/programcpp", "./results/programcpp"),  
+    # ("C++", "g++ Main.cpp -o results/programcpp", "./results/programcpp"),  
     ("C", "gcc Main.c -o results/programc", "./results/programc"), 
     # ("Go", "", "go run Main.go") , 
     # ("Rust", "rustc Main.rs -o results/programrust", "./results/programrust"),
@@ -72,10 +73,37 @@ def display_average_run_times(averages):
     print(f"{'Language'.ljust(20, ' ')}{'Average Time (s)'.ljust(20, ' ')}{'Number of Runs'}")
     for label, (avg_time, num_runs) in sorted(averages.items(), key=lambda x: x[1]):
         print(f"{label.ljust(20, ' ')}{f'{avg_time:.4f}'.ljust(20, ' ')}{str(num_runs).ljust(20, ' ')}")
+
+def generate_and_save_graph(data):
+    
+    if not data:
+        print("No data available to plot.")
+        return
+
+    # Prepare data for plotting
+    generations = [run['generations'] for run in data]
+    run_times = [run['run_time'] for run in data]
+
+    # Plotting
+    plt.figure(figsize=(10, 6))
+    plt.scatter(generations, run_times, color='blue', label='Run Time')
+    plt.title('Elementry Cellular Automiton: Generations vs Run Time')
+    plt.xlabel('Generations')
+    plt.ylabel('Run Time (seconds)')
+    plt.legend()
+    plt.grid(True)
+
+    # Save the plot in the results directory
+    plt.savefig(os.path.join("results", "generations_vs_runtime.png"))
+    print("Graph has been saved.")
     
 def main():
     # List to store all runs
     existing_runs = read_existing_data(get_results_file_path())
+
+    if '--graph' in sys.argv or '-g' in sys.argv:
+        generate_and_save_graph(existing_runs)
+        return
 
     if '--average' in sys.argv or '-avg' in sys.argv:
         aggregateData = calculate_average_run_times(existing_runs)
