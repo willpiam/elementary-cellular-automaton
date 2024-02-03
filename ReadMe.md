@@ -1,5 +1,5 @@
 # elementry cellular automiton
-![Rule 30, an elementry cellular automiton, generated from a single active cell for 500 generations](media/r30_g100_i1.png)
+![Rule 30, an elementry cellular automiton, generated from a single active cell for 500 generations](media/r30_g100_i1_c.png)
 ## Run a specific version
 
 Run TypeScript code:
