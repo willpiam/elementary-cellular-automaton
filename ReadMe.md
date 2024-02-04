@@ -190,3 +190,11 @@ This becomes clunky and annoying when you are testing different inputs (by alter
     - [ ] C#
 
 3. The C version of the program calls malloc in a loop to construct essentially a 2D array. runCellularAutomaton returns char\*\*. This can potentually be reduced to a single malloc call. This solution would involve changing the return type of runCellularAutomaton to char\* and then using pointer arithmetic to access the elements of the array.
+
+## The Author
+
+Cardano [$wildoy](https://handle.me/wildoy)
+
+Ethereum and more [WilliamDoyle.eth](https://app.ens.domains/williamdoyle.eth)
+
+Twitter [@william00000010](https://x.com/william00000010)
