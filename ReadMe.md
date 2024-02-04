@@ -108,25 +108,21 @@ Todo:
 
 ## Compare.py
 
-This program allows you to run multiple versions of the CA program and compare runs. There are three ways to run the program.
-
-With no flags:
-
-    python3 Compare.py
-
-With the average flag:
-
-    python3 Compare.py -avg
-
-Or with the all flag:
-
-    python3 Compare.py --all
+This program allows you to run multiple versions of the CA program and compare runs. 
 
 When no arguments are supplied the program will run the programs and print how long they each took. It will also save the runs to a file. 
 
 The average flag causes the program to forgo running any of the CA programs and simply display the average execution time of each language. 
+    
+    python3 Compare.py -avg
 
 The all command causes the program to print all run times found in the file. It will still execute the CAs and those runs will be included in the output. 
+    
+    python3 Compare.py --all
+
+To graph the results of the runs use the graph flag. This will cause the program to graph the results of the runs where the X axis is the number of generations and the Y axis is the run time.
+
+    python3 Compare.py --graph
 
 ### Graphing
 
@@ -182,9 +178,9 @@ This becomes clunky and annoying when you are testing different inputs (by alter
 
     Versions to update:
     - [ ] Python
-    - [ ] C++
+    - [x] C++
     - [ ] TypeScript
-    - [ ] C
+    - [x] C
     - [ ] Haskell
     - [ ] Go
     - [ ] Scala
@@ -192,3 +188,5 @@ This becomes clunky and annoying when you are testing different inputs (by alter
     - [ ] Java
     - [ ] Clojure
     - [ ] C#
+
+3. The C version of the program calls malloc in a loop to construct essentially a 2D array. runCellularAutomaton returns char\*\*. This can potentually be reduced to a single malloc call. This solution would involve changing the return type of runCellularAutomaton to char\* and then using pointer arithmetic to access the elements of the array.

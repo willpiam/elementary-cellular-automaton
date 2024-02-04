@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define MAX_LENGTH_INITIAL_CONDITIONS 100
+#define MAX_LENGTH_INITIAL_CONDITIONS 1000
 
 char* ruleToBinaryArray(char ruleNumber) {
     char* ruleBinary = (char*)malloc(8 * sizeof(char));
@@ -98,9 +98,8 @@ int main() {
     char* cells = (char*)malloc((initialConditionsLength + 1) * sizeof(char));
     cells[initialConditionsLength] = '\0';
 
-    for (int i = 0; i < initialConditionsLength; i++) {
+    for (int i = 0; i < initialConditionsLength; i++) 
         cells[i] = initialConditions[i] - '0';
-    }
     
     char** automatonData = runCellularAutomaton(rule, generations, cells, initialConditionsLength);
 
