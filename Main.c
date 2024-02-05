@@ -69,13 +69,13 @@ char** runCellularAutomaton(const char* rule, const int generations, char* cells
     return automatonData;
 }
 
-void outputToFile(char** automatonData, int ruleNumber, int generations, const char *initialConditions, int imageWidth) {
+int outputToFile(char** automatonData, int ruleNumber, int generations, const char *initialConditions, int imageWidth) {
     char filename[MAX_LENGTH_INITIAL_CONDITIONS + 50];
     sprintf(filename, "results/r%d_g%d_i%s_c.pbm", ruleNumber, generations, initialConditions);
     FILE *file = fopen(filename, "w");
     if (!file) {
         printf("Error creating output file!\n");
-        return;
+        return 1;
     }
 
     fprintf(file, "P1\n%d %d\n", imageWidth, generations);
@@ -87,6 +87,7 @@ void outputToFile(char** automatonData, int ruleNumber, int generations, const c
         fprintf(file, "\n");
     }
     fclose(file);
+    return 0; // success
 }
 
 int main() {
@@ -100,14 +101,18 @@ int main() {
     int ruleNumber, generations;
     char initialConditions[MAX_LENGTH_INITIAL_CONDITIONS];
     resultFlag = fscanf(inputFile, "%d %s %d", &ruleNumber, initialConditions, &generations);
-    if (3 != resultFlag) {
+    if (3 != resultFlag) {  // example: if there are less than 3 lines in the input.txt 
         printf("Error reading input file! Got %d elements instead of the expectecd 3\n", resultFlag);
         fclose(inputFile);
         return 1;
     }
-    printf("Result Flag: %d\n", resultFlag);
 
-    fclose(inputFile);
+    resultFlag = fclose(inputFile);
+
+    if (0 != resultFlag) {
+        printf("Error closing input file!\n");
+        return 1;
+    }
 
     char* rule = ruleToBinaryArray(ruleNumber);
     int initialConditionsLength = strlen(initialConditions);
@@ -115,6 +120,7 @@ int main() {
     char* cells = (char*)malloc((initialConditionsLength + 1) * sizeof(char));
     if (NULL == cells) {
         printf("Error allocating memory!\n");
+        free(rule);
         return 1;
     }
 
@@ -132,7 +138,22 @@ int main() {
     }
 
     int imageWidth = strlen(initialConditions) + 2 * generations;
-    outputToFile(automatonData, ruleNumber, generations, initialConditions, imageWidth);
+    resultFlag = outputToFile(automatonData, ruleNumber, generations, initialConditions, imageWidth);
+    
+    printf("Result Flag: %d\n", resultFlag);
+
+    if (0 != resultFlag) {
+        printf("Error writing to file!\n");
+
+        for (int i = 0; i < generations; i++)
+            free(automatonData[i]);
+
+        free(automatonData);
+        free(rule);
+        free(cells);
+
+        return 1;
+    }
 
     for (int i = 0; i < generations; i++)
         free(automatonData[i]);
