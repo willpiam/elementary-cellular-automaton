@@ -152,7 +152,8 @@ This becomes clunky and annoying when you are testing different inputs (by alter
 
 ## Other variations
 
-    It might be fun to write another C++ version with a more functional style
+1. It might be fun to write another C++ version with a more functional style
+2. A multi-threaded version written in C would be cool
 
 ## Tips 
 

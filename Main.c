@@ -20,6 +20,10 @@ char calculateCell(const char *neighborhood, const char* ruleBinary) {
 char** runCellularAutomaton(const char* rule, const int generations, char* cells, int initialConditionsLength) {
     const int imageWidth = initialConditionsLength + 2 * generations;
     char** automatonData = (char**)malloc(generations * sizeof(char*));
+    if (NULL == automatonData) {
+        printf("Error allocating memory!\n");
+        return NULL;
+    }
 
     int length = initialConditionsLength;
     int initialOffset = (imageWidth - initialConditionsLength) / 2;
@@ -27,6 +31,11 @@ char** runCellularAutomaton(const char* rule, const int generations, char* cells
     // allocate memory for the entire Cellular Automaton
     for (int i = 0; i < generations; i++) {
         char* row = (char*)malloc((imageWidth + 1)* sizeof(char));
+        if (NULL == row) {
+            printf("Error allocating memory!\n");
+            // free the memory allocated by this function so far
+            return NULL; // return null to indicate that the function failed and the caller should gracefully exit
+        }
         memset(row, 0, (imageWidth + 1) * sizeof(char));
         row[imageWidth] = '\0';
 
@@ -96,12 +105,23 @@ int main() {
     int initialConditionsLength = strlen(initialConditions);
 
     char* cells = (char*)malloc((initialConditionsLength + 1) * sizeof(char));
+    if (NULL == cells) {
+        printf("Error allocating memory!\n");
+        return 1;
+    }
+
     cells[initialConditionsLength] = '\0';
 
     for (int i = 0; i < initialConditionsLength; i++) 
         cells[i] = initialConditions[i] - '0';
     
     char** automatonData = runCellularAutomaton(rule, generations, cells, initialConditionsLength);
+    if (NULL == automatonData) {
+        printf("Error running cellular automaton!\n");
+        free(cells);
+        free(rule);
+        return 1;
+    }
 
     int imageWidth = strlen(initialConditions) + 2 * generations;
     outputToFile(automatonData, ruleNumber, generations, initialConditions, imageWidth);
