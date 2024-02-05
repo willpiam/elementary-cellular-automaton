@@ -199,3 +199,5 @@ Cardano [$wildoy](https://handle.me/wildoy)
 Ethereum and more [WilliamDoyle.eth](https://app.ens.domains/williamdoyle.eth)
 
 Twitter [@william00000010](https://x.com/william00000010)
+
+Other projects [projects.williamdoyle.ca](https://projects.williamdoyle.ca)
