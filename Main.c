@@ -96,9 +96,17 @@ int main() {
         return 1;
     }
 
+    int resultFlag;
     int ruleNumber, generations;
     char initialConditions[MAX_LENGTH_INITIAL_CONDITIONS];
-    fscanf(inputFile, "%d %s %d", &ruleNumber, initialConditions, &generations);
+    resultFlag = fscanf(inputFile, "%d %s %d", &ruleNumber, initialConditions, &generations);
+    if (3 != resultFlag) {
+        printf("Error reading input file! Got %d elements instead of the expectecd 3\n", resultFlag);
+        fclose(inputFile);
+        return 1;
+    }
+    printf("Result Flag: %d\n", resultFlag);
+
     fclose(inputFile);
 
     char* rule = ruleToBinaryArray(ruleNumber);
