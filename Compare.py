@@ -8,7 +8,7 @@ from collections import defaultdict
 
 # Define the sets of commands with labels. Each set contains a label, a compile command, and a run command.
 command_sets = [
-    # ("C++", "g++ Main.cpp -o results/programcpp", "./results/programcpp"),  
+    ("C++", "g++ Main.cpp -o results/programcpp", "./results/programcpp"),  
     ("C", "gcc Main.c -o results/programc", "./results/programc"), 
     # ("Go", "", "go run Main.go") , 
     # ("Rust", "rustc Main.rs -o results/programrust", "./results/programrust"),

@@ -33,7 +33,9 @@ char** runCellularAutomaton(const char* rule, const int generations, char* cells
         char* row = (char*)malloc((imageWidth + 1)* sizeof(char));
         if (NULL == row) {
             printf("Error allocating memory!\n");
-            // free the memory allocated by this function so far
+            for (int j = 0; j < i; j++) // free the memory allocated by this function so far
+                free(automatonData[j]);
+            free(automatonData);
             return NULL; // return null to indicate that the function failed and the caller should gracefully exit
         }
         memset(row, 0, (imageWidth + 1) * sizeof(char));
@@ -80,17 +82,16 @@ int outputToFile(char** automatonData, int ruleNumber, int generations, const ch
 
     fprintf(file, "P1\n%d %d\n", imageWidth, generations);
     for (int i = 0; i < generations; i++) {
-        int generationSize = strlen(automatonData[i]);
         for (int j = 0; j < imageWidth; j++) 
             fprintf(file, "%d", automatonData[i][j]);
         
         fprintf(file, "\n");
     }
-    fclose(file);
-    return 0; // success
+    return fclose(file);
 }
 
 int main() {
+    int exitCode = 0;
     FILE *inputFile = fopen("input.txt", "r");
     if (!inputFile) {
         printf("Error opening input file!\n");
@@ -118,10 +119,11 @@ int main() {
     int initialConditionsLength = strlen(initialConditions);
 
     char* cells = (char*)malloc((initialConditionsLength + 1) * sizeof(char));
+    // char* cells = NULL; // UNCOMMENT TO TEST ERROR HANDLING .. REMEMBER TO COMMENT OUT THE LINE ABOVE 
     if (NULL == cells) {
         printf("Error allocating memory!\n");
-        free(rule);
-        return 1;
+        exitCode = 1;
+        goto CLEAN_UP_AND_EXIT_3;
     }
 
     cells[initialConditionsLength] = '\0';
@@ -130,37 +132,33 @@ int main() {
         cells[i] = initialConditions[i] - '0';
     
     char** automatonData = runCellularAutomaton(rule, generations, cells, initialConditionsLength);
+    // char** automatonData = NULL; // UNCOMMENT TO TEST ERROR HANDLING .. REMEMBER TO COMMENT OUT THE LINE ABOVE
     if (NULL == automatonData) {
         printf("Error running cellular automaton!\n");
-        free(cells);
-        free(rule);
-        return 1;
+        exitCode = 1;
+        goto CLEAN_UP_AND_EXIT_2;
     }
 
     int imageWidth = strlen(initialConditions) + 2 * generations;
     resultFlag = outputToFile(automatonData, ruleNumber, generations, initialConditions, imageWidth);
-    
-    printf("Result Flag: %d\n", resultFlag);
-
+    // resultFlag = 1; // UNCOMMENT TO TEST ERROR HANDLING
     if (0 != resultFlag) {
         printf("Error writing to file!\n");
-
-        for (int i = 0; i < generations; i++)
-            free(automatonData[i]);
-
-        free(automatonData);
-        free(rule);
-        free(cells);
-
-        return 1;
+        exitCode = 1;
+        goto CLEAN_UP_AND_EXIT;
     }
 
+CLEAN_UP_AND_EXIT:
     for (int i = 0; i < generations; i++)
         free(automatonData[i]);
 
     free(automatonData);
-    free(rule);
+
+CLEAN_UP_AND_EXIT_2:
     free(cells);
 
-    return 0;
+CLEAN_UP_AND_EXIT_3:
+    free(rule);
+
+    return exitCode;
 }

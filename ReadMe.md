@@ -1,5 +1,6 @@
 # elementry cellular automiton
 ![Rule 30, an elementry cellular automiton, generated from a single active cell for 500 generations](media/r30_g100_i1_c.png)
+![Rule 30, with longer & random initial conditions](media/wideDemo.png)
 ## Run a specific version
 
 Run TypeScript code:
@@ -75,12 +76,6 @@ Run All Versions:
 Clear results:
 
     bash clearResults.sh
-
-Todo: 
-
-- [ ] ensure no memory leaks in C program
-- [ ] ensure no memory leaks in C++ program
-- [ ] Write a script to run a subset of these programs with various inputs and record their times 
 
 ## Testing
 
