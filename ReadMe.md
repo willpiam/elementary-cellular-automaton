@@ -132,11 +132,11 @@ To enable the graphing functionalities you must have matplotlib installed. You c
 
 ### Run time analysis
 
-The following plot shows the relationship between the number of generations and the run time of the program. This plot was created with the *--graph* flag. Rule 30 was used with standard initial conditions (single active cell) each run. The only varied parameter was the number of generations. All of the runs were created with the C version of the program as of February 2nd 2024.
+The following plot shows the relationship between the number of generations and the run time of the program. This plot was created with the *--graph* flag. Rule 30 was used with standard initial conditions (a single active cell) each run. The only varied parameter was the number of generations. All of the runs were created with the C version of the program as of February 2nd 2024.
 
 ![A graph depicting the relationship between the number of generations and the run time of the program](media/generations_vs_runtime.png)
 
-The following bar graph was made with the *--bar* flag. It compares average run times of the C, C++, Python, and TypeScript versions of the program. These versions were chosen because they are currently the only ones which don't waste time computing values which will always be zero regardless of the rule. Rule 30 was used with standard initial conditions (single active cell) and 1000 generations we run. This graph was created on Febuary 7th 2024. 
+The following bar graph was made with the *--bar* flag. It compares average run times of the C, C++, Python, and TypeScript versions of the program. These versions were chosen because they are currently the only ones which don't waste time computing values which will always be zero regardless of the rule. Rule 30 was used with standard initial conditions and 1000 generations we run. This graph was created on February 7th 2024. 
 
 ![A bar graph comparing the C, C++, Python, and TypeScript run times](media/R30G1000STDIC.png)
 
@@ -184,9 +184,9 @@ This becomes clunky and annoying when you are testing different inputs (by alter
 2. Remove timer from every version of the program and simply rely on the Compare.py program to time the runs. Programs should have no output except for the image file.
 
     Versions to update:
-    - [ ] Python
+    - [x] Python
     - [x] C++
-    - [ ] TypeScript
+    - [x] TypeScript
     - [x] C
     - [ ] Haskell
     - [ ] Go
@@ -196,7 +196,7 @@ This becomes clunky and annoying when you are testing different inputs (by alter
     - [ ] Clojure
     - [ ] C#
 
-3. The C version of the program calls malloc in a loop to construct essentially a 2D array. runCellularAutomaton returns char\*\*. This can potentually be reduced to a single malloc call. This solution would involve changing the return type of runCellularAutomaton to char\* and then using pointer arithmetic to access the elements of the array.
+3. The C version of the program calls malloc in a loop to construct essentially a 2D array. runCellularAutomaton returns char\*\*. This can potentually be reduced to a single malloc call. This solution would involve changing the return type of runCellularAutomaton to char\* and using pointer arithmetic to access the elements of the array.
 
 ## The Author
 
