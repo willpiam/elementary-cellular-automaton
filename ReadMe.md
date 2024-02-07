@@ -119,15 +119,26 @@ To graph the results of the runs use the graph flag. This will cause the program
 
     python3 Compare.py --graph
 
+The following command groups runs by language, rule, initial conditions, and number of generations, it takes the average for each group and creates a bar graph of the results. 
+
+    python3 Compare.py --bar
+
 ### Graphing
 
 To enable the graphing functionalities you must have matplotlib installed. You can install it with the following command:
 
     pip3 install matplotlib
 
-### Run time 
+
+### Run time analysis
+
+The following plot shows the relationship between the number of generations and the run time of the program. This plot was created with the *--graph* flag. Rule 30 was used with standard initial conditions (single active cell) each run. The only varied parameter was the number of generations. All of the runs were created with the C version of the program as of February 2nd 2024.
 
 ![A graph depicting the relationship between the number of generations and the run time of the program](media/generations_vs_runtime.png)
+
+The following bar graph was made with the *--bar* flag. It compares average run times of the C, C++, Python, and TypeScript versions of the program. These versions were chosen because they are currently the only ones which don't waste time computing values which will always be zero regardless of the rule. Rule 30 was used with standard initial conditions (single active cell) and 1000 generations we run. This graph was created on Febuary 7th 2024. 
+
+![A bar graph comparing the C, C++, Python, and TypeScript run times](media/R30G1000STDIC.png)
 
 ## compareResults.sh
 

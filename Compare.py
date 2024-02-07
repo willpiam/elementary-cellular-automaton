@@ -5,6 +5,7 @@ import os
 import sys
 import matplotlib.pyplot as plt 
 from collections import defaultdict
+import numpy as np
 
 # Define the sets of commands with labels. Each set contains a label, a compile command, and a run command.
 command_sets = [
@@ -15,8 +16,8 @@ command_sets = [
     # ("Haskell (slow)", "ghc -odir results -hidir results Main.hs -o results/programhaskell", "./results/programhaskell" ),
     # ("Haskell*", "ghc -odir results -hidir results MainB.hs -o results/programhaskell_B", "./results/programhaskell_B"),
     # ("Java", "javac -d results Main.java", "java -cp results Main"),
-    # ("Python", "", "python3 Main.py"),
-    # ("TypeScript", "", "deno run --allow-net --allow-read --allow-write Main.ts"),
+    ("Python", "", "python3 Main.py"),
+    ("TypeScript", "", "deno run --allow-net --allow-read --allow-write Main.ts"),
     # ("Scala", "scalac -d ./results Main.scala", "scala -cp ./results CellularAutomaton")
 ]
 
@@ -136,6 +137,40 @@ def run_each_command_set(existing_runs):
         label = "label"
         print(f"{f'{run[label]} '.ljust(20, '.')} {run['run_time']:.4f} seconds")
 
+
+def generate_and_save_bar_graph(existing_runs):
+    # Aggregate runs based on unique configuration
+    aggregated_runs = {}
+    for run in existing_runs:
+        # Create a unique key for each configuration
+        config_key = (run['label'], run['rule_number'], run['initial_conditions'], run['generations'])
+        if config_key not in aggregated_runs:
+            aggregated_runs[config_key] = []
+        aggregated_runs[config_key].append(run['run_time'])
+    
+    # Calculate average run time for each configuration
+    config_labels = []
+    avg_run_times = []
+    for config, times in aggregated_runs.items():
+        avg_time = sum(times) / len(times)
+        label = f"{config[0]} (Rule {config[1]}, Gen {config[3]})"
+        config_labels.append(label)
+        avg_run_times.append(avg_time)
+    
+    # Generate bar graph
+    plt.figure(figsize=(12, 8))
+    y_pos = np.arange(len(config_labels))
+    plt.bar(y_pos, avg_run_times, align='center', alpha=0.7)
+    plt.xticks(y_pos, config_labels, rotation='vertical')
+    plt.ylabel('Average Run Time (seconds)')
+    plt.title('Average Run Times by Configuration')
+    plt.tight_layout()  # Adjust layout to not cut off labels
+
+    # Save the plot in the results directory
+    plt.savefig(os.path.join("results", "configurations_vs_runtime.png"))
+    print("Bar graph has been saved.")
+
+
 def main():
     # List to store all runs
     existing_runs = read_existing_data(get_results_file_path())
@@ -147,6 +182,16 @@ def main():
     if '--average' in sys.argv or '-avg' in sys.argv:
         aggregateData = calculate_average_run_times(existing_runs)
         display_average_run_times(aggregateData)
+        return
+
+    if ('--bar' in sys.argv or '-b' in sys.argv):
+        # create a bar graph where the y axis is the run time and the x axis is the run
+        # each slot on the x axis is a unique set of (label, rule_number, initial_conditions, generations)
+        # the data is aggregated such that each run of the same label, rule_number, initial_conditions, generations is averaged
+        # so if there were two runs in C of rule 30, a single active cell as the initial condition, and 100 generations then
+        # the two runs would be averaged together and the result would be a single bar on the x axis 
+        generate_and_save_bar_graph(existing_runs)
+
         return
 
     run_each_command_set(existing_runs)
