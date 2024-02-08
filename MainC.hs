@@ -16,8 +16,8 @@ calculateCell pState rule =
     "010" -> rule `BC.index` 5
     "001" -> rule `BC.index` 6
     "000" -> rule `BC.index` 7
-    
-padZeros :: Int -> BC.ByteString 
+
+padZeros :: Int -> BC.ByteString
 padZeros n = BC.concat [BC.pack "0" | _ <- [1..n]]
 
 binaryString :: Int -> BC.ByteString
@@ -29,7 +29,7 @@ binaryString x = do
       BC.append (padZeros missingZeros) bs
 
 ensureLengthThree :: BC.ByteString -> BC.ByteString
-ensureLengthThree s 
+ensureLengthThree s
  | BC.length s == 3 = s
  | otherwise = BC.append s (padZeros (3 - BC.length s))
 
@@ -40,10 +40,9 @@ padGen gen padTo = do
   BC.concat [zeros, gen, zeros]
 
 generateLine :: BC.ByteString -> BC.ByteString -> BC.ByteString -> Int -> Int -> BC.ByteString
-generateLine previousLine rule currentLine numberOfGenerations initialConditionLength 
---   | BC.length currentLine == BC.length previousLine = padGen currentLine (numberOfGenerations - 1 + initialConditionLength)
+generateLine previousLine rule currentLine numberOfGenerations initialConditionLength
+--   | BC.length currentLine == BC.length previousLine = padGen currentLine (numberOfGenerations  + initialConditionLength)
   | BC.length currentLine == BC.length previousLine = padGen currentLine (numberOfGenerations  + initialConditionLength)
---   | BC.length currentLine == BC.length previousLine = currentLine
   | otherwise = do
       let substr = BC.drop (BC.length currentLine - 1) (BC.take ((BC.length currentLine - 1)+3) previousLine) -- get substring of previous state
       let psubstr = ensureLengthThree substr-- pad if needed to ensure length of three
@@ -51,21 +50,22 @@ generateLine previousLine rule currentLine numberOfGenerations initialConditionL
       let currentLineExtended = BC.append currentLine (BC.singleton calulatedCell)
       generateLine previousLine rule currentLineExtended numberOfGenerations initialConditionLength
 
-generate :: BC.ByteString -> BC.ByteString -> Int -> Int -> BC.ByteString -> Int -> BC.ByteString
-generate previousLine rule generationCounter numberOfGenerations cellularAutomaton initialConditionLength 
-  | generationCounter >= numberOfGenerations = cellularAutomaton
+generate :: BC.ByteString -> BC.ByteString -> Int -> Int -> [BC.ByteString] -> Int -> [BC.ByteString]
+generate previousLine rule generationCounter numberOfGenerations cadata initialConditionLength
+  | generationCounter >= numberOfGenerations = cadata
   | otherwise = do
     let thisLine = generateLine previousLine rule BC.empty numberOfGenerations initialConditionLength
-    generate thisLine rule (generationCounter + 1) numberOfGenerations (BC.append cellularAutomaton (BC.append (BC.pack "\n") thisLine)) initialConditionLength
+    generate thisLine rule (generationCounter + 1) numberOfGenerations (cadata ++ [thisLine]) initialConditionLength
 
 runCellularAutomation :: Int -> Int -> BC.ByteString -> IO [BC.ByteString]
 runCellularAutomation rule generations initialConditions = do
-    return [BC.pack "a"]
+    let ca = generate initialConditions (binaryString rule) 0 generations [initialConditions] (BC.length initialConditions)
+    return ca
 
 main :: IO ()
 main = do
   contents <- BC.readFile "input.txt"
-  let [sRule, initialConditionsRaw, slines] = BC.lines contents 
+  let [sRule, initialConditionsRaw, slines] = BC.lines contents
 
   let rule = read (BC.unpack sRule) :: Int
   let initialLength = BC.length initialConditionsRaw
@@ -73,7 +73,13 @@ main = do
   let imageWidth = (nlines * 2) + initialLength
 
   cellularAutomaton <- runCellularAutomation rule nlines initialConditionsRaw
+--   print cellularAutomaton
 
+  -- pad the CA
+--   let paddedCA = map (\x -> padGen x imageWidth) cellularAutomaton
+  let paddedCA = map (\x -> padGen x (nlines - 1)) cellularAutomaton
+  print paddedCA
+--   let paddedCA = map (`padGen` imageWidth) cellularAutomaton
 --   let initialConditions = padGen initialConditionsRaw (nlines + (initialLength `div` 2))
 --   let initialConditions = initialConditionsRaw
   -- let initialConditions = padGen initialConditionsRaw (nlines + initialLength -1)
@@ -89,9 +95,9 @@ main = do
 
   -- WRITE TO FILE SYSTEM AS IMAGE
 --   let pbmText = BC.concat [BC.pack "P1\n", BC.pack $ show imageWidth, BC.pack " ", BC.pack $ show nlines, BC.pack "\n", lines, BC.pack "\n"]
-  let pbmText = BC.concat [BC.pack "P1\n", BC.pack $ show imageWidth, BC.pack " ", BC.pack $ show nlines, BC.pack "\n", BC.pack "\n"]
+  let pbmText = BC.concat [BC.pack "P1\n", BC.pack $ show imageWidth, BC.pack " ", BC.pack $ show nlines, BC.pack "\n", BC.intercalate (BC.pack "\n") paddedCA, BC.pack "\n"]
+--   let pbmText = BC.concat [BC.pack "P1\n", BC.pack $ show imageWidth, BC.pack " ", BC.pack $ show nlines, BC.pack "\n", BC.pack "\n"]
 
   BC.writeFile (BC.unpack (BC.append fileNamePrefix (BC.pack ".pbm"))) pbmText
 
 
-  
