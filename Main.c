@@ -38,6 +38,7 @@ char** runCellularAutomaton(const char* rule, const int generations, char* cells
             free(automatonData);
             return NULL; // return null to indicate that the function failed and the caller should gracefully exit
         }
+        // memset(row, 0, (imageWidth + 1) * sizeof(char));
         memset(row, 0, (imageWidth + 1) * sizeof(char));
         row[imageWidth] = '\0';
 

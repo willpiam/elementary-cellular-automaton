@@ -40,8 +40,8 @@ padGen gen padTo = do
 
 generateLine :: BC.ByteString -> BC.ByteString -> BC.ByteString -> Int -> Int -> BC.ByteString
 generateLine previousLine rule currentLine numberOfGenerations initialConditionLength 
-  -- | BC.length currentLine == BC.length previousLine = padGen currentLine (numberOfGenerations - 1 + initialConditionLength)
-  | BC.length currentLine == BC.length previousLine = currentLine
+  | BC.length currentLine == BC.length previousLine = padGen currentLine (numberOfGenerations - 1 + initialConditionLength)
+--   | BC.length currentLine == BC.length previousLine = currentLine
   | otherwise = do
       let substr = BC.drop (BC.length currentLine - 1) (BC.take ((BC.length currentLine - 1)+3) previousLine) -- get substring of previous state
       let psubstr = ensureLengthThree substr-- pad if needed to ensure length of three
@@ -66,12 +66,13 @@ main = do
   let nlines = read (BC.unpack slines) :: Int
 
   let initialConditions = padGen initialConditionsRaw (nlines + (initialLength `div` 2))
+--   let initialConditions = initialConditionsRaw
   putStrLn("Initial Conditions: " ++ BC.unpack initialConditions)
   -- let initialConditions = padGen initialConditionsRaw (nlines + initialLength -1)
 
-  let lines = generate initialConditions (binaryString rule) 0 (nlines -1) initialConditions initialLength
+  let lines = generate initialConditionsRaw (binaryString rule) 0 (nlines -1) initialConditions initialLength
 
-  let fileNamePrefix = BC.concat [BC.pack "results/r", BC.pack $ show rule, BC.pack "_g", slines, BC.pack "_i", initialConditionsRaw, BC.pack "_haskell_B"]
+  let fileNamePrefix = BC.concat [BC.pack "results/r", BC.pack $ show rule, BC.pack "_g", slines, BC.pack "_i", initialConditionsRaw, BC.pack "_haskell_C"]
 
   -- WRITE TO FILE SYSTEM AS IMAGE
   let pbmText = BC.concat [BC.pack "P1\n", BC.pack $ show (BC.length initialConditions), BC.pack " ", BC.pack $ show nlines, BC.pack "\n", lines, BC.pack "\n"]
