@@ -3,6 +3,7 @@ module Main where
 import Numeric -- (showIntAtBase)
 import Data.Char -- (intToDigit)
 import qualified Data.ByteString.Char8 as BC
+import GHCi.Run (run)
 
 calculateCell :: BC.ByteString -> BC.ByteString -> Char
 calculateCell pState rule =
@@ -40,7 +41,8 @@ padGen gen padTo = do
 
 generateLine :: BC.ByteString -> BC.ByteString -> BC.ByteString -> Int -> Int -> BC.ByteString
 generateLine previousLine rule currentLine numberOfGenerations initialConditionLength 
-  | BC.length currentLine == BC.length previousLine = padGen currentLine (numberOfGenerations - 1 + initialConditionLength)
+--   | BC.length currentLine == BC.length previousLine = padGen currentLine (numberOfGenerations - 1 + initialConditionLength)
+  | BC.length currentLine == BC.length previousLine = padGen currentLine (numberOfGenerations  + initialConditionLength)
 --   | BC.length currentLine == BC.length previousLine = currentLine
   | otherwise = do
       let substr = BC.drop (BC.length currentLine - 1) (BC.take ((BC.length currentLine - 1)+3) previousLine) -- get substring of previous state
@@ -56,6 +58,10 @@ generate previousLine rule generationCounter numberOfGenerations cellularAutomat
     let thisLine = generateLine previousLine rule BC.empty numberOfGenerations initialConditionLength
     generate thisLine rule (generationCounter + 1) numberOfGenerations (BC.append cellularAutomaton (BC.append (BC.pack "\n") thisLine)) initialConditionLength
 
+runCellularAutomation :: Int -> Int -> BC.ByteString -> IO [BC.ByteString]
+runCellularAutomation rule generations initialConditions = do
+    return [BC.pack "a"]
+
 main :: IO ()
 main = do
   contents <- BC.readFile "input.txt"
@@ -64,18 +70,26 @@ main = do
   let rule = read (BC.unpack sRule) :: Int
   let initialLength = BC.length initialConditionsRaw
   let nlines = read (BC.unpack slines) :: Int
+  let imageWidth = (nlines * 2) + initialLength
 
-  let initialConditions = padGen initialConditionsRaw (nlines + (initialLength `div` 2))
+  cellularAutomaton <- runCellularAutomation rule nlines initialConditionsRaw
+
+--   let initialConditions = padGen initialConditionsRaw (nlines + (initialLength `div` 2))
 --   let initialConditions = initialConditionsRaw
-  putStrLn("Initial Conditions: " ++ BC.unpack initialConditions)
   -- let initialConditions = padGen initialConditionsRaw (nlines + initialLength -1)
 
-  let lines = generate initialConditionsRaw (binaryString rule) 0 (nlines -1) initialConditions initialLength
+--   let lines = generate initialConditions (binaryString rule) 0 (nlines -1) initialConditions initialLength
+--   let lines = generate initialConditionsRaw (binaryString rule) 0 (nlines -1) initialConditions initialLength
+--   let lines = generate initialConditions (binaryString rule) 0 (nlines -1) initialConditionsRaw initialLength
+--   let lines = generate initialConditions (binaryString rule) 0 (nlines -1) (BC.pack "") initialLength
+
+--   putStrLn $ BC.unpack lines
 
   let fileNamePrefix = BC.concat [BC.pack "results/r", BC.pack $ show rule, BC.pack "_g", slines, BC.pack "_i", initialConditionsRaw, BC.pack "_haskell_C"]
 
   -- WRITE TO FILE SYSTEM AS IMAGE
-  let pbmText = BC.concat [BC.pack "P1\n", BC.pack $ show (BC.length initialConditions), BC.pack " ", BC.pack $ show nlines, BC.pack "\n", lines, BC.pack "\n"]
+--   let pbmText = BC.concat [BC.pack "P1\n", BC.pack $ show imageWidth, BC.pack " ", BC.pack $ show nlines, BC.pack "\n", lines, BC.pack "\n"]
+  let pbmText = BC.concat [BC.pack "P1\n", BC.pack $ show imageWidth, BC.pack " ", BC.pack $ show nlines, BC.pack "\n", BC.pack "\n"]
 
   BC.writeFile (BC.unpack (BC.append fileNamePrefix (BC.pack ".pbm"))) pbmText
 
