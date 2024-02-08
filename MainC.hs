@@ -4,6 +4,7 @@ import Numeric -- (showIntAtBase)
 import Data.Char -- (intToDigit)
 import qualified Data.ByteString.Char8 as BC
 import GHCi.Run (run)
+import Text.XHtml (image)
 
 calculateCell :: BC.ByteString -> BC.ByteString -> Char
 calculateCell pState rule =
@@ -77,7 +78,10 @@ main = do
 
   -- pad the CA
 --   let paddedCA = map (\x -> padGen x imageWidth) cellularAutomaton
-  let paddedCA = map (\x -> padGen x (nlines - 1)) cellularAutomaton
+--   let paddedCA = map (\x -> padGen x (nlines)) cellularAutomaton
+--   let paddedCA = map (\gen -> padZeros (BC.length gen) >>= \zeros -> BC.pack [zeros, gen, zeros]) cellularAutomaton
+  let paddedCA = map (\gen -> let zeros = padZeros (imageWidth - BC.length gen) in BC.concat [zeros, gen, zeros]) cellularAutomaton
+
   print paddedCA
 --   let paddedCA = map (`padGen` imageWidth) cellularAutomaton
 --   let initialConditions = padGen initialConditionsRaw (nlines + (initialLength `div` 2))
@@ -95,8 +99,8 @@ main = do
 
   -- WRITE TO FILE SYSTEM AS IMAGE
 --   let pbmText = BC.concat [BC.pack "P1\n", BC.pack $ show imageWidth, BC.pack " ", BC.pack $ show nlines, BC.pack "\n", lines, BC.pack "\n"]
-  let pbmText = BC.concat [BC.pack "P1\n", BC.pack $ show imageWidth, BC.pack " ", BC.pack $ show nlines, BC.pack "\n", BC.intercalate (BC.pack "\n") paddedCA, BC.pack "\n"]
 --   let pbmText = BC.concat [BC.pack "P1\n", BC.pack $ show imageWidth, BC.pack " ", BC.pack $ show nlines, BC.pack "\n", BC.pack "\n"]
+  let pbmText = BC.concat [BC.pack "P1\n", BC.pack $ show imageWidth, BC.pack " ", BC.pack $ show nlines, BC.pack "\n", BC.intercalate (BC.pack "\n") paddedCA, BC.pack "\n"]
 
   BC.writeFile (BC.unpack (BC.append fileNamePrefix (BC.pack ".pbm"))) pbmText
 
