@@ -43,9 +43,11 @@ padGen gen padTo = do
 generateLine :: BC.ByteString -> BC.ByteString -> BC.ByteString -> Int -> Int -> BC.ByteString
 generateLine previousLine rule currentLine numberOfGenerations initialConditionLength
 --   | BC.length currentLine == BC.length previousLine = padGen currentLine (numberOfGenerations  + initialConditionLength)
-  | BC.length currentLine == BC.length previousLine = padGen currentLine (numberOfGenerations  + initialConditionLength)
+--   | BC.length currentLine == BC.length previousLine = currentLine
+  | BC.length currentLine == BC.length previousLine = BC.concat [padZeros 2, currentLine , padZeros 2]
   | otherwise = do
       let substr = BC.drop (BC.length currentLine - 1) (BC.take ((BC.length currentLine - 1)+3) previousLine) -- get substring of previous state
+    -- substr is the cell 
       let psubstr = ensureLengthThree substr-- pad if needed to ensure length of three
       let calulatedCell = calculateCell psubstr rule
       let currentLineExtended = BC.append currentLine (BC.singleton calulatedCell)
@@ -60,7 +62,10 @@ generate previousLine rule generationCounter numberOfGenerations cadata initialC
 
 runCellularAutomation :: Int -> Int -> BC.ByteString -> IO [BC.ByteString]
 runCellularAutomation rule generations initialConditions = do
-    let ca = generate initialConditions (binaryString rule) 0 generations [initialConditions] (BC.length initialConditions)
+    let initialConditionsLength = BC.length initialConditions
+    putStrLn $ "ic length is " ++ show initialConditionsLength
+    let ca = generate initialConditions (binaryString rule) 0 generations [initialConditions] initialConditionsLength
+    print ca
     return ca
 
 main :: IO ()
@@ -74,7 +79,6 @@ main = do
   let imageWidth = (nlines * 2) + initialLength
 
   cellularAutomaton <- runCellularAutomation rule nlines initialConditionsRaw
---   print cellularAutomaton
 
   -- pad the CA
 --   let paddedCA = map (\x -> padGen x imageWidth) cellularAutomaton
@@ -82,7 +86,7 @@ main = do
 --   let paddedCA = map (\gen -> padZeros (BC.length gen) >>= \zeros -> BC.pack [zeros, gen, zeros]) cellularAutomaton
   let paddedCA = map (\gen -> let zeros = padZeros (imageWidth - BC.length gen) in BC.concat [zeros, gen, zeros]) cellularAutomaton
 
-  print paddedCA
+--   print paddedCA
 --   let paddedCA = map (`padGen` imageWidth) cellularAutomaton
 --   let initialConditions = padGen initialConditionsRaw (nlines + (initialLength `div` 2))
 --   let initialConditions = initialConditionsRaw
