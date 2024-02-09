@@ -40,11 +40,25 @@ padGen gen padTo = do
   let zeros = padZeros missingZeros
   BC.concat [zeros, gen, zeros]
 
+getThirdCharOrZero :: BC.ByteString -> BC.ByteString
+getThirdCharOrZero s
+  | BC.length s >= 3 = BC.singleton $ s `BC.index` 2
+  | otherwise = BC.singleton '0'
+
 generateLine :: BC.ByteString -> BC.ByteString -> BC.ByteString -> Int -> Int -> BC.ByteString
 generateLine previousLine rule currentLine numberOfGenerations initialConditionLength
 --   | BC.length currentLine == BC.length previousLine = padGen currentLine (numberOfGenerations  + initialConditionLength)
 --   | BC.length currentLine == BC.length previousLine = currentLine
-  | BC.length currentLine == BC.length previousLine = BC.concat [padZeros 2, currentLine , padZeros 2]
+  | BC.length currentLine == BC.length previousLine + 2 = currentLine
+  | BC.length currentLine == 0 = do
+        let previousLength = BC.length previousLine
+        let thirdParent = getThirdCharOrZero previousLine 
+        let substr = BC.concat [BC.singleton '0', BC.take 1 previousLine, getThirdCharOrZero previousLine ]
+        let psubstr = ensureLengthThree substr-- pad if needed to ensure length of three
+        let calulatedCell = calculateCell psubstr rule
+        let currentLineExtended = BC.append currentLine (BC.singleton calulatedCell)
+        generateLine previousLine rule currentLineExtended numberOfGenerations initialConditionLength
+
   | otherwise = do
       let substr = BC.drop (BC.length currentLine - 1) (BC.take ((BC.length currentLine - 1)+3) previousLine) -- get substring of previous state
     -- substr is the cell 
@@ -84,7 +98,7 @@ main = do
 --   let paddedCA = map (\x -> padGen x imageWidth) cellularAutomaton
 --   let paddedCA = map (\x -> padGen x (nlines)) cellularAutomaton
 --   let paddedCA = map (\gen -> padZeros (BC.length gen) >>= \zeros -> BC.pack [zeros, gen, zeros]) cellularAutomaton
-  let paddedCA = map (\gen -> let zeros = padZeros (imageWidth - BC.length gen) in BC.concat [zeros, gen, zeros]) cellularAutomaton
+  let paddedCA = map (\gen -> let zeros = padZeros ((imageWidth - BC.length gen) `div` 2 ) in BC.concat [zeros, gen, zeros]) cellularAutomaton
 
 --   print paddedCA
 --   let paddedCA = map (`padGen` imageWidth) cellularAutomaton
