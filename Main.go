@@ -70,7 +70,7 @@ func runCellularAutomaton(ruleNumber, generations int, initialConditions string)
 }
 
 func outputToFile(automatonData [][]int, ruleNumber, generations int, initialConditions string) {
-    filename := fmt.Sprintf("results/r%d_g%d_i%s_go.pbm", ruleNumber, generations, initialConditions)
+    filename := fmt.Sprintf("results/r%d_g%d_i%s_goOLD.pbm", ruleNumber, generations, initialConditions)
     file, err := os.Create(filename)
     if err != nil {
         panic(err)
