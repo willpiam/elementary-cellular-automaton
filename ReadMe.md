@@ -177,7 +177,7 @@ This becomes clunky and annoying when you are testing different inputs (by alter
     - [ ] Go
     - [ ] Scala
     - [ ] Rust
-    - [ ] Java
+    - [x] Java
     - [ ] Clojure
     - [ ] C#
 
