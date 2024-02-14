@@ -1,5 +1,3 @@
-
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -32,7 +30,6 @@ public class Main {
         return ruleMap.get(pState);
     }
 
-
     public static List<List<Integer>> runCellularAutomaton(List<Integer> rule, int generations, List<Integer> initialCells) {
         List<Integer> cells = new ArrayList<>(initialCells);
         List<List<Integer>> ca = new ArrayList<>();
@@ -58,7 +55,6 @@ public class Main {
         ca.add(cells);
         return ca;
     }
-
 
     public static List<List<Integer>> padImageData(List<List<Integer>> imageData, int totalWidth) {
         List<List<Integer>> paddedData = new ArrayList<>();
