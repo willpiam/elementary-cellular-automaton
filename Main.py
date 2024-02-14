@@ -57,7 +57,7 @@ def main():
     cells = [int(bit) for bit in initial_conditions]
 
     ca = run_cellular_automaton(rule_binary, generations, cells)
-    
+
     # Determine the total width for the final padding
     final_width = len(initial_conditions) + 2 * generations
     padded_ca = pad_image_data(ca, final_width)
