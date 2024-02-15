@@ -179,7 +179,7 @@ This becomes clunky and annoying when you are testing different inputs (by alter
     - [ ] Rust
     - [x] Java
     - [ ] Clojure
-    - [ ] C#
+    - [x] C#
 
 2. Remove timer from every version of the program and simply rely on the Compare.py program to time the runs. Programs should have no output except for the image file.
 
