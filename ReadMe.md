@@ -136,9 +136,9 @@ The following plot shows the relationship between the number of generations and 
 
 ![A graph depicting the relationship between the number of generations and the run time of the program](media/generations_vs_runtime.png)
 
-The following bar graph was made with the *--bar* flag. It compares average run times of the C, C++, Python, and TypeScript versions of the program. These versions were chosen because they are currently the only ones which don't waste time computing values which will always be zero regardless of the rule. Rule 30 was used with standard initial conditions and 1000 generations we run. This graph was created on February 7th 2024. 
+The following bar graph was made with the *--bar* flag. It compares average run times of a few versions of the program. Rule 30 was used with standard initial conditions and 2000 generations were run. This graph was created on February 15th 2024. 
 
-![A bar graph comparing the C, C++, Python, and TypeScript run times](media/R30G1000STDIC.png)
+![A bar graph comparing the C, C++, Python, and TypeScript run times](media/R30G3000STDIC.png)
 
 ## compareResults.sh
 
