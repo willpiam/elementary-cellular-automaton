@@ -16,10 +16,12 @@ command_sets = [
     # ("Haskell (slow)", "ghc -odir results -hidir results Main.hs -o results/programhaskell", "./results/programhaskell" ),
     # ("Haskell*", "ghc -odir results -hidir results MainB.hs -o results/programhaskell_B", "./results/programhaskell_B"),
     # ("Haskell**", "ghc -odir results -hidir results MainC.hs -o results/programhaskell_C", "./results/programhaskell_C"),
-    ("Java", "javac -d results Main.java", "java -cp results Main"),
-    ("Python", "", "python3 Main.py"),
+    # ("Java", "javac -d results Main.java", "java -cp results Main"),
+    # ("Python", "", "python3 Main.py"),
     # ("TypeScript", "", "deno run --allow-net --allow-read --allow-write Main.ts"),
-    # ("Scala", "scalac -d ./results Main.scala", "scala -cp ./results CellularAutomaton")
+    # ("Scala", "scalac -d ./results Main.scala", "scala -cp ./results CellularAutomaton"),
+    ("C#", "mcs -out:results/programcsharp Main.cs", "mono results/programcsharp"),
+    ("C#OLD", "mcs -out:results/programcsharpold MainOLD.cs", "mono results/programcsharpold"),
 ]
 
 # Function to execute a command (no timing)
