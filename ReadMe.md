@@ -138,7 +138,7 @@ The following plot shows the relationship between the number of generations and 
 
 The following bar graph was made with the *--bar* flag. It compares average run times of a few versions of the program. Rule 30 was used with standard initial conditions and 2000 generations were run. This graph was created on February 15th 2024. 
 
-![A bar graph comparing the C, C++, Python, and TypeScript run times](media/R30G3000STDIC.png)
+![A bar graph comparing the C, C++, Python, and TypeScript run times](media/R30G2000STDIC.png)
 
 ## compareResults.sh
 
@@ -192,9 +192,9 @@ This becomes clunky and annoying when you are testing different inputs (by alter
     - [ ] Go
     - [ ] Scala
     - [ ] Rust
-    - [ ] Java
+    - [x] Java
     - [ ] Clojure
-    - [ ] C#
+    - [x] C#
 
 3. The C version of the program calls malloc in a loop to construct essentially a 2D array. runCellularAutomaton returns char\*\*. This can potentually be reduced to a single malloc call. This solution would involve changing the return type of runCellularAutomaton to char\* and using pointer arithmetic to access the elements of the array.
 
