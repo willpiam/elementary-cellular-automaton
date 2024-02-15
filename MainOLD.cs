@@ -46,7 +46,6 @@ class CellularAutomaton
         StringBuilder imageData = new StringBuilder();
         imageData.AppendLine($"P1\n{imageWidth} {generations}");
 
-        Stopwatch stopwatch = Stopwatch.StartNew();
 
         for (int i = 0; i < generations; i++)
         {
@@ -72,8 +71,6 @@ class CellularAutomaton
             cells = nextGeneration;
         }
 
-        stopwatch.Stop();
-        Console.WriteLine($"Took {stopwatch.ElapsedMilliseconds}ms to generate {generations} generations of rule {ruleNumber}");
 
         File.WriteAllText($"results/r{ruleNumber}_g{generations}_i{initialConditions}_csharpOLD.pbm", imageData.ToString());
     }
@@ -85,9 +82,6 @@ class CellularAutomaton
         string initialConditions = lines[1].Trim();
         int generations = int.Parse(lines[2].Trim());
 
-        Console.WriteLine($"Rule Number: {ruleNumber}");
-        Console.WriteLine($"Initial Conditions: {initialConditions}");
-        Console.WriteLine($"Generations: {generations}");
 
         RunCellularAutomaton(ruleNumber, generations, initialConditions);
     }

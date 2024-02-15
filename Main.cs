@@ -1,202 +1,94 @@
-// using System;
-// using System.IO;
-// using System.Collections.Generic;
-// using System.Diagnostics;
-// using System.Text;
-
-// class CellularAutomaton
-// {
-//     static int[] RuleToBinaryArray(int ruleNumber)
-//     {
-//         string binaryString = Convert.ToString(ruleNumber, 2).PadLeft(8, '0');
-//         int[] binaryArray = new int[8];
-//         for (int i = 0; i < 8; i++)
-//         {
-//             binaryArray[i] = int.Parse(binaryString[i].ToString());
-//         }
-//         return binaryArray;
-//     }
-
-//     static int CalculateCell(string pState, int[] rule)
-//     {
-//         var ruleMap = new Dictionary<string, int>
-//         {
-//             { "111", rule[0] },
-//             { "110", rule[1] },
-//             { "101", rule[2] },
-//             { "100", rule[3] },
-//             { "011", rule[4] },
-//             { "010", rule[5] },
-//             { "001", rule[6] },
-//             { "000", rule[7] }
-//         };
-//         return ruleMap[pState];
-//     }
-
-//     static void RunCellularAutomaton(int ruleNumber, int generations, string initialConditions)
-//     {
-//         List<int> cells = new List<int>();
-//         foreach (char c in initialConditions)
-//         {
-//             cells.Add(int.Parse(c.ToString()));
-//         }
-
-//         int[] ruleBinary = RuleToBinaryArray(ruleNumber);
-//         int imageWidth = cells.Count + 2 * generations;
-//         StringBuilder imageData = new StringBuilder();
-//         imageData.AppendLine($"P1\n{imageWidth} {generations}");
-
-//         Stopwatch stopwatch = Stopwatch.StartNew();
-
-//         for (int i = 0; i < generations; i++)
-//         {
-//             int paddingLength = (imageWidth - cells.Count) / 2;
-//             List<int> padding = new List<int>(new int[paddingLength]);
-//             List<int> extendedCells = new List<int>();
-//             extendedCells.AddRange(padding);
-//             extendedCells.AddRange(cells);
-//             extendedCells.AddRange(padding);
-
-//             foreach (var cell in extendedCells)
-//             {
-//                 imageData.Append(cell > 0 ? "1" : "0");
-//             }
-//             imageData.AppendLine();
-
-//             List<int> nextGeneration = new List<int>();
-//             for (int j = 1; j < extendedCells.Count - 1; j++)
-//             {
-//                 string neighborhood = $"{extendedCells[j - 1]}{extendedCells[j]}{extendedCells[j + 1]}";
-//                 nextGeneration.Add(CalculateCell(neighborhood, ruleBinary));
-//             }
-//             cells = nextGeneration;
-//         }
-
-//         stopwatch.Stop();
-//         Console.WriteLine($"Took {stopwatch.ElapsedMilliseconds}ms to generate {generations} generations of rule {ruleNumber}");
-
-//         File.WriteAllText($"results/r{ruleNumber}_g{generations}_i{initialConditions}_csharp.pbm", imageData.ToString());
-//     }
-
-//     static void Main(string[] args)
-//     {
-//         string[] lines = File.ReadAllLines("input.txt");
-//         int ruleNumber = int.Parse(lines[0].Trim());
-//         string initialConditions = lines[1].Trim();
-//         int generations = int.Parse(lines[2].Trim());
-
-//         Console.WriteLine($"Rule Number: {ruleNumber}");
-//         Console.WriteLine($"Initial Conditions: {initialConditions}");
-//         Console.WriteLine($"Generations: {generations}");
-
-//         RunCellularAutomaton(ruleNumber, generations, initialConditions);
-//     }
-// }
-
 using System;
-using System.Collections.Generic;
 using System.IO;
+using System.Text;
 
 class CellularAutomaton
 {
-    static List<int> RuleToBinaryArray(int ruleNumber)
+    const int MaxLengthInitialConditions = 1000;
+
+    static bool[] RuleToBinaryArray(int ruleNumber)
     {
-        string binaryString = Convert.ToString(ruleNumber, 2).PadLeft(8, '0');
-        List<int> binaryArray = new List<int>();
-        foreach (char bit in binaryString)
-        {
-            binaryArray.Add(int.Parse(bit.ToString()));
-        }
-        return binaryArray;
+        bool[] ruleBinary = new bool[8];
+        for (int i = 0; i < 8; i++)
+            ruleBinary[i] = (ruleNumber >> i & 1) == 1;
+        return ruleBinary;
     }
 
-    static int CalculateCell(string pState, List<int> rule)
+    static bool CalculateCell(string neighborhood, bool[] ruleBinary)
     {
-        Dictionary<string, int> ruleMap = new Dictionary<string, int>
-        {
-            {"111", rule[0]},
-            {"110", rule[1]},
-            {"101", rule[2]},
-            {"100", rule[3]},
-            {"011", rule[4]},
-            {"010", rule[5]},
-            {"001", rule[6]},
-            {"000", rule[7]}
-        };
-        return ruleMap[pState];
+        int index = Convert.ToInt32(neighborhood, 2);
+        return ruleBinary[index];
     }
 
-    static List<List<int>> RunCellularAutomaton(List<int> rule, int generations, List<int> initialCells)
+    static bool[][] RunCellularAutomaton(int rule, int generations, string cells)
     {
-        List<int> cells = new List<int>(initialCells);
-        List<List<int>> ca = new List<List<int>>();
+        int initialConditionsLength = cells.Length;
+        int imageWidth = initialConditionsLength + 2 * generations;
+        bool[][] automatonData = new bool[generations][];
 
-        for (int i = 0; i < generations - 1; i++)
+        int length = initialConditionsLength;
+        int initialOffset = (imageWidth - initialConditionsLength) / 2;
+
+        for (int i = 0; i < generations; i++)
         {
-            List<int> extendedCells = new List<int> { 0, 0 };
-            extendedCells.AddRange(cells);
-            extendedCells.Add(0);
-            extendedCells.Add(0);
-            ca.Add(new List<int>(cells));
-
-            List<int> nextGeneration = new List<int>();
-            for (int j = 1; j < extendedCells.Count - 1; j++)
+            automatonData[i] = new bool[imageWidth];
+            if (i == 0)
             {
-                string neighborhood = string.Join("", extendedCells.GetRange(j - 1, 3).ConvertAll(k => k.ToString()));
-                nextGeneration.Add(CalculateCell(neighborhood, rule));
+                for (int j = 0; j < initialConditionsLength; j++)
+                    automatonData[i][j + initialOffset] = cells[j] == '1';
             }
-            cells = nextGeneration;
         }
-        ca.Add(cells);
-        return ca;
+
+        length += 2;
+
+        for (int i = 1; i < generations; i++)
+        {
+            int paddingOffset = initialOffset - i;
+            for (int j = paddingOffset; j < paddingOffset + length; j++)
+            {
+                string neighborhood = $"{(automatonData[i - 1][j - 1] ? '1' : '0')}{(automatonData[i - 1][j] ? '1' : '0')}{(automatonData[i - 1][j + 1] ? '1' : '0')}";
+                automatonData[i][j] = CalculateCell(neighborhood, RuleToBinaryArray(rule));
+            }
+            length += 2;
+        }
+
+        return automatonData;
     }
 
-    static List<List<int>> PadImageData(List<List<int>> imageData, int totalWidth)
+    static void OutputToFile(bool[][] automatonData, int ruleNumber, int generations, string initialConditions)
     {
-        List<List<int>> paddedData = new List<List<int>>();
-        foreach (var row in imageData)
+        string directoryPath = "results";
+        Directory.CreateDirectory(directoryPath); // Ensure the directory exists
+        string filename = $"{directoryPath}/r{ruleNumber}_g{generations}_i{initialConditions}_csharp.pbm";
+        using (StreamWriter file = new StreamWriter(filename))
         {
-            int paddingLength = (totalWidth - row.Count) / 2;
-            List<int> paddedRow = new List<int>(new int[paddingLength]);
-            paddedRow.AddRange(row);
-            paddedRow.AddRange(new int[paddingLength]);
-            paddedData.Add(paddedRow);
+            int imageWidth = initialConditions.Length + 2 * generations;
+            file.WriteLine($"P1\n{imageWidth} {generations}");
+            foreach (var row in automatonData)
+            {
+                foreach (var cell in row)
+                    file.Write(cell ? "1" : "0");
+                file.WriteLine();
+            }
         }
-        return paddedData;
     }
 
-    static (int, string, int) ReadInputsFromFile(string filePath)
+    static void Main()
     {
-        string[] lines = File.ReadAllLines(filePath);
-        int ruleNumber = int.Parse(lines[0].Trim());
-        string initialConditions = lines[1].Trim();
-        int generations = int.Parse(lines[2].Trim());
-        return (ruleNumber, initialConditions, generations);
-    }
-
-    static void Main(string[] args)
-    {
-        (int ruleNumber, string initialConditions, int generations) = ReadInputsFromFile("input.txt");
-        
-        List<int> ruleBinary = RuleToBinaryArray(ruleNumber);
-        List<int> cells = new List<int>();
-        foreach (char bit in initialConditions)
+        try
         {
-            cells.Add(int.Parse(bit.ToString()));
+            string[] input = File.ReadAllLines("input.txt");
+            int ruleNumber = int.Parse(input[0]);
+            string initialConditions = input[1];
+            int generations = int.Parse(input[2]);
+
+            // bool[] rule = RuleToBinaryArray(ruleNumber);
+            bool[][] automatonData = RunCellularAutomaton(ruleNumber, generations, initialConditions);
+            OutputToFile(automatonData, ruleNumber, generations, initialConditions);
         }
-
-        List<List<int>> ca = RunCellularAutomaton(ruleBinary, generations, cells);
-
-        // Determine the total width for the final padding
-        int finalWidth = initialConditions.Length + 2 * generations;
-        List<List<int>> paddedCa = PadImageData(ca, finalWidth);
-
-        string imageData = $"P1\n{finalWidth} {generations}\n";
-        foreach (var row in paddedCa)
+        catch (Exception ex)
         {
-            imageData += string.Join("", row) + "\n";
+            Console.WriteLine($"An error occurred: {ex.Message}");
         }
-
-        File.WriteAllText($"results/r{ruleNumber}_g{generations}_i{initialConditions}_csharp.pbm", imageData);
     }
 }
