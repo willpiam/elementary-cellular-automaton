@@ -9,18 +9,21 @@ import numpy as np
 
 # Define the sets of commands with labels. Each set contains a label, a compile command, and a run command.
 command_sets = [
-    ("C++", "g++ Main.cpp -o results/programcpp", "./results/programcpp"),  
     ("C", "gcc Main.c -o results/programc", "./results/programc"), 
-    # ("Go", "", "go run Main.go") , 
-    # ("Rust", "rustc Main.rs -o results/programrust", "./results/programrust"),
-    # ("Haskell (slow)", "ghc -odir results -hidir results Main.hs -o results/programhaskell", "./results/programhaskell" ),
-    # ("Haskell*", "ghc -odir results -hidir results MainB.hs -o results/programhaskell_B", "./results/programhaskell_B"),
-    # ("Haskell**", "ghc -odir results -hidir results MainC.hs -o results/programhaskell_C", "./results/programhaskell_C"),
+    ("C++", "g++ Main.cpp -o results/programcpp", "./results/programcpp"),  
     ("Java", "javac -d results Main.java", "java -cp results Main"),
     ("Python", "", "python3 Main.py"),
     ("TypeScript", "", "deno run --allow-net --allow-read --allow-write Main.ts"),
-    # ("Scala", "scalac -d ./results Main.scala", "scala -cp ./results CellularAutomaton"),
     ("C#", "mcs -out:results/programcsharp Main.cs", "mono results/programcsharp"),
+
+    ("Rust", "rustc Main.rs -o results/programrust", "./results/programrust"),
+
+    # ("Go", "", "go run Main.go") , 
+    # ("Haskell (slow)", "ghc -odir results -hidir results Main.hs -o results/programhaskell", "./results/programhaskell" ),
+    # ("Haskell*", "ghc -odir results -hidir results MainB.hs -o results/programhaskell_B", "./results/programhaskell_B"),
+    # ("Haskell**", "ghc -odir results -hidir results MainC.hs -o results/programhaskell_C", "./results/programhaskell_C"),
+    
+    # ("Scala", "scalac -d ./results Main.scala", "scala -cp ./results CellularAutomaton"),
 ]
 
 # Function to execute a command (no timing)
