@@ -102,45 +102,6 @@ def generate_and_save_graph(data):
     plt.savefig(os.path.join("results", "generations_vs_runtime.png"))
     print("Graph has been saved.")
 
-# def run_each_command_set(existing_runs):
-#     # Read inputs from the file
-#     rule_number, initial_conditions, generations = read_inputs_from_file("input.txt")
-
-#     current_runs = []
-
-#     # Execute and time each set of commands
-#     for label, compile_cmd, run_cmd in command_sets:
-#         print(f"Running {label}...")
-#         execute_command(compile_cmd)  # Compile without timing
-#         run_time = time_command(run_cmd)  # Run with timing
-
-#         # Create a Run dictionary and add it to the list
-#         run = {
-#             "label": label,
-#             "rule_number": rule_number,
-#             "initial_conditions": initial_conditions,
-#             "generations": generations,
-#             "run_time": run_time
-#         }
-#         existing_runs.append(run)
-#         current_runs.append(run)
-
-#     # Write the updated data to the file
-#     write_data_to_file(get_results_file_path(), existing_runs)
-
-#     # Decide which runs to process based on command line arguments
-#     def runsToProcess():
-#         if '-a' in sys.argv or '--all' in sys.argv:
-#             return existing_runs
-#         else:
-#             return current_runs
-
-#     runs_to_display = runsToProcess()
-#     # Print the sorted execution times
-#     for run in sorted(runs_to_display, key=lambda x: x['run_time']):
-#         label = "label"
-#         print(f"{f'{run[label]} '.ljust(20, '.')} {run['run_time']:.4f} seconds")
-
 def run_each_command_set(existing_runs):
     rule_number, initial_conditions, generations = read_inputs_from_file("input.txt")
     hashes = defaultdict(list)
@@ -195,7 +156,7 @@ def generate_and_save_bar_graph(existing_runs):
     avg_run_times = []
     for config, times in aggregated_runs.items():
         avg_time = sum(times) / len(times)
-        label = f"{config[0]} (Rule {config[1]}, Gen {config[3]})"
+        label = f"{config[0]} (Rule {config[1]}, Gen {config[3]}, IC {config[2]})"
         config_labels.append(label)
         avg_run_times.append(avg_time)
     
