@@ -1,29 +1,28 @@
+from builtins import print
 import subprocess
 import time
 import json
 import os
 import sys
+import hashlib
 import matplotlib.pyplot as plt 
 from collections import defaultdict
 import numpy as np
 
-# Define the sets of commands with labels. Each set contains a label, a compile command, and a run command.
 command_sets = [
-    ("C", "gcc Main.c -o results/programc", "./results/programc"), 
-    ("C++", "g++ Main.cpp -o results/programcpp", "./results/programcpp"),  
-    ("Java", "javac -d results Main.java", "java -cp results Main"),
-    ("Python", "", "python3 Main.py"),
-    ("TypeScript", "", "deno run --allow-net --allow-read --allow-write Main.ts"),
-    ("C#", "mcs -out:results/programcsharp Main.cs", "mono results/programcsharp"),
+    ("C", "c", "gcc Main.c -o results/programc", "./results/programc"),
+    ("C++", "cpp", "g++ Main.cpp -o results/programcpp", "./results/programcpp"),
+    ("Java", "java", "javac -d results Main.java", "java -cp results Main"),
+    ("Python", "python", "", "python3 Main.py"),
+    ("TypeScript", "typescript", "", "deno run --allow-net --allow-read --allow-write Main.ts"),
+    ("C#", "csharp", "mcs -out:results/programcsharp Main.cs", "mono results/programcsharp"),
 
-    ("Rust", "rustc Main.rs -o results/programrust", "./results/programrust"),
-
-    # ("Go", "", "go run Main.go") , 
+    ("Rust", "rust", "rustc Main.rs -o results/programrust", "./results/programrust"),
+    ("Go", "go", "", "go run Main.go"),
     # ("Haskell (slow)", "ghc -odir results -hidir results Main.hs -o results/programhaskell", "./results/programhaskell" ),
-    # ("Haskell*", "ghc -odir results -hidir results MainB.hs -o results/programhaskell_B", "./results/programhaskell_B"),
+    ("Haskell*", "haskell_B", "ghc -odir results -hidir results MainB.hs -o results/programhaskell_B", "./results/programhaskell_B"),
     # ("Haskell**", "ghc -odir results -hidir results MainC.hs -o results/programhaskell_C", "./results/programhaskell_C"),
-    
-    # ("Scala", "scalac -d ./results Main.scala", "scala -cp ./results CellularAutomaton"),
+    ("Scala", "scala", "scalac -d ./results Main.scala", "scala -cp ./results CellularAutomaton"),
 ]
 
 # Function to execute a command (no timing)
@@ -103,19 +102,63 @@ def generate_and_save_graph(data):
     plt.savefig(os.path.join("results", "generations_vs_runtime.png"))
     print("Graph has been saved.")
 
+# def run_each_command_set(existing_runs):
+#     # Read inputs from the file
+#     rule_number, initial_conditions, generations = read_inputs_from_file("input.txt")
+
+#     current_runs = []
+
+#     # Execute and time each set of commands
+#     for label, compile_cmd, run_cmd in command_sets:
+#         print(f"Running {label}...")
+#         execute_command(compile_cmd)  # Compile without timing
+#         run_time = time_command(run_cmd)  # Run with timing
+
+#         # Create a Run dictionary and add it to the list
+#         run = {
+#             "label": label,
+#             "rule_number": rule_number,
+#             "initial_conditions": initial_conditions,
+#             "generations": generations,
+#             "run_time": run_time
+#         }
+#         existing_runs.append(run)
+#         current_runs.append(run)
+
+#     # Write the updated data to the file
+#     write_data_to_file(get_results_file_path(), existing_runs)
+
+#     # Decide which runs to process based on command line arguments
+#     def runsToProcess():
+#         if '-a' in sys.argv or '--all' in sys.argv:
+#             return existing_runs
+#         else:
+#             return current_runs
+
+#     runs_to_display = runsToProcess()
+#     # Print the sorted execution times
+#     for run in sorted(runs_to_display, key=lambda x: x['run_time']):
+#         label = "label"
+#         print(f"{f'{run[label]} '.ljust(20, '.')} {run['run_time']:.4f} seconds")
+
 def run_each_command_set(existing_runs):
-    # Read inputs from the file
     rule_number, initial_conditions, generations = read_inputs_from_file("input.txt")
+    hashes = defaultdict(list)
 
-    current_runs = []
-
-    # Execute and time each set of commands
-    for label, compile_cmd, run_cmd in command_sets:
+    for label, version_indicator, compile_cmd, run_cmd in command_sets:
         print(f"Running {label}...")
-        execute_command(compile_cmd)  # Compile without timing
-        run_time = time_command(run_cmd)  # Run with timing
+        execute_command(compile_cmd)
+        run_time = time_command(run_cmd)
 
-        # Create a Run dictionary and add it to the list
+        filename = f"results/r{rule_number}_g{generations}_i{initial_conditions}_{version_indicator}.pbm"
+        if os.path.exists(filename):
+            with open(filename, 'rb') as file:
+                file_contents = file.read()
+                file_hash = hashlib.sha256(file_contents).hexdigest()
+            hashes[file_hash].append(label)
+        else:
+            print(f"File {filename} not found for {label}")
+        
         run = {
             "label": label,
             "rule_number": rule_number,
@@ -124,23 +167,17 @@ def run_each_command_set(existing_runs):
             "run_time": run_time
         }
         existing_runs.append(run)
-        current_runs.append(run)
 
-    # Write the updated data to the file
     write_data_to_file(get_results_file_path(), existing_runs)
 
-    # Decide which runs to process based on command line arguments
-    def runsToProcess():
-        if '-a' in sys.argv or '--all' in sys.argv:
-            return existing_runs
-        else:
-            return current_runs
-
-    runs_to_display = runsToProcess()
-    # Print the sorted execution times
-    for run in sorted(runs_to_display, key=lambda x: x['run_time']):
-        label = "label"
-        print(f"{f'{run[label]} '.ljust(20, '.')} {run['run_time']:.4f} seconds")
+    if len(hashes) == 1:
+        print(f"\nAll generated images hash to {next(iter(hashes.keys()))}")
+    else:
+        print(f"\nWarning! The generated images hash to the following {len(hashes)} unique values:\n")
+        for file_hash, labels in hashes.items():
+            print(f"{file_hash}")
+            for label in labels:
+                print(f"\t{label}")
 
 
 def generate_and_save_bar_graph(existing_runs):

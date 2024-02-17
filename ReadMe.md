@@ -100,6 +100,7 @@ Clear results:
 - [ ] Agda (??)
 - [ ] Idris (??)
 - [ ] bash
+- [ ] assembly
 
 ## Compare.py
 

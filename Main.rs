@@ -15,7 +15,7 @@ fn run_cellular_automaton(rule_number: u8, generations: usize, initial_condition
     for _ in 0..generations {
         let padding_length = (image_width - cells.len()) / 2;
  
-        let mut extended_cells = vec![0; image_width];
+        let mut extended_cells = vec![0; image_width]; 
         let start = padding_length;
         let end = start + cells.len();
         extended_cells[start..end].copy_from_slice(&cells);
