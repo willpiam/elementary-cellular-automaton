@@ -188,13 +188,7 @@ def main():
         return
 
     if ('--bar' in sys.argv or '-b' in sys.argv):
-        # create a bar graph where the y axis is the run time and the x axis is the run
-        # each slot on the x axis is a unique set of (label, rule_number, initial_conditions, generations)
-        # the data is aggregated such that each run of the same label, rule_number, initial_conditions, generations is averaged
-        # so if there were two runs in C of rule 30, a single active cell as the initial condition, and 100 generations then
-        # the two runs would be averaged together and the result would be a single bar on the x axis 
         generate_and_save_bar_graph(existing_runs)
-
         return
 
     run_each_command_set(existing_runs)

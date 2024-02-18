@@ -106,11 +106,11 @@ Clear results:
 
 This program allows you to run multiple versions of the CA program and compare runs. 
 
-When no arguments are supplied the program will run the programs and print how long they each took. It will also save the runs to a file. 
+When no arguments are supplied the program will run the programs and print how long they each took. The program will save all run data to a file called *run_data.json*. After executing each run the resulting image is hashed, these hashes are used to compare the results of the runs. The program will inform the user which images hash to the same value and which do not.
 
 The average flag causes the program to forgo running any of the CA programs and simply display the average execution time of each language. 
     
-    python3 Compare.py -avg
+    python3 Compare.py --average
 
 The all command causes the program to print all run times found in the file. It will still execute the CAs and those runs will be included in the output. 
     
@@ -151,20 +151,12 @@ To run the program:
 
 The program will either print "same" or "different" to the terminal.
 
-An example of how this program can be chained with Compare.py to rapidly test changes against another implementation:
-
-    python3 Compare.py ; bash compareResults.sh results/r30_g50_i1_c.pbm results/r30_g50_i1_cpp.pbm 
-
-This becomes clunky and annoying when you are testing different inputs (by altering inputs.txt) and need to modify the command each time you change the inputs. It would be better to include this functionality in the Compare.py program.
+*Compare.py* already does this verification but the bash script may be useful in a pinch, or when you don't want to rerun the Compare.py program for whatever reason. 
 
 ## Other variations
 
 1. It might be fun to write another C++ version with a more functional style
 2. A multi-threaded version written in C would be cool
-
-## Tips 
-
-1. Use sha256sum or compareResults.sh to compare two generated images and ensure they are exactly the same
 
 ## Improvements 
 1. Some versions of the program are doing more computations than necessary as they are computing cells which are unaffected by the initial conditions. The current python implementation does not have the flaw. Because of this all other versions need to be updated to reflect the logic of the python implementation. 
