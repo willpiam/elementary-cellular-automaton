@@ -174,22 +174,7 @@ The program will either print "same" or "different" to the terminal.
     - [ ] Clojure
     - [x] C#
 
-2. Remove timer from every version of the program and simply rely on the Compare.py program to time the runs. Programs should have no output except for the image file.
-
-    Versions to update:
-    - [x] Python
-    - [x] C++
-    - [x] TypeScript
-    - [x] C
-    - [ ] Haskell
-    - [ ] Go
-    - [ ] Scala
-    - [ ] Rust
-    - [x] Java
-    - [ ] Clojure
-    - [x] C#
-
-3. The C version of the program calls malloc in a loop to construct essentially a 2D array. runCellularAutomaton returns char\*\*. This can potentually be reduced to a single malloc call. This solution would involve changing the return type of runCellularAutomaton to char\* and using pointer arithmetic to access the elements of the array.
+2. The C version of the program calls malloc in a loop to construct essentially a 2D array. runCellularAutomaton returns char\*\*. This can potentually be reduced to a single malloc call. This solution would involve changing the return type of runCellularAutomaton to char\* and using pointer arithmetic to access the elements of the array.
 
 ## The Author
 

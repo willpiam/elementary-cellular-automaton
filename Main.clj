@@ -66,9 +66,7 @@
   (if (empty? condition) "010" condition))
 
 (defn -main [& args]
-  (println "Running...") 
-  (let [time1 (get-current-time-in-ms)
-        contents (slurp "input.txt")
+  (let [contents (slurp "input.txt")
         [s-rule incon slines] (str/split-lines contents)
         rule (parse-number-with-default 30 s-rule)
         temp-initial-conditions (initial-conditions-or-default incon)
@@ -79,8 +77,6 @@
         fprefix (str "results/r" rule "_g" slines "_i" temp-initial-conditions "_clojure")
         pbm-text (str "P1\n" (count initial-conditions) " " nlines "\n" lines "\n")]
     (spit (str fprefix ".pbm") pbm-text)
-    (let [time2 (get-current-time-in-ms)
-          time-delta (- time2 time1)]
-      (println "Time taken:" time-delta "ms"))))
+    ))
 
 (-main)

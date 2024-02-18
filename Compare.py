@@ -19,10 +19,10 @@ command_sets = [
 
     ("Rust", "rust", "rustc Main.rs -o results/programrust", "./results/programrust"),
     ("Go", "go", "", "go run Main.go"),
-    # ("Haskell (slow)", "ghc -odir results -hidir results Main.hs -o results/programhaskell", "./results/programhaskell" ),
-    ("Haskell*", "haskell_B", "ghc -odir results -hidir results MainB.hs -o results/programhaskell_B", "./results/programhaskell_B"),
+    ("Haskell", "haskell", "ghc -odir results -hidir results Main.hs -o results/programhaskell", "./results/programhaskell"),
     # ("Haskell**", "ghc -odir results -hidir results MainC.hs -o results/programhaskell_C", "./results/programhaskell_C"),
     ("Scala", "scala", "scalac -d ./results Main.scala", "scala -cp ./results CellularAutomaton"),
+    ("Clojure", "clojure", "", "clojure Main.clj"),
 ]
 
 # Function to execute a command (no timing)

@@ -29,8 +29,6 @@ object CellularAutomaton:
     val imageWidth = cells.length + 2 * generations
     val imageData = new StringBuilder(s"P1\n$imageWidth $generations\n")
 
-    val startTime = System.nanoTime()
-
     for (_ <- 0 until generations) 
       val paddingLength = (imageWidth - cells.length) / 2
       val padding = Array.fill(paddingLength)(0)
@@ -43,9 +41,6 @@ object CellularAutomaton:
         val neighborhood = s"${extendedCells(j - 1)}${extendedCells(j)}${extendedCells(j + 1)}"
         nextGeneration += calculateCell(neighborhood, ruleBinary)
       cells = nextGeneration.toArray
-
-    val endTime = System.nanoTime()
-    println(f"Took ${(endTime - startTime) / 1e6}%.2fms to generate $generations generations of rule $ruleNumber")
 
     new PrintWriter(s"results/r${ruleNumber}_g${generations}_i${initialConditions}_scala.pbm") {
       write(imageData.toString); close()
@@ -60,10 +55,6 @@ object CellularAutomaton:
 
   def main(args: Array[String]): Unit = 
     val (ruleNumber, initialConditions, generations) = readInputsFromFile("input.txt")
-    println(s"Rule Number: $ruleNumber")
-    println(s"Initial Conditions: $initialConditions")
-    println(s"Generations: $generations")
-
     runCellularAutomaton(ruleNumber, generations, initialConditions)
 
 // This is the correct way to invoke the main method in Scala.

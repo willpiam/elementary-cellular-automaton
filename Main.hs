@@ -2,90 +2,77 @@ module Main where
 
 import Numeric -- (showIntAtBase)
 import Data.Char -- (intToDigit)
-import Data.Time.Clock.POSIX (getPOSIXTime)
+import qualified Data.ByteString.Char8 as BC
 
-getCurrentTimeInMs :: IO Integer
-getCurrentTimeInMs = do
-  now <- getPOSIXTime
-  return $ round (now * 1000)
-
-calculateCell :: String -> String -> String
+calculateCell :: BC.ByteString -> BC.ByteString -> Char
 calculateCell pState rule =
-  case pState of
-    "111" -> [head rule]
-    "110" -> [rule !! 1]
-    "101" -> [rule !! 2]
-    "100" -> [rule !! 3]
-    "011" -> [rule !! 4]
-    "010" -> [rule !! 5]
-    "001" -> [rule !! 6]
-    "000" -> [rule !! 7]
+  case BC.unpack pState of
+    "111" -> BC.head rule
+    "110" -> rule `BC.index` 1
+    "101" -> rule `BC.index` 2
+    "100" -> rule `BC.index` 3
+    "011" -> rule `BC.index` 4
+    "010" -> rule `BC.index` 5
+    "001" -> rule `BC.index` 6
+    "000" -> rule `BC.index` 7
+    
+padZeros :: Int -> BC.ByteString 
+padZeros n = BC.concat [BC.pack "0" | _ <- [1..n]]
 
-padZeros :: Int -> String 
-padZeros n = concat ["0" | _ <- [1..n]]
-
-binaryString :: Int -> String
+binaryString :: Int -> BC.ByteString
 binaryString x = do
-  let bs = showIntAtBase 2 intToDigit x ""
-  if length bs >= 8 then bs
+  let bs = BC.pack $ showIntAtBase 2 intToDigit x ""
+  if BC.length bs >= 8 then bs
     else do
-      -- pad the string with zeros
-      let missingZeros = 8 - length bs
-      padZeros missingZeros ++ bs
+      let missingZeros = 8 - BC.length bs
+      BC.append (padZeros missingZeros) bs
 
-ensureLengthThree :: String -> String 
-ensureLengthThree s
- | length s == 3 = s
- | otherwise = s ++ padZeros (3 - length s)
+ensureLengthThree :: BC.ByteString -> BC.ByteString
+ensureLengthThree s 
+ | BC.length s == 3 = s
+ | otherwise = BC.append s (padZeros (3 - BC.length s))
 
-padGen :: String -> Int -> String
+padGen :: BC.ByteString -> Int -> BC.ByteString
 padGen gen padTo = do
-  let missingZeros = padTo - (length gen `quot` 2)
+  let missingZeros = padTo - (BC.length gen `quot` 2)
   let zeros = padZeros missingZeros
-  zeros ++ gen ++ zeros
+  BC.concat [zeros, gen, zeros]
 
-generateLine :: String -> String -> String -> Int -> Int -> String
+generateLine :: BC.ByteString -> BC.ByteString -> BC.ByteString -> Int -> Int -> BC.ByteString
 generateLine previousLine rule currentLine numberOfGenerations initialConditionLength 
-  -- | length currentLine == length previousLine = padGen currentLine (numberOfGenerations - 1 + initialConditionLength)
-  -- | length currentLine == length previousLine = padGen currentLine ((((numberOfGenerations * 2) + initialConditionLength) - length currentLine))
-  | length currentLine == length previousLine = currentLine
+  -- | BC.length currentLine == BC.length previousLine = padGen currentLine (numberOfGenerations - 1 + initialConditionLength)
+  | BC.length currentLine == BC.length previousLine = currentLine
   | otherwise = do
-      let substr = drop (length currentLine - 1) (take ((length currentLine - 1)+3) previousLine) -- get substring of previous state
-      let psubstr = ensureLengthThree substr -- pad if needed to ensure length of three
-      let currentLineExtended = currentLine ++ calculateCell psubstr rule
+      let substr = BC.drop (BC.length currentLine - 1) (BC.take ((BC.length currentLine - 1)+3) previousLine) -- get substring of previous state
+      let psubstr = ensureLengthThree substr-- pad if needed to ensure length of three
+      let calulatedCell = calculateCell psubstr rule
+      let currentLineExtended = BC.append currentLine (BC.singleton calulatedCell)
       generateLine previousLine rule currentLineExtended numberOfGenerations initialConditionLength
 
-generate :: String -> String -> Int -> Int -> String -> Int -> String
+generate :: BC.ByteString -> BC.ByteString -> Int -> Int -> BC.ByteString -> Int -> BC.ByteString
 generate previousLine rule generationCounter numberOfGenerations cellularAutomaton initialConditionLength 
   | generationCounter >= numberOfGenerations = cellularAutomaton
   | otherwise = do
-    let thisLine = generateLine previousLine rule "" numberOfGenerations initialConditionLength
-    generate thisLine rule (generationCounter + 1) numberOfGenerations (cellularAutomaton ++ "\n" ++ thisLine) initialConditionLength
+    let thisLine = generateLine previousLine rule BC.empty numberOfGenerations initialConditionLength
+    generate thisLine rule (generationCounter + 1) numberOfGenerations (BC.append cellularAutomaton (BC.append (BC.pack "\n") thisLine)) initialConditionLength
 
 main :: IO ()
 main = do
-  time1 <- getCurrentTimeInMs
-  contents <- readFile "input.txt"
-  let [sRule, initialConditionsRaw, slines] = lines contents -- how can we make this more robust?
+  contents <- BC.readFile "input.txt"
+  let [sRule, initialConditionsRaw, slines] = BC.lines contents 
 
-  let rule = read sRule :: Int
-  let initialLength = length initialConditionsRaw
-  let nlines = read slines :: Int
+  let rule = read (BC.unpack sRule) :: Int
+  let initialLength = BC.length initialConditionsRaw
+  let nlines = read (BC.unpack slines) :: Int
 
-  -- let initialConditions = padGen initialConditionsRaw (nlines + initialLength -1)
   let initialConditions = padGen initialConditionsRaw (nlines + (initialLength `div` 2))
+  -- let initialConditions = padGen initialConditionsRaw (nlines + initialLength -1)
 
-  putStrLn ("Rule " ++ show rule ++ " is \"" ++ binaryString rule ++ "\"")
+  let lines = generate initialConditions (binaryString rule) 0 (nlines -1) initialConditions initialLength
 
-  let lines = generate initialConditions (binaryString rule) 0 (nlines -1)  initialConditions initialLength
-
-  let fprefix = "results/r" ++ show rule ++ "_g" ++ slines ++ "_i" ++ initialConditionsRaw ++ "_haskell"
+  let fileNamePrefix = BC.concat [BC.pack "results/r", BC.pack $ show rule, BC.pack "_g", slines, BC.pack "_i", initialConditionsRaw, BC.pack "_haskell"]
 
   -- WRITE TO FILE SYSTEM AS IMAGE
-  let pbmText = "P1\n" ++ show (length initialConditions) ++ " " ++ show nlines ++ "\n" ++ lines ++ "\n"
+  let pbmText = BC.concat [BC.pack "P1\n", BC.pack $ show (BC.length initialConditions), BC.pack " ", BC.pack $ show nlines, BC.pack "\n", lines, BC.pack "\n"]
 
-  writeFile (fprefix ++ ".pbm") pbmText
-  time2 <- getCurrentTimeInMs
-
-  let timeDelta = time2 - time1
-  putStrLn ("Time taken: " ++ show timeDelta ++ "ms")
+  BC.writeFile (BC.unpack (BC.append fileNamePrefix (BC.pack ".pbm"))) pbmText
