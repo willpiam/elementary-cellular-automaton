@@ -5,7 +5,6 @@ import (
     "fmt"
     "os"
     "strconv"
-    "time"
 )
 
 func ruleToBinaryArray(ruleNumber int) []int {
@@ -113,12 +112,6 @@ func main() {
     scanner.Scan()
     generations, _ := strconv.Atoi(scanner.Text())
 
-    start := time.Now()
-
     automatonData := runCellularAutomaton(ruleNumber, generations, initialConditions)
     outputToFile(automatonData, ruleNumber, generations, initialConditions)
-
-    duration := time.Since(start)
-    fmt.Printf("Took %v to generate %d generations of rule %d\n", duration, generations, ruleNumber)
-    fmt.Println("Done!")
 }
