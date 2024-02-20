@@ -93,8 +93,8 @@ Clear results:
 
 ## Languages To Add
 
-- [ ] Lisp (common lisp)
 - [ ] Kotlin
+- [ ] Lisp (common lisp)
 - [ ] Wolfram Language
 - [ ] Lean (??)
 - [ ] Agda (??)
@@ -137,9 +137,9 @@ The following plot shows the relationship between the number of generations and 
 
 ![A graph depicting the relationship between the number of generations and the run time of the program](media/generations_vs_runtime.png)
 
-The following bar graph was made with the *--bar* flag. It compares average run times of a few versions of the program. Rule 30 was used with standard initial conditions and 2000 generations were run. This graph was created on February 15th 2024. 
+The following bar graph compares the run times of different versions of the program. 
 
-![A bar graph comparing the C, C++, Python, and TypeScript run times](media/R30G2000STDIC.png)
+![A bar graph comparing all run times](media/configurations_vs_runtime.png)
 
 ## compareResults.sh
 

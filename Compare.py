@@ -79,8 +79,7 @@ def display_average_run_times(averages):
     for label, (avg_time, num_runs) in sorted(averages.items(), key=lambda x: x[1]):
         print(f"{label.ljust(20, ' ')}{f'{avg_time:.4f}'.ljust(20, ' ')}{str(num_runs).ljust(20, ' ')}")
 
-def generate_and_save_graph(data):
-    
+def generate_and_save_graph(data ):
     if not data:
         print("No data available to plot.")
         return
@@ -140,8 +139,7 @@ def run_each_command_set(existing_runs):
             for label in labels:
                 print(f"\t{label}")
 
-
-def generate_and_save_bar_graph(existing_runs):
+def generate_and_save_bar_graph(existing_runs, sort):
     # Aggregate runs based on unique configuration
     aggregated_runs = {}
     for run in existing_runs:
@@ -152,14 +150,19 @@ def generate_and_save_bar_graph(existing_runs):
         aggregated_runs[config_key].append(run['run_time'])
     
     # Calculate average run time for each configuration
-    config_labels = []
-    avg_run_times = []
+    config_avg_times = []
     for config, times in aggregated_runs.items():
         avg_time = sum(times) / len(times)
         label = f"{config[0]} (Rule {config[1]}, Gen {config[3]}, IC {config[2]})"
-        config_labels.append(label)
-        avg_run_times.append(avg_time)
+        config_avg_times.append((label, avg_time))
     
+    # Sort by average run time if sort is True
+    if sort:
+        config_avg_times.sort(key=lambda x: x[1])
+
+    # Separate labels and times for plotting
+    config_labels, avg_run_times = zip(*config_avg_times)
+
     # Generate bar graph
     plt.figure(figsize=(12, 8))
     y_pos = np.arange(len(config_labels))
@@ -170,6 +173,10 @@ def generate_and_save_bar_graph(existing_runs):
     plt.tight_layout()  # Adjust layout to not cut off labels
 
     # Save the plot in the results directory
+    # Ensure the 'results' directory exists
+    if not os.path.exists("results"):
+        os.makedirs("results")
+
     plt.savefig(os.path.join("results", "configurations_vs_runtime.png"))
     print("Bar graph has been saved.")
 
@@ -188,7 +195,7 @@ def main():
         return
 
     if ('--bar' in sys.argv or '-b' in sys.argv):
-        generate_and_save_bar_graph(existing_runs)
+        generate_and_save_bar_graph(existing_runs, '--sort' in sys.argv)
         return
 
     run_each_command_set(existing_runs)
