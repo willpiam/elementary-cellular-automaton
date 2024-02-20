@@ -5,7 +5,7 @@
 
 Run TypeScript code:
 
-   deno run --allow-net --allow-read --allow-write Main.ts
+    deno run --allow-net --allow-read --allow-write Main.ts
 
 Run C++ code:
 
