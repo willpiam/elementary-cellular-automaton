@@ -87,9 +87,9 @@ Clear results:
 
     gcc -g Main.c -o results/programc ; valgrind --leak-check=full ./results/programc
 
-**Haskell** *with profiling on version B*
+**Haskell** *with profiling*
 
-    ghc -O2 -prof -fprof-auto -rtsopts -odir results -hidir results MainB.hs -o results/programhaskell_B ; ./results/programhaskell_B +RTS -p -poresults/programhaskell_B  -RTS
+    ghc -O2 -prof -fprof-auto -rtsopts -odir results -hidir results Main.hs -o results/programhaskell ; ./results/programhaskell +RTS -p -poresults/programhaskell  -RTS
 
 ## Languages To Add
 
@@ -123,6 +123,10 @@ To graph the results of the runs use the graph flag. This will cause the program
 The following command groups runs by language, rule, initial conditions, and number of generations, it takes the average for each group and creates a bar graph of the results. 
 
     python3 Compare.py --bar
+
+Include the *sort* flag to sort the results by the average run time. 
+
+    python3 Compare.py --bar --sort
 
 ### Graphing
 
