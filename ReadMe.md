@@ -180,6 +180,8 @@ The program will either print "same" or "different" to the terminal.
 
 2. The C version of the program calls malloc in a loop to construct essentially a 2D array. runCellularAutomaton returns char\*\*. This can potentually be reduced to a single malloc call. This solution would involve changing the return type of runCellularAutomaton to char\* and using pointer arithmetic to access the elements of the array.
 
+3. Add a *clear results* function to Compare.py and delete the `clearResults.sh` bash script. 
+
 ## The Author
 
 Cardano [$wildoy](https://handle.me/wildoy)

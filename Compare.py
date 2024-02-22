@@ -8,6 +8,7 @@ import hashlib
 import matplotlib.pyplot as plt 
 from collections import defaultdict
 import numpy as np
+import argparse
 
 command_sets = [
     ("C", "c", "gcc Main.c -o results/programc", "./results/programc"),
@@ -20,7 +21,7 @@ command_sets = [
     ("Rust", "rust", "rustc Main.rs -o results/programrust", "./results/programrust"),
     ("Go", "go", "", "go run Main.go"),
     ("Haskell", "haskell", "ghc -odir results -hidir results Main.hs -o results/programhaskell", "./results/programhaskell"),
-    # ("Haskell**", "ghc -odir results -hidir results MainC.hs -o results/programhaskell_C", "./results/programhaskell_C"),
+   # ("Haskell**", "ghc -odir results -hidir results MainC.hs -o results/programhaskell_C", "./results/programhaskell_C"),
     ("Scala", "scala", "scalac -d ./results Main.scala", "scala -cp ./results CellularAutomaton"),
     ("Clojure", "clojure", "", "clojure Main.clj"),
 ]
@@ -182,23 +183,47 @@ def generate_and_save_bar_graph(existing_runs, sort):
 
 
 def main():
+    parser = argparse.ArgumentParser(description='Your program description.')
+
+    parser.add_argument('--graph', '-g', action='store_true', help='Generate and save a graph')
+    parser.add_argument('--average', '-avg', action='store_true', help='Calculate and display average run times')
+    parser.add_argument('--bar', '-b', action='store_true', help='Generate and save a bar graph')
+    parser.add_argument('--sort', action='store_true', help='Sort the bar graph')
+    parser.add_argument('--runs', type=int, help='Specify the number of runs')
+
+    args = parser.parse_args()
     # List to store all runs
     existing_runs = read_existing_data(get_results_file_path())
 
-    if '--graph' in sys.argv or '-g' in sys.argv:
+    # if '--graph' in sys.argv or '-g' in sys.argv:
+    #     generate_and_save_graph(existing_runs)
+    #     return
+
+    # if '--average' in sys.argv or '-avg' in sys.argv:
+    #     aggregateData = calculate_average_run_times(existing_runs)
+    #     display_average_run_times(aggregateData)
+    #     return
+
+    # if ('--bar' in sys.argv or '-b' in sys.argv):
+    #     generate_and_save_bar_graph(existing_runs, '--sort' in sys.argv)
+    #     return
+
+    if args.graph:
         generate_and_save_graph(existing_runs)
         return
 
-    if '--average' in sys.argv or '-avg' in sys.argv:
+    if args.average:
         aggregateData = calculate_average_run_times(existing_runs)
         display_average_run_times(aggregateData)
         return
 
-    if ('--bar' in sys.argv or '-b' in sys.argv):
-        generate_and_save_bar_graph(existing_runs, '--sort' in sys.argv)
+    if args.bar:
+        generate_and_save_bar_graph(existing_runs, args.sort)
         return
 
-    run_each_command_set(existing_runs)
+    for i in range(0, args.runs if args.runs is not None else 1):
+        run_each_command_set(existing_runs)
+
     return
 
 
