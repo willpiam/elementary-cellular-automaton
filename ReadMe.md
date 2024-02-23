@@ -2,6 +2,9 @@
 ![Rule 30, an elementry cellular automiton, generated from a single active cell for 500 generations](media/r30_g100_i1_c.png)
 ![Rule 30, with longer & random initial conditions](media/wideDemo.png)
 ## Run a specific version
+Run C code:
+
+    gcc Main.c -o results/programc ; ./results/programc
 
 Run TypeScript code:
 
@@ -10,10 +13,6 @@ Run TypeScript code:
 Run C++ code:
 
     g++ Main.cpp -o results/programcpp ; ./results/programcpp
-
-Run C code:
-
-    gcc Main.c -o results/programc ; ./results/programc
 
 Run Haskell code:
     
@@ -69,14 +68,6 @@ Output File format:
 
     r30_g100_i1000_cpp.pbm
 
-Run All Versions:
-
-    bash runAll.sh
-
-Clear results:
-
-    bash clearResults.sh
-
 ## Testing
 
 **C++** *with Valgrind*
@@ -127,6 +118,10 @@ The following command groups runs by language, rule, initial conditions, and num
 Include the *sort* flag to sort the results by the average run time. 
 
     python3 Compare.py --bar --sort
+
+The *clear* flag will clear the results folder
+
+    python3 Compare.py --clear
 
 ### Graphing
 
@@ -180,7 +175,7 @@ The program will either print "same" or "different" to the terminal.
 
 2. The C version of the program calls malloc in a loop to construct essentially a 2D array. runCellularAutomaton returns char\*\*. This can potentually be reduced to a single malloc call. This solution would involve changing the return type of runCellularAutomaton to char\* and using pointer arithmetic to access the elements of the array.
 
-3. Add a *clear results* function to Compare.py and delete the `clearResults.sh` bash script. 
+3. In Compare.py save each run to the run_data.json file before starting the next run. This will mean that we can still collect data if the program is interrupted.
 
 ## The Author
 
