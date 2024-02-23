@@ -84,7 +84,14 @@ Output File format:
 
 ## Languages To Add
 
+- [ ] Basic
+- [ ] Erlang
+- [ ] Fortran
+- [ ] COBOL
+- [ ] Swift
+- [ ] Ruby
 - [ ] Kotlin
+- [ ] JavaScript
 - [ ] Lisp (common lisp)
 - [ ] Wolfram Language
 - [ ] Lean (??)
