@@ -9,6 +9,8 @@ import matplotlib.pyplot as plt
 from collections import defaultdict
 import numpy as np
 import argparse
+import os
+import shutil
 
 command_sets = [
     ("C", "c", "gcc Main.c -o results/programc", "./results/programc"),
@@ -190,6 +192,7 @@ def main():
     parser.add_argument('--bar', '-b', action='store_true', help='Generate and save a bar graph')
     parser.add_argument('--sort', action='store_true', help='Sort the bar graph')
     parser.add_argument('--runs', type=int, help='Specify the number of runs')
+    parser.add_argument('--clear', action='store_true', help='Clear the results directory')
 
     args = parser.parse_args()
     # List to store all runs
@@ -219,6 +222,12 @@ def main():
 
     if args.bar:
         generate_and_save_bar_graph(existing_runs, args.sort)
+        return
+
+    if args.clear:
+        if os.path.exists("results"):
+            shutil.rmtree("results")
+            os.makedirs("results")
         return
 
     for i in range(0, args.runs if args.runs is not None else 1):
