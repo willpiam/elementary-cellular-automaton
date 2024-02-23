@@ -3,7 +3,6 @@ import subprocess
 import time
 import json
 import os
-import sys
 import hashlib
 import matplotlib.pyplot as plt 
 from collections import defaultdict
@@ -197,19 +196,6 @@ def main():
     args = parser.parse_args()
     # List to store all runs
     existing_runs = read_existing_data(get_results_file_path())
-
-    # if '--graph' in sys.argv or '-g' in sys.argv:
-    #     generate_and_save_graph(existing_runs)
-    #     return
-
-    # if '--average' in sys.argv or '-avg' in sys.argv:
-    #     aggregateData = calculate_average_run_times(existing_runs)
-    #     display_average_run_times(aggregateData)
-    #     return
-
-    # if ('--bar' in sys.argv or '-b' in sys.argv):
-    #     generate_and_save_bar_graph(existing_runs, '--sort' in sys.argv)
-    #     return
 
     if args.graph:
         generate_and_save_graph(existing_runs)
