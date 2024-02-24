@@ -46,6 +46,10 @@ Run Java code:
 
     javac -d results Main.java ; java -cp results Main
 
+Run Perl code:
+
+    ./Main.pl
+
 Notice:
 
     You may need to manually create the `results` directory.
@@ -86,6 +90,9 @@ Output File format:
 
 - [ ] Basic
 - [ ] Erlang
+- [ ] PHP
+- [ ] Perl
+- [ ] Pascal
 - [ ] Fortran
 - [ ] COBOL
 - [ ] Swift
@@ -158,6 +165,12 @@ To run the program:
 The program will either print "same" or "different" to the terminal.
 
 *Compare.py* already does this verification but the bash script may be useful in a pinch, or when you don't want to rerun the Compare.py program for whatever reason. 
+
+## Implementaton Specific Notes
+
+1. You may need to mark the *perl* version as executable with the following command:
+
+    chmod +x Main.pl
 
 ## Other variations
 
