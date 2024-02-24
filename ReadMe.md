@@ -91,7 +91,6 @@ Output File format:
 - [ ] Basic
 - [ ] Erlang
 - [ ] PHP
-- [ ] Perl
 - [ ] Pascal
 - [ ] Fortran
 - [ ] COBOL
