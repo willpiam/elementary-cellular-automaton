@@ -50,6 +50,10 @@ Run Perl code:
 
     ./Main.pl
 
+Run PHP code:
+
+    php Main.php
+
 Notice:
 
     You may need to manually create the `results` directory.
@@ -90,7 +94,6 @@ Output File format:
 
 - [ ] Basic
 - [ ] Erlang
-- [ ] PHP
 - [ ] Pascal
 - [ ] Fortran
 - [ ] COBOL
