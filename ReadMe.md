@@ -54,6 +54,10 @@ Run PHP code:
 
     php Main.php
 
+Run Pascal code:
+
+    fpc Main.pas -oresults/programpascal ; ./results/programpascal
+
 Notice:
 
     You may need to manually create the `results` directory.

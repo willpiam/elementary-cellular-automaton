@@ -2,10 +2,6 @@
   (:require [clojure.string :as str])
   (:import [java.time Instant]))
 
-(defn get-current-time-in-ms []
-  (-> (Instant/now)
-      (.toEpochMilli)))
-
 (defn calculate-cell [p-state rule]
   (case p-state
     "111" (str (first rule))
