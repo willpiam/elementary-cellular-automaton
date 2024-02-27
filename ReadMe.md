@@ -54,9 +54,13 @@ Run PHP code:
 
     php Main.php
 
-Run Pascal code:
+Run Pascal code (work in progress):
 
     fpc Main.pas -oresults/programpascal ; ./results/programpascal
+
+Run Kotlin code:
+
+    kotlinc Main.kt -include-runtime -d results/MainKT.jar ; java -jar results/MainKT.jar 
 
 Notice:
 

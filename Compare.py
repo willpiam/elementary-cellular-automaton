@@ -13,20 +13,21 @@ import shutil
 
 command_sets = [
     ("C", "c", "gcc Main.c -o results/programc", "./results/programc"),
-    # ("C++", "cpp", "g++ Main.cpp -o results/programcpp", "./results/programcpp"),
-    # ("Java", "java", "javac -d results Main.java", "java -cp results Main"),
-    # ("Python", "python", "", "python3 Main.py"),
-    # ("TypeScript", "typescript", "", "deno run --allow-net --allow-read --allow-write Main.ts"),
-    # ("C#", "csharp", "mcs -out:results/programcsharp Main.cs", "mono results/programcsharp"),
+    ("C++", "cpp", "g++ Main.cpp -o results/programcpp", "./results/programcpp"),
+    ("Java", "java", "javac -d results Main.java", "java -cp results Main"),
+    ("Python", "python", "", "python3 Main.py"),
+    ("TypeScript", "typescript", "", "deno run --allow-net --allow-read --allow-write Main.ts"),
+    ("C#", "csharp", "mcs -out:results/programcsharp Main.cs", "mono results/programcsharp"),
 
     ("Rust", "rust", "rustc Main.rs -o results/programrust", "./results/programrust"),
     ("Go", "go", "", "go run Main.go"),
     ("Haskell", "haskell", "ghc -odir results -hidir results Main.hs -o results/programhaskell", "./results/programhaskell"),
    # ("Haskell**", "ghc -odir results -hidir results MainC.hs -o results/programhaskell_C", "./results/programhaskell_C"),
-    # ("Scala", "scala", "scalac -d ./results Main.scala", "scala -cp ./results CellularAutomaton"),
+    ("Scala", "scala", "scalac -d ./results Main.scala", "scala -cp ./results CellularAutomaton"),
     ("Clojure", "clojure", "", "clojure Main.clj"),
     ("Perl", "perl", "", "./Main.pl"),
     ("PHP", "php", "", "php Main.php"),
+    ("Kotlin", "kotlin", "kotlinc Main.kt -include-runtime -d results/MainKT.jar", "java -jar results/MainKT.jar"),
 ]
 
 # Function to execute a command (no timing)
