@@ -159,9 +159,11 @@ The following plot shows the relationship between the number of generations and 
 
 ![A graph depicting the relationship between the number of generations and the run time of the program](media/generations_vs_runtime.png)
 
-The following bar graph compares the run times of different versions of the program. 
+The following bar graph compares the run times of different versions of the program, each with the same number of genrations (1000) and the same initial conditions. 
 
 ![A bar graph comparing all run times](media/configurations_vs_runtime.png)
+
+This next graph increases the number of generations to 2000 and compares the run times of different versions of the program again. 
 
 ## compareResults.sh
 
