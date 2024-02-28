@@ -145,48 +145,6 @@ def run_each_command_set(existing_runs):
             for label in labels:
                 print(f"\t{label}")
 
-# def generate_and_save_bar_graph(existing_runs, sort):
-#     # Aggregate runs based on unique configuration
-#     aggregated_runs = {}
-#     for run in existing_runs:
-#         # Create a unique key for each configuration
-#         config_key = (run['label'], run['rule_number'], run['initial_conditions'], run['generations'])
-#         if config_key not in aggregated_runs:
-#             aggregated_runs[config_key] = []
-#         aggregated_runs[config_key].append(run['run_time'])
-    
-#     # Calculate average run time for each configuration
-#     config_avg_times = []
-#     for config, times in aggregated_runs.items():
-#         avg_time = sum(times) / len(times)
-#         label = f"{config[0]} (Rule {config[1]}, Gen {config[3]}, IC {config[2]})"
-#         config_avg_times.append((label, avg_time))
-    
-#     # Sort by average run time if sort is True
-#     if sort:
-#         config_avg_times.sort(key=lambda x: x[1])
-
-#     # Separate labels and times for plotting
-#     config_labels, avg_run_times = zip(*config_avg_times)
-
-#     # Generate bar graph
-#     plt.figure(figsize=(12, 8))
-#     y_pos = np.arange(len(config_labels))
-#     plt.bar(y_pos, avg_run_times, align='center', alpha=0.7)
-#     plt.xticks(y_pos, config_labels, rotation='vertical')
-#     plt.ylabel('Average Run Time (seconds)')
-#     plt.title('Average Run Times by Configuration')
-#     plt.tight_layout()  # Adjust layout to not cut off labels
-
-#     # Save the plot in the results directory
-#     # Ensure the 'results' directory exists
-#     if not os.path.exists("results"):
-#         os.makedirs("results")
-
-#     plt.savefig(os.path.join("results", "configurations_vs_runtime.png"))
-#     print("Bar graph has been saved.")
-
-
 def generate_and_save_bar_graph(existing_runs, sort):
     # Aggregate runs based on unique configuration
     aggregated_runs = {}
