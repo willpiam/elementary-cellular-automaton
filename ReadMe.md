@@ -107,7 +107,6 @@ Output File format:
 - [ ] COBOL
 - [ ] Swift
 - [ ] Ruby
-- [ ] Kotlin
 - [ ] JavaScript
 - [ ] Lisp (common lisp)
 - [ ] Wolfram Language
