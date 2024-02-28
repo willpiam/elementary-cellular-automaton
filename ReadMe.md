@@ -165,6 +165,8 @@ The following bar graph compares the run times of different versions of the prog
 
 This next graph increases the number of generations to 2000 and compares the run times of different versions of the program again. 
 
+![A bar graph comparing all run times but with new data](media/configurations_vs_runtime_2000gen.png)
+
 ## compareResults.sh
 
 This program takes two files and returns true if they hash to the same value. This is useful for comparing the output of two different implementations of the same cellular automaton program.
