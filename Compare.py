@@ -29,6 +29,7 @@ command_sets = [
     ("Perl", "perl", "", "./Main.pl"),
     ("PHP", "php", "", "php Main.php"),
     ("Kotlin", "kotlin", "kotlinc Main.kt -include-runtime -d results/MainKT.jar", "java -jar results/MainKT.jar"),
+    ("JavaScript", "javascript", "", "node Main.js"),
 ]
 
 # Function to execute a command (no timing)
