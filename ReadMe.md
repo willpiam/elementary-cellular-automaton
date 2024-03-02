@@ -211,9 +211,7 @@ The program will either print "same" or "different" to the terminal.
 
 2. The C version of the program calls malloc in a loop to construct essentially a 2D array. runCellularAutomaton returns char\*\*. This can potentually be reduced to a single malloc call. This solution would involve changing the return type of runCellularAutomaton to char\* and using pointer arithmetic to access the elements of the array.
 
-3. In Compare.py save each run to the run_data.json file before starting the next run. This will mean that we can still collect data if the program is interrupted.
-
-4. The clojure version of the image does not hash to the same value as the other versions when the initial conditions are longer than a single cell.
+3. The clojure version of the image does not hash to the same value as the other versions when the initial conditions are longer than a single cell.
 
 ## The Author
 

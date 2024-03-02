@@ -134,8 +134,7 @@ def run_each_command_set(existing_runs):
             "run_time": run_time
         }
         existing_runs.append(run)
-
-    write_data_to_file(get_results_file_path(), existing_runs)
+        write_data_to_file(get_results_file_path(), existing_runs)
 
     if len(hashes) == 1:
         print(f"\nAll generated images hash to {next(iter(hashes.keys()))}")
