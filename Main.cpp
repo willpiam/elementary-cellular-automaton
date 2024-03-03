@@ -2,18 +2,17 @@
 #include <fstream>
 #include <vector>
 #include <string>
-#include <bitset>
+#include <array> 
 
-std::vector<int> rule_to_binary_array(int rule_number) {
-    std::bitset<8> binary(rule_number);
-    std::vector<int> result;
-    for (int i = 7; i >= 0; --i) {
-        result.push_back(binary[i]);
+std::array<int, 8> rule_to_binary_array(int rule_number) {
+    std::array<int, 8> result;
+    for (int i = 0; i < 8; ++i) {
+        result[7 - i] = (rule_number >> i) & 1;
     }
     return result;
 }
 
-int calculate_cell(const std::string& p_state, const std::vector<int>& rule) {
+int calculate_cell(const std::string& p_state, const std::array<int, 8>& rule) {
     static const std::vector<std::string> patterns = {
         "111", "110", "101", "100", "011", "010", "001", "000"
     };
@@ -25,7 +24,7 @@ int calculate_cell(const std::string& p_state, const std::vector<int>& rule) {
     return 0;
 }
 
-std::vector<std::vector<int>> run_cellular_automaton(const std::vector<int>& rule, int generations, const std::vector<int>& initial_cells) {
+std::vector<std::vector<int>> run_cellular_automaton(const std::array<int, 8>& rule, int generations, const std::vector<int>& initial_cells) {
     std::vector<int> cells = initial_cells;
     std::vector<std::vector<int>> ca;
 
