@@ -4,27 +4,24 @@
 #include <string>
 #include <array> 
 
-std::array<int, 8> rule_to_binary_array(int rule_number) {
+std::array<int, 8> rule_to_binary_array(const int rule_number) {
     std::array<int, 8> result;
-    for (int i = 0; i < 8; ++i) {
+    for (int i = 0; i < 8; ++i) 
         result[7 - i] = (rule_number >> i) & 1;
-    }
     return result;
 }
 
 int calculate_cell(const std::string& p_state, const std::array<int, 8>& rule) {
-    static const std::vector<std::string> patterns = {
+    static const std::array<std::string, 8> patterns = {
         "111", "110", "101", "100", "011", "010", "001", "000"
     };
-    for (size_t i = 0; i < patterns.size(); ++i) {
-        if (p_state == patterns[i]) {
+    for (size_t i = 0; i < 8; ++i) 
+        if (p_state == patterns[i]) 
             return rule[i];
-        }
-    }
     return 0;
 }
 
-std::vector<std::vector<int>> run_cellular_automaton(const std::array<int, 8>& rule, int generations, const std::vector<int>& initial_cells) {
+std::vector<std::vector<int>> run_cellular_automaton(const std::array<int, 8>& rule, const int generations, const std::vector<int>& initial_cells) {
     std::vector<int> cells = initial_cells;
     std::vector<std::vector<int>> ca;
 
@@ -49,7 +46,7 @@ std::vector<std::vector<int>> run_cellular_automaton(const std::array<int, 8>& r
     return ca;
 }
 
-std::vector<std::vector<int>> pad_image_data(const std::vector<std::vector<int>>& image_data, int total_width) {
+std::vector<std::vector<int>> pad_image_data(const std::vector<std::vector<int>>& image_data, const int total_width) {
     std::vector<std::vector<int>> padded_data;
     for (const auto& row : image_data) {
         int padding_length = (total_width - row.size()) / 2;
