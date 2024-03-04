@@ -133,6 +133,10 @@ The all command causes the program to print all run times found in the file. It 
     
     python3 Compare.py --all
 
+The runs flag can be used to specify how many times each program should be run. This can be useful when you want to graph the average run time of each program. 
+
+    python3 Compare.py --runs 10
+
 To graph the results of the runs use the graph flag. This will cause the program to graph the results of the runs where the X axis is the number of generations and the Y axis is the run time.
 
     python3 Compare.py --graph
