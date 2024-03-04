@@ -217,6 +217,8 @@ The program will either print "same" or "different" to the terminal.
 
 3. The clojure version of the image does not hash to the same value as the other versions when the initial conditions are longer than a single cell.
 
+4. The C++ version of the program is the third fastest, but it's still significantly slower than the C and Rust versions. If my old prof Garth Santor were here he'd say it's because my C++ code is lacking, and he'd remind me that C++ should be able to out perform C. 
+
 ## The Author
 
 Cardano [$wildoy](https://handle.me/wildoy)
