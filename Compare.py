@@ -14,6 +14,7 @@ import shutil
 
 command_sets = [
     ("C", "c", "gcc Main.c -o results/programc", "./results/programc"),
+    ("C2", "c2", "gcc Main2.c -o results/programc2", "./results/programc2"),
     ("C++", "cpp", "g++ Main.cpp -o results/programcpp", "./results/programcpp"),
     # ("Java", "java", "javac -d results Main.java", "java -cp results Main"),
     # ("Python", "python", "", "python3 Main.py"),
