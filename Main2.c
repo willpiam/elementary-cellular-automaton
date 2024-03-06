@@ -40,9 +40,9 @@ char* runCellularAutomaton(const char* rule, const int generations, char* cells,
     // set the entire automaton to 0
     memset(automatonData, '0', fullAutomatonSize * sizeof(char));
 
-    // set the null terminator for each generation
+    // set the new line for each generation
     for (int i = 0; i < generations; i++) 
-        automatonData[i * imageWidth + imageWidth] = '\n';
+        automatonData[i * imageWidth + (imageWidth - 1)] = '\n';
 
     // set the very last char to be the null terminator
     automatonData[fullAutomatonSize] = '\0';
