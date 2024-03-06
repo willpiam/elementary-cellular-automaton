@@ -38,12 +38,10 @@ char* runCellularAutomaton(const char* rule, const int generations, char* cells,
     int initialOffset = (imageWidth - initialConditionsLength) / 2;
 
     // set the entire automaton to 0
-    // memset(automatonData, 0, fullAutomatonSize * sizeof(char));
     memset(automatonData, '0', fullAutomatonSize * sizeof(char));
 
     // set the null terminator for each generation
     for (int i = 0; i < generations; i++) 
-        // automatonData[i * imageWidth + imageWidth] = '\0';
         automatonData[i * imageWidth + imageWidth] = '\n';
 
     // set the very last char to be the null terminator
@@ -61,10 +59,7 @@ char* runCellularAutomaton(const char* rule, const int generations, char* cells,
         int paddingOffset = initialOffset - i;
 
         for (int j = paddingOffset; j < paddingOffset + length; j++) {
-            // neighborhood[0] = automatonData[(i - 1) * (imageWidth + 1) + j - 1] + '0';
-            // neighborhood[1] = automatonData[(i - 1) * (imageWidth + 1)  + j] + '0';
-            // neighborhood[2] = automatonData[(i - 1) * (imageWidth + 1) + j + 1] + '0';
-             neighborhood[0] = automatonData[(i - 1) * (imageWidth + 1) + j - 1];
+            neighborhood[0] = automatonData[(i - 1) * (imageWidth + 1) + j - 1];
             neighborhood[1] = automatonData[(i - 1) * (imageWidth + 1)  + j] ;
             neighborhood[2] = automatonData[(i - 1) * (imageWidth + 1) + j + 1];
            
@@ -84,7 +79,7 @@ int outputToFile(char* automatonData, int ruleNumber, int generations, const cha
     // Calculate the maximum possible size of the content
     // Each cell will be '0' or '1' plus a newline character at the end of each generation.
     // Plus the header size (assuming 20 characters for "P1\n", imageWidth, and generations)
-    int maxSize = generations * (imageWidth + 1) + 20;
+    int maxSize = generations * (imageWidth + 1) + 21;
     char *content = (char *)malloc(sizeof(char) * maxSize);
     if (!content) {
         printf("Error allocating memory for file content!\n");
@@ -93,13 +88,8 @@ int outputToFile(char* automatonData, int ruleNumber, int generations, const cha
 
     // Start building the content
     int offset = sprintf(content, "P1\n%d %d\n", imageWidth, generations);
-    
-    for (int i = 0; i < generations; i++) {
-        for (int j = 0; j < imageWidth; j++) 
-            offset += sprintf(content + offset, "%d", automatonData[i * imageWidth + j]);
-        
-        offset += sprintf(content + offset, "\n");
-    }
+
+offset += sprintf(content + offset, "%s\n", automatonData); 
 
     FILE *file = fopen(filename, "w");
     if (!file) {
