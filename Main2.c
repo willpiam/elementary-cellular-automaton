@@ -38,7 +38,7 @@ char* runCellularAutomaton(const char* rule, const int generations, char* cells,
     int initialOffset = (imageWidth - initialConditionsLength) / 2;
 
     // set the entire automaton to 0
-    memset(automatonData, '0', fullAutomatonSize * sizeof(char));
+    memset(automatonData, '0', (fullAutomatonSize + 1) * sizeof(char));
 
     // set the new line for each generation
     for (int i = 0; i < generations; i++) 
@@ -57,13 +57,22 @@ char* runCellularAutomaton(const char* rule, const int generations, char* cells,
 
     for (int i = 1; i < generations; i++) {
         int paddingOffset = initialOffset - i;
+        // int paddingOffset = initialOffset - i - (1 * i);
 
         for (int j = paddingOffset; j < paddingOffset + length; j++) {
             neighborhood[0] = automatonData[(i - 1) * (imageWidth + 1) + j - 1];
             neighborhood[1] = automatonData[(i - 1) * (imageWidth + 1)  + j] ;
             neighborhood[2] = automatonData[(i - 1) * (imageWidth + 1) + j + 1];
-           
-            automatonData[i * (imageWidth + 1) + j] = calculateCell(neighborhood, rule);
+
+            for (int k = 0; k < 3; k++) 
+                if (neighborhood[k] != '0' && neighborhood[k] != '1') {
+                    printf("Error: (i, j) is (%d, %d)\n", i, j);
+                    return NULL;
+                }
+            // automatonData[i * (imageWidth + 1) + j] = calculateCell(neighborhood, rule);
+            // automatonData[(i * (imageWidth + 1) + j) - i] = calculateCell(neighborhood, rule);
+            // automatonData[(i * (imageWidth + 1) + j) - i] = '1';
+            automatonData[i * (imageWidth + 1) + j] = '1';
         }
 
         length += 2; 
