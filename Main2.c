@@ -27,8 +27,8 @@ char calculateCell(const char *neighborhood, const char* ruleBinary) {
 char* runCellularAutomaton(const char* rule, const int generations, char* cells, int initialConditionsLength) {
     const int imageWidth = initialConditionsLength + 2 * generations;
 
-    const int fullAutomatonSize = generations * (imageWidth + 1) ; // generations * size of last generation
-    char* automatonData = (char*)malloc((fullAutomatonSize + 1) * sizeof(char)); // plus 1 to hold the null terminator
+    const int fullAutomatonSize = generations * (imageWidth + 1) ;
+    char* automatonData = (char*)malloc((fullAutomatonSize) * sizeof(char)); // plus 1 to hold the null terminator
     if (NULL == automatonData) {
         printf("Error allocating memory!\n");
         return NULL;
@@ -38,14 +38,14 @@ char* runCellularAutomaton(const char* rule, const int generations, char* cells,
     int initialOffset = (imageWidth - initialConditionsLength) / 2;
 
     // set the entire automaton to 0
-    memset(automatonData, '0', (fullAutomatonSize + 1) * sizeof(char));
+    memset(automatonData, '0', (fullAutomatonSize) * sizeof(char));
 
     // set the new line for each generation
     for (int i = 0; i < generations; i++) 
         automatonData[i * imageWidth + (imageWidth - 1)] = '\n';
 
     // set the very last char to be the null terminator
-    automatonData[fullAutomatonSize] = '\0';
+    // automatonData[fullAutomatonSize] = '\0';
 
     // set the first generation to be the content of cells
     memcpy(automatonData + initialOffset, cells, initialConditionsLength * sizeof(char));
@@ -55,24 +55,35 @@ char* runCellularAutomaton(const char* rule, const int generations, char* cells,
     char neighborhood[4];
     neighborhood[3] = '\0'; 
 
+    // return automatonData;
+
     for (int i = 1; i < generations; i++) {
         int paddingOffset = initialOffset - i;
         // int paddingOffset = initialOffset - i - (1 * i);
 
         for (int j = paddingOffset; j < paddingOffset + length; j++) {
-            neighborhood[0] = automatonData[(i - 1) * (imageWidth + 1) + j - 1];
-            neighborhood[1] = automatonData[(i - 1) * (imageWidth + 1)  + j] ;
-            neighborhood[2] = automatonData[(i - 1) * (imageWidth + 1) + j + 1];
+            // neighborhood[0] = automatonData[(i - 1) * (imageWidth + 1) + j - 1];
+            // neighborhood[1] = automatonData[(i - 1) * (imageWidth + 1)  + j ] ;
+            // neighborhood[2] = automatonData[(i - 1) * (imageWidth + 1) + j + 1 ];
+            
+            neighborhood[0] = automatonData[((i - 1) * (imageWidth + 1) + j - 1 )- i];
+            neighborhood[1] = automatonData[((i - 1) * (imageWidth + 1)  + j )- i ] ;
+            neighborhood[2] = automatonData[((i - 1) * (imageWidth + 1) + j + 1 )- i];
 
             for (int k = 0; k < 3; k++) 
                 if (neighborhood[k] != '0' && neighborhood[k] != '1') {
                     printf("Error: (i, j) is (%d, %d)\n", i, j);
+                    // show the automaton data
+                    printf("\"\"\"\n%s\n\"\"\"\n", automatonData);
+
+                    // free the allocated memory
+                    free(automatonData);
                     return NULL;
                 }
             // automatonData[i * (imageWidth + 1) + j] = calculateCell(neighborhood, rule);
+            // automatonData[i * (imageWidth + 1) + j] = '1';
             // automatonData[(i * (imageWidth + 1) + j) - i] = calculateCell(neighborhood, rule);
-            // automatonData[(i * (imageWidth + 1) + j) - i] = '1';
-            automatonData[i * (imageWidth + 1) + j] = '1';
+            automatonData[(i * (imageWidth + 1) + j) - i] = '1';
         }
 
         length += 2; 
