@@ -16,7 +16,7 @@ Run C++ code:
 
 Run Haskell code:
     
-   ghc -odir haskellbuild -hidir haskellbuild Main.hs -o results/programhaskell ; ./results/programhaskell 
+    ghc -odir haskellbuild -hidir haskellbuild Main.hs -o results/programhaskell ; ./results/programhaskell 
 
 Run Python code: 
 
