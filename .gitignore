@@ -1,2 +1,5 @@
 results
 .vscode
+.bsp
+.scala-build
+haskellbuild

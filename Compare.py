@@ -14,23 +14,28 @@ import shutil
 
 command_sets = [
     ("C", "c", "gcc Main.c -o results/programc", "./results/programc"),
-    ("C2", "c2", "gcc Main2.c -o results/programc2", "./results/programc2"),
-    # ("C++", "cpp", "g++ Main.cpp -o results/programcpp", "./results/programcpp"),
-    # ("Java", "java", "javac -d results Main.java", "java -cp results Main"),
-    # ("Python", "python", "", "python3 Main.py"),
-    # ("TypeScript", "typescript", "", "deno run --allow-net --allow-read --allow-write Main.ts"),
-    # ("C#", "csharp", "mcs -out:results/programcsharp Main.cs", "mono results/programcsharp"),
+    ("C++", "cpp", "g++ Main.cpp -o results/programcpp", "./results/programcpp"),
+    ("Java", "java", "javac -d results Main.java", "java -cp results Main"),
+    ("Python", "python", "", "python3 Main.py"),
+    ("TypeScript", "typescript", "", "deno run --allow-net --allow-read --allow-write Main.ts"),
+    ("C#", "csharp", "mcs -out:results/programcsharp Main.cs", "mono results/programcsharp"),
 
-    # ("Rust", "rust", "rustc Main.rs -o results/programrust", "./results/programrust"),
-    # ("Go", "go", "", "go run Main.go"),
-    # ("Haskell", "haskell", "ghc -odir results -hidir results Main.hs -o results/programhaskell", "./results/programhaskell"),
-   # ("Haskell**", "ghc -odir results -hidir results MainC.hs -o results/programhaskell_C", "./results/programhaskell_C"),
+    ("Rust", "rust", "rustc Main.rs -o results/programrust", "./results/programrust"),
+    ("Go", "go", "", "go run Main.go"),
+    ("Haskell", "haskell", "ghc -odir haskellbuild -hidir haskellbuild Main.hs -o results/programhaskell", "./results/programhaskell"),
+    ("Scala", "scala", "", "scala Main.scala --main-class CellularAutomaton"),
+    ("Clojure", "clojure", "", "clojure -M Main.clj"),
+    ("Perl", "perl", "", "./Main.pl"),
+    ("PHP", "php", "", "php Main.php"),
+    ("Kotlin", "kotlin", "kotlinc Main.kt -include-runtime -d results/MainKT.jar", "java -jar results/MainKT.jar"),
+    ("JavaScript", "javascript", "", "node Main.js"),
+    ("OCaml", "ocaml", "ocamlopt -c -o results/Main.cmx -I results Main.ml && ocamlopt -o results/programocaml -I results results/Main.cmx", "./results/programocaml "),
+    # old commands and commands which might not work
+    # ("C2", "c2", "gcc Main2.c -o results/programc2", "./results/programc2"),
+    # ("Haskell**", "ghc -odir results -hidir results MainC.hs -o results/programhaskell_C", "./results/programhaskell_C"),
     # ("Scala", "scala", "scalac -d ./results Main.scala", "scala -cp ./results CellularAutomaton"),
-    # ("Clojure", "clojure", "", "clojure Main.clj"),
-    # ("Perl", "perl", "", "./Main.pl"),
-    # ("PHP", "php", "", "php Main.php"),
-    # ("Kotlin", "kotlin", "kotlinc Main.kt -include-runtime -d results/MainKT.jar", "java -jar results/MainKT.jar"),
-    # ("JavaScript", "javascript", "", "node Main.js"),
+
+
 ]
 
 # Function to execute a command (no timing)

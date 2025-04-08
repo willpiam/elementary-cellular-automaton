@@ -16,7 +16,7 @@ Run C++ code:
 
 Run Haskell code:
     
-    ghc -odir results -hidir results Main.hs -o results/programhaskell ; ./results/programhaskell
+   ghc -odir haskellbuild -hidir haskellbuild Main.hs -o results/programhaskell ; ./results/programhaskell 
 
 Run Python code: 
 
@@ -65,6 +65,10 @@ Run Kotlin code:
 Run JavaScript code:
 
     node Main.js
+
+Run Ocaml code: 
+
+    ocamlopt -c -o results/Main.cmx -I results Main.ml && ocamlopt -o results/programocaml -I results results/Main.cmx ; ./results/programocaml
 
 Notice:
 
@@ -228,3 +232,12 @@ Ethereum and more [WilliamDoyle.eth](https://app.ens.domains/williamdoyle.eth)
 Twitter [@william00000010](https://x.com/william00000010)
 
 Other projects [projects.williamdoyle.ca](https://projects.williamdoyle.ca)
+
+
+## notes on bug (delete this section)
+
+ls results after building with haskell
+
+Main.hi  Main.o  programhaskell
+
+Okay yeah the problem is that ocaml and haskell both create Main.o file
