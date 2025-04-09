@@ -74,6 +74,10 @@ Run Bash code:
 
     bash Main.sh
 
+Run Lua code:
+
+    lua Main.lua
+
 Notice:
 
     You may need to manually create the `results` directory.
