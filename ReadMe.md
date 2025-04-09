@@ -118,6 +118,7 @@ Output File format:
 - [ ] Fortran
 - [ ] COBOL
 - [ ] Swift
+- [ ] Objective C
 - [ ] Ruby
 - [ ] Lisp (common lisp)
 - [ ] Wolfram Language
@@ -235,12 +236,3 @@ Ethereum and more [WilliamDoyle.eth](https://app.ens.domains/williamdoyle.eth)
 Twitter [@william00000010](https://x.com/william00000010)
 
 Other projects [projects.williamdoyle.ca](https://projects.williamdoyle.ca)
-
-
-## notes on bug (delete this section)
-
-ls results after building with haskell
-
-Main.hi  Main.o  programhaskell
-
-Okay yeah the problem is that ocaml and haskell both create Main.o file

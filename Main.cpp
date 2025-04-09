@@ -11,19 +11,15 @@ std::array<int, 8> rule_to_binary_array(const int rule_number) {
     return result;
 }
 
-int calculate_cell(const std::string& p_state, const std::array<int, 8>& rule) {
-    static const std::array<std::string, 8> patterns = {
-        "111", "110", "101", "100", "011", "010", "001", "000"
-    };
-    for (size_t i = 0; i < 8; ++i) 
-        if (p_state == patterns[i]) 
-            return rule[i];
-    return 0;
+int calculate_cell(const int left, const int center, const int right, const std::array<int, 8>& rule) {
+    int pattern = (left << 2) | (center << 1) | right;
+    return rule[7 - pattern];
 }
 
 std::vector<std::vector<int>> run_cellular_automaton(const std::array<int, 8>& rule, const int generations, const std::vector<int>& initial_cells) {
     std::vector<int> cells = initial_cells;
     std::vector<std::vector<int>> ca;
+    ca.reserve(generations);  // Pre-allocate space for all generations
 
     for (int i = 0; i < generations - 1; ++i) {
         std::vector<int> extended_cells = {0, 0};
@@ -34,12 +30,18 @@ std::vector<std::vector<int>> run_cellular_automaton(const std::array<int, 8>& r
         ca.push_back(cells);
 
         std::vector<int> next_generation;
+        next_generation.reserve(cells.size());  // Pre-allocate space for next generation
+
         for (size_t j = 1; j < extended_cells.size() - 1; ++j) {
-            std::string neighborhood = std::to_string(extended_cells[j - 1]) + std::to_string(extended_cells[j]) + std::to_string(extended_cells[j + 1]);
-            next_generation.push_back(calculate_cell(neighborhood, rule));
+            next_generation.push_back(calculate_cell(
+                extended_cells[j - 1],
+                extended_cells[j],
+                extended_cells[j + 1],
+                rule
+            ));
         }
 
-        cells = next_generation;
+        cells = std::move(next_generation);  // Use move semantics
     }
 
     ca.push_back(cells);

@@ -30,7 +30,7 @@ command_sets = [
     ("Kotlin", "kotlin", "kotlinc Main.kt -include-runtime -d results/MainKT.jar", "java -jar results/MainKT.jar"),
     ("JavaScript", "javascript", "", "node Main.js"),
     ("OCaml", "ocaml", "ocamlopt -c -o results/Main.cmx -I results Main.ml && ocamlopt -o results/programocaml -I results results/Main.cmx", "./results/programocaml "),
-    ("Bash", "bash", "", "bash Main.sh"),
+    # ("Bash", "bash", "", "bash Main.sh"),
     # old commands and commands which might not work
     # ("C2", "c2", "gcc Main2.c -o results/programc2", "./results/programc2"),
     # ("Haskell**", "ghc -odir results -hidir results MainC.hs -o results/programhaskell_C", "./results/programhaskell_C"),
