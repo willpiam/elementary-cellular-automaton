@@ -14,9 +14,9 @@ class CellularAutomaton
         return ruleBinary;
     }
 
-    static bool CalculateCell(string neighborhood, bool[] ruleBinary)
+    static bool CalculateCell(bool left, bool center, bool right, bool[] ruleBinary)
     {
-        int index = Convert.ToInt32(neighborhood, 2);
+        int index = (left ? 4 : 0) | (center ? 2 : 0) | (right ? 1 : 0);
         return ruleBinary[index];
     }
 
@@ -25,6 +25,7 @@ class CellularAutomaton
         int initialConditionsLength = cells.Length;
         int imageWidth = initialConditionsLength + 2 * generations;
         bool[][] automatonData = new bool[generations][];
+        bool[] ruleBinary = RuleToBinaryArray(rule);
 
         int length = initialConditionsLength;
         int initialOffset = (imageWidth - initialConditionsLength) / 2;
@@ -46,8 +47,12 @@ class CellularAutomaton
             int paddingOffset = initialOffset - i;
             for (int j = paddingOffset; j < paddingOffset + length; j++)
             {
-                string neighborhood = $"{(automatonData[i - 1][j - 1] ? '1' : '0')}{(automatonData[i - 1][j] ? '1' : '0')}{(automatonData[i - 1][j + 1] ? '1' : '0')}";
-                automatonData[i][j] = CalculateCell(neighborhood, RuleToBinaryArray(rule));
+                automatonData[i][j] = CalculateCell(
+                    automatonData[i - 1][j - 1],
+                    automatonData[i - 1][j],
+                    automatonData[i - 1][j + 1],
+                    ruleBinary
+                );
             }
             length += 2;
         }
@@ -58,17 +63,21 @@ class CellularAutomaton
     static void OutputToFile(bool[][] automatonData, int ruleNumber, int generations, string initialConditions)
     {
         string directoryPath = "results";
-        Directory.CreateDirectory(directoryPath); // Ensure the directory exists
+        Directory.CreateDirectory(directoryPath);
         string filename = $"{directoryPath}/r{ruleNumber}_g{generations}_i{initialConditions}_csharp.pbm";
+        
         using (StreamWriter file = new StreamWriter(filename))
         {
             int imageWidth = initialConditions.Length + 2 * generations;
             file.WriteLine($"P1\n{imageWidth} {generations}");
+            
+            StringBuilder lineBuilder = new StringBuilder(imageWidth);
             foreach (var row in automatonData)
             {
+                lineBuilder.Clear();
                 foreach (var cell in row)
-                    file.Write(cell ? "1" : "0");
-                file.WriteLine();
+                    lineBuilder.Append(cell ? '1' : '0');
+                file.WriteLine(lineBuilder);
             }
         }
     }
@@ -82,7 +91,6 @@ class CellularAutomaton
             string initialConditions = input[1];
             int generations = int.Parse(input[2]);
 
-            // bool[] rule = RuleToBinaryArray(ruleNumber);
             bool[][] automatonData = RunCellularAutomaton(ruleNumber, generations, initialConditions);
             OutputToFile(automatonData, ruleNumber, generations, initialConditions);
         }
