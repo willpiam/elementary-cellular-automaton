@@ -70,6 +70,10 @@ Run Ocaml code:
 
     ocamlopt -c -o results/Main.cmx -I results Main.ml && ocamlopt -o results/programocaml -I results results/Main.cmx ; ./results/programocaml
 
+Run Bash code:
+
+    bash Main.sh
+
 Notice:
 
     You may need to manually create the `results` directory.
