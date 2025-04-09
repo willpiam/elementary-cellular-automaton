@@ -13,66 +13,71 @@ char* ruleToBinaryArray(char ruleNumber) {
 
 // the neighborhood must be an actual string, with ascii values of 0 and 1 and a null terminator
 char calculateCell(const char *neighborhood, const char* ruleBinary) {
-    char index = strtol(neighborhood, NULL, 2);
+    // Convert neighborhood directly to index using bit operations
+    char index = ((neighborhood[0] - '0') << 2) | 
+                 ((neighborhood[1] - '0') << 1) | 
+                 (neighborhood[2] - '0');
     return ruleBinary[index];
 }
 
-char** runCellularAutomaton(const char* rule, const int generations, char* cells, int initialConditionsLength) {
+char** runCellularAutomaton(const char* rule, const int generations, char* cells, const int initialConditionsLength) {
     const int imageWidth = initialConditionsLength + 2 * generations;
+    // Allocate all memory at once
+    char* memoryBlock = (char*)malloc(generations * (imageWidth + 1) * sizeof(char));
+    if (NULL == memoryBlock) {
+        printf("Error allocating memory!\n");
+        return NULL;
+    }
+
     char** automatonData = (char**)malloc(generations * sizeof(char*));
     if (NULL == automatonData) {
         printf("Error allocating memory!\n");
+        free(memoryBlock);
         return NULL;
+    }
+
+    // Set up row pointers
+    for (int i = 0; i < generations; i++) {
+        automatonData[i] = memoryBlock + i * (imageWidth + 1);
+        automatonData[i][imageWidth] = '\0';
     }
 
     int length = initialConditionsLength;
     int initialOffset = (imageWidth - initialConditionsLength) / 2;
 
-    // allocate memory for the entire Cellular Automaton
-    for (int i = 0; i < generations; i++) {
-        char* row = (char*)malloc((imageWidth + 1)* sizeof(char));
-        if (NULL == row) {
-            printf("Error allocating memory!\n");
-            for (int j = 0; j < i; j++) // free the memory allocated by this function so far
-                free(automatonData[j]);
-            free(automatonData);
-            return NULL; // return null to indicate that the function failed and the caller should gracefully exit
-        }
-        // memset(row, 0, (imageWidth + 1) * sizeof(char));
-        memset(row, 0, (imageWidth + 1) * sizeof(char));
-        row[imageWidth] = '\0';
-
-        if (i == 0) 
-            memcpy(row + initialOffset, cells, initialConditionsLength * sizeof(char));
-
-        automatonData[i] = row;
-    }
+    // Initialize first generation
+    memset(automatonData[0], 0, imageWidth);
+    memcpy(automatonData[0] + initialOffset, cells, initialConditionsLength);
 
     length += 2;
 
-    char neighborhood[4];
-    neighborhood[3] = '\0'; 
+    // Use a static buffer for neighborhood
+    static char neighborhood[4];
+    neighborhood[3] = '\0';
 
     for (int i = 1; i < generations; i++) {
         int paddingOffset = initialOffset - i;
+        char* currentRow = automatonData[i];
+        char* previousRow = automatonData[i - 1];
+
+        // Clear the current row
+        memset(currentRow, 0, imageWidth);
 
         for (int j = paddingOffset; j < paddingOffset + length; j++) {
-            char* previousRow = automatonData[i - 1];
-
             neighborhood[0] = previousRow[j - 1] + '0';
             neighborhood[1] = previousRow[j] + '0';
             neighborhood[2] = previousRow[j + 1] + '0';
 
-            automatonData[i][j] = calculateCell(neighborhood, rule);
+            currentRow[j] = calculateCell(neighborhood, rule);
         }
 
-        length += 2; 
+        length += 2;
     }
 
     return automatonData;
 }
 
-int outputToFile(char** automatonData, int ruleNumber, int generations, const char *initialConditions, int imageWidth) {
+int outputToFile(char** automatonData, int ruleNumber, const int generations, const char *initialConditions, const int imageWidth) {
     char filename[MAX_LENGTH_INITIAL_CONDITIONS + 50];
     sprintf(filename, "results/r%d_g%d_i%s_c.pbm", ruleNumber, generations, initialConditions);
     FILE *file = fopen(filename, "w");
@@ -150,10 +155,10 @@ int main() {
     }
 
 CLEAN_UP_AND_EXIT:
-    for (int i = 0; i < generations; i++)
-        free(automatonData[i]);
-
-    free(automatonData);
+    if (automatonData != NULL) {
+        free(automatonData[0]); // Free the entire memory block
+        free(automatonData);
+    }
 
 CLEAN_UP_AND_EXIT_2:
     free(cells);
