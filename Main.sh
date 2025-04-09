@@ -1,74 +1,99 @@
 #!/bin/bash
 
-# Function to convert a rule number to its binary representation
-rule_to_binary_array() {
+# Precompute the rule lookup table
+declare -a RULE_TABLE
+
+init_rule_table() {
     local rule_number=$1
-    local binary=""
     for ((i=0; i<8; i++)); do
-        binary="$(( (rule_number >> i) & 1 ))$binary"
+        RULE_TABLE[i]=$(( (rule_number >> i) & 1 ))
     done
-    echo "$binary"
 }
 
-# Function to calculate the next state of a cell based on its neighborhood
-calculate_cell() {
-    local neighborhood=$1
-    local rule=$2
-    local index=0
-    
-    # Convert neighborhood to decimal index
-    for ((i=0; i<3; i++)); do
-        local bit=${neighborhood:$i:1}
-        index=$(( (index << 1) | bit ))
-    done
-    
-    # Get the corresponding bit from the rule
-    echo "${rule:$((7-index)):1}"
-}
-
-# Function to run the cellular automaton
+# Run the cellular automaton
 run_cellular_automaton() {
-    local rule=$1
+    local rule_number=$1
     local generations=$2
-    local initial_cells=$3
+    local initial_state=$3
+    local width=${#initial_state}
+    local final_width=$((width + 2*generations))
     
-    # Initialize the automaton data
-    local cells=$initial_cells
-    local automaton_data=()
-    automaton_data+=("$cells")
+    # Initialize rule table
+    init_rule_table "$rule_number"
     
-    # Run for the specified number of generations
-    for ((i=1; i<generations; i++)); do
-        # Add padding of 2 zeros to each side
-        local padded_cells="00${cells}00"
-        local next_generation=""
+    # Create output directory
+    mkdir -p results
+    
+    # Open output file for writing
+    local output_file="results/r${rule_number}_g${generations}_i${initial_state}_bash.pbm"
+    exec 3> "$output_file"
+    
+    # Write PBM header
+    echo "P1" >&3
+    echo "$final_width $generations" >&3
+    
+    # Convert initial state to array for faster access
+    declare -a current_gen
+    for ((i=0; i<width; i++)); do
+        current_gen[i]=${initial_state:i:1}
+    done
+    
+    # Output first generation (padded)
+    local half_padding=$(( (final_width - width) / 2 ))
+    local row=""
+    for ((i=0; i<half_padding; i++)); do
+        row+="0"
+    done
+    for ((i=0; i<width; i++)); do
+        row+="${current_gen[i]}"
+    done
+    for ((i=0; i<half_padding; i++)); do
+        row+="0"
+    done
+    echo "$row" >&3
+    
+    # Process each subsequent generation
+    for ((gen=1; gen<generations; gen++)); do
+        # Expand current generation array with padding
+        declare -a padded_gen
+        padded_gen[0]=0
+        padded_gen[1]=0
+        for ((i=0; i<width; i++)); do
+            padded_gen[i+2]=${current_gen[i]}
+        done
+        padded_gen[width+2]=0
+        padded_gen[width+3]=0
         
         # Calculate next generation
-        for ((j=1; j<${#padded_cells}-1; j++)); do
-            local neighborhood=${padded_cells:$((j-1)):3}
-            next_generation+=$(calculate_cell "$neighborhood" "$rule")
+        declare -a next_gen
+        for ((i=0; i<width+2; i++)); do
+            # Calculate neighborhood index directly
+            local idx=$(( padded_gen[i]*4 + padded_gen[i+1]*2 + padded_gen[i+2] ))
+            next_gen[i]=${RULE_TABLE[idx]}
         done
         
-        cells=$next_generation
-        automaton_data+=("$cells")
+        # Update width and current generation
+        width=$((width+2))
+        unset current_gen
+        declare -a current_gen=("${next_gen[@]}")
+        
+        # Output this generation (padded)
+        local remaining_padding=$(( (final_width - width) / 2 ))
+        row=""
+        for ((i=0; i<remaining_padding; i++)); do
+            row+="0"
+        done
+        for ((i=0; i<width; i++)); do
+            row+="${current_gen[i]}"
+        done
+        for ((i=0; i<remaining_padding; i++)); do
+            row+="0"
+        done
+        echo "$row" >&3
     done
     
-    echo "${automaton_data[@]}"
-}
-
-# Function to pad the image data
-pad_image_data() {
-    local image_data=($1)
-    local total_width=$2
-    local padded_data=()
-    
-    for row in "${image_data[@]}"; do
-        local padding_length=$(( (total_width - ${#row}) / 2 ))
-        local padding=$(printf "%0${padding_length}d" 0)
-        padded_data+=("${padding}${row}${padding}")
-    done
-    
-    echo "${padded_data[@]}"
+    # Close output file
+    exec 3>&-
 }
 
 # Main function
@@ -80,37 +105,15 @@ main() {
         exit 1
     fi
     
-    local rule_number
-    local initial_conditions
-    local generations
-    
-    read -r rule_number < "$input_file"
-    read -r initial_conditions < <(tail -n +2 "$input_file" | head -n 1)
-    read -r generations < <(tail -n +3 "$input_file" | head -n 1)
-    
-    # Convert rule number to binary
-    local rule_binary=$(rule_to_binary_array "$rule_number")
+    # Read the first three lines
+    mapfile -t input_lines < "$input_file"
+    local rule_number=${input_lines[0]}
+    local initial_conditions=${input_lines[1]}
+    local generations=${input_lines[2]}
     
     # Run the cellular automaton
-    local automaton_data=$(run_cellular_automaton "$rule_binary" "$generations" "$initial_conditions")
-    
-    # Calculate final width and pad the data
-    local final_width=$(( ${#initial_conditions} + 2 * generations ))
-    local padded_data=$(pad_image_data "$automaton_data" "$final_width")
-    
-    # Create results directory if it doesn't exist
-    mkdir -p results
-    
-    # Write to PBM file
-    local output_file="results/r${rule_number}_g${generations}_i${initial_conditions}_bash.pbm"
-    {
-        echo "P1"
-        echo "$final_width $generations"
-        for row in $padded_data; do
-            echo "$row"
-        done
-    } > "$output_file"
+    run_cellular_automaton "$rule_number" "$generations" "$initial_conditions"
 }
 
 # Run the main function
-main 
+main

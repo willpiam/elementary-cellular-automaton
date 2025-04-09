@@ -124,7 +124,6 @@ Output File format:
 - [ ] Lean (??)
 - [ ] Agda (??)
 - [ ] Idris (??)
-- [ ] bash
 - [ ] assembly
 
 ## Compare.py
