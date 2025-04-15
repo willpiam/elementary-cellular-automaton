@@ -17,23 +17,26 @@ int calculate_cell(const int left, const int center, const int right, const std:
 }
 
 std::vector<std::vector<int>> run_cellular_automaton(const std::array<int, 8>& rule, const int generations, const std::vector<int>& initial_cells) {
-    std::vector<int> cells = initial_cells;
     std::vector<std::vector<int>> ca;
     ca.reserve(generations);  // Pre-allocate space for all generations
-
+    
+    // Pre-allocate vectors for current and next generation
+    std::vector<int> current_gen = initial_cells;
+    std::vector<int> next_gen;
+    next_gen.reserve(current_gen.size() + 4);  // +4 for padding
+    
     for (int i = 0; i < generations - 1; ++i) {
+        // Add padding to current generation
         std::vector<int> extended_cells = {0, 0};
-        extended_cells.insert(extended_cells.end(), cells.begin(), cells.end());
+        extended_cells.insert(extended_cells.end(), current_gen.begin(), current_gen.end());
         extended_cells.push_back(0);
         extended_cells.push_back(0);
 
-        ca.push_back(cells);
-
-        std::vector<int> next_generation;
-        next_generation.reserve(cells.size());  // Pre-allocate space for next generation
+        ca.push_back(current_gen);
+        next_gen.clear();  // Reuse the vector instead of creating a new one
 
         for (size_t j = 1; j < extended_cells.size() - 1; ++j) {
-            next_generation.push_back(calculate_cell(
+            next_gen.push_back(calculate_cell(
                 extended_cells[j - 1],
                 extended_cells[j],
                 extended_cells[j + 1],
@@ -41,10 +44,10 @@ std::vector<std::vector<int>> run_cellular_automaton(const std::array<int, 8>& r
             ));
         }
 
-        cells = std::move(next_generation);  // Use move semantics
+        current_gen = std::move(next_gen);  // Use move semantics
     }
 
-    ca.push_back(cells);
+    ca.push_back(current_gen);
     return ca;
 }
 
