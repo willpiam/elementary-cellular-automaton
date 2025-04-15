@@ -3,12 +3,6 @@
 #include <string.h>
 #include <stdbool.h>
 
-/*
-    ImprovedMain.c
-    This program is an optimized version of Main.c that addresses performance issues
-    and bugs in the original implementation.
-*/
-
 #define MAX_LENGTH_INITIAL_CONDITIONS 1000
 
 // Convert rule number to binary representation
