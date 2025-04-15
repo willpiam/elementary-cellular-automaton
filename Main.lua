@@ -7,55 +7,43 @@ local function ruleToBinaryArray(ruleNumber)
     return ruleBinary
 end
 
--- Function to calculate next cell state
-local function calculateCell(neighborhood, rule)
-    local index = tonumber(neighborhood, 2)
+-- Function to calculate next cell state using bit operations
+local function calculateCell(left, center, right, rule)
+    local index = (left << 2) | (center << 1) | right
     return rule[index + 1]
 end
 
 -- Function to run the cellular automaton
 local function runCellularAutomaton(rule, generations, initialCells)
-    local cells = {}
-    for i = 1, #initialCells do
-        cells[i] = tonumber(initialCells:sub(i, i))
-    end
-
+    local initialLength = #initialCells
+    local imageWidth = initialLength + 2 * generations
     local ca = {}
-    local imageWidth = #cells + 2 * generations
-
+    
+    -- Pre-allocate arrays
     for i = 1, generations do
-        local paddingLength = (imageWidth - #cells) / 2
-        local extendedCells = {}
-        
-        -- Add padding
-        for j = 1, paddingLength do
-            extendedCells[j] = 0
+        ca[i] = {}
+        for j = 1, imageWidth do
+            ca[i][j] = 0
         end
-        
-        -- Add cells
-        for j = 1, #cells do
-            extendedCells[paddingLength + j] = cells[j]
-        end
-        
-        -- Add padding
-        for j = 1, paddingLength do
-            extendedCells[paddingLength + #cells + j] = 0
-        end
-
-        ca[i] = extendedCells
-
-        -- Calculate next generation
-        local nextGeneration = {}
-        for j = 2, #extendedCells - 1 do
-            local neighborhood = string.format("%d%d%d", 
-                extendedCells[j - 1], 
-                extendedCells[j], 
-                extendedCells[j + 1])
-            nextGeneration[j - 1] = calculateCell(neighborhood, rule)
-        end
-        cells = nextGeneration
     end
-
+    
+    -- Initialize first generation
+    local paddingLength = (imageWidth - initialLength) / 2
+    for i = 1, initialLength do
+        ca[1][paddingLength + i] = tonumber(initialCells:sub(i, i))
+    end
+    
+    -- Calculate subsequent generations
+    for i = 2, generations do
+        local prevRow = ca[i-1]
+        local currRow = ca[i]
+        
+        -- Calculate next generation
+        for j = 2, imageWidth - 1 do
+            currRow[j] = calculateCell(prevRow[j-1], prevRow[j], prevRow[j+1], rule)
+        end
+    end
+    
     return ca
 end
 
