@@ -14,11 +14,11 @@ import shutil
 
 command_sets = [
     ("C", "c", "gcc Main.c -o results/programc", "./results/programc"),
+    ("C#", "csharp", "mcs -out:results/programcsharp Main.cs", "mono results/programcsharp"),
     ("C++", "cpp", "g++ Main.cpp -o results/programcpp", "./results/programcpp"),
     ("Java", "java", "javac -d results Main.java", "java -cp results Main"),
     ("Python", "python", "", "python3 Main.py"),
     ("TypeScript", "typescript", "", "deno run --allow-net --allow-read --allow-write Main.ts"),
-    ("C#", "csharp", "mcs -out:results/programcsharp Main.cs", "mono results/programcsharp"),
 
     ("Rust", "rust", "rustc Main.rs -o results/programrust", "./results/programrust"),
     ("Go", "go", "", "go run Main.go"),
@@ -31,6 +31,7 @@ command_sets = [
     ("JavaScript", "javascript", "", "node Main.js"),
     ("OCaml", "ocaml", "ocamlopt -c -o results/Main.cmx -I results Main.ml && ocamlopt -o results/programocaml -I results results/Main.cmx", "./results/programocaml "),
     ("Lua", "lua", "", "lua Main.lua"),
+
     # ("Bash", "bash", "", "bash Main.sh"),
     # old commands and commands which might not work
     # ("C2", "c2", "gcc Main2.c -o results/programc2", "./results/programc2"),
