@@ -133,13 +133,16 @@ def run_each_command_set(existing_runs):
             hashes[file_hash].append(label)
         else:
             print(f"File {filename} not found for {label}")
-        
+            file_hash = None
+            continue
+
         run = {
             "label": label,
             "rule_number": rule_number,
             "initial_conditions": initial_conditions,
             "generations": generations,
-            "run_time": run_time
+            "run_time": run_time,
+            "image_hash": file_hash
         }
         existing_runs.append(run)
         write_data_to_file(get_results_file_path(), existing_runs)
