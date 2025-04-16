@@ -78,6 +78,10 @@ Run Lua code:
 
     lua Main.lua
 
+Run Fortran code:
+
+    gfortran -o results/programfortran Main.f90 ; ./results/programfortran
+
 Notice:
 
     You may need to manually create the `results` directory.

@@ -15,6 +15,8 @@ import shutil
 command_sets = [
     ("C", "c", "gcc Main.c -o results/programc", "./results/programc"),
     ("C#", "csharp", "mcs -out:results/programcsharp Main.cs", "mono results/programcsharp"),
+
+    ("Fortran", "fortran", "gfortran -o results/programfortran Main.f90", "./results/programfortran"),
     ("C++", "cpp", "g++ Main.cpp -o results/programcpp", "./results/programcpp"),
     ("Java", "java", "javac -d results Main.java", "java -cp results Main"),
     ("Python", "python", "", "python3 Main.py"),
