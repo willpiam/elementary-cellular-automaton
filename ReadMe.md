@@ -66,6 +66,10 @@ Run JavaScript code:
 
     node Main.js
 
+Run Julia code:
+
+    julia Main.jl
+
 Run Ocaml code: 
 
     ocamlopt -c -o results/Main.cmx -I results Main.ml && ocamlopt -o results/programocaml -I results results/Main.cmx ; ./results/programocaml
@@ -81,6 +85,8 @@ Run Lua code:
 Run Fortran code:
 
     gfortran -o results/programfortran Main.f90 ; ./results/programfortran
+
+
 
 Notice:
 

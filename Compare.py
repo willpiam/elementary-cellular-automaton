@@ -21,6 +21,7 @@ command_sets = [
     ("Java", "java", "javac -d results Main.java", "java -cp results Main"),
     ("Python", "python", "", "python3 Main.py"),
     ("TypeScript", "typescript", "", "deno run --allow-net --allow-read --allow-write Main.ts"),
+    ("Julia", "julia", "", "julia Main.jl"),
 
     ("Rust", "rust", "rustc Main.rs -o results/programrust", "./results/programrust"),
     ("Go", "go", "", "go run Main.go"),
