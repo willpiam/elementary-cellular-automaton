@@ -86,8 +86,6 @@ Run Fortran code:
 
     gfortran -o results/programfortran Main.f90 ; ./results/programfortran
 
-
-
 Notice:
 
     You may need to manually create the `results` directory.
@@ -129,7 +127,7 @@ Output File format:
 - [ ] Basic
 - [ ] Erlang
 - [ ] Pascal
-- [ ] Fortran
+- [x] Fortran
 - [ ] COBOL
 - [ ] Swift
 - [ ] Objective C

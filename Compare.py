@@ -22,6 +22,7 @@ command_sets = [
     ("Python", "python", "", "python3 Main.py"),
     ("TypeScript", "typescript", "", "deno run --allow-net --allow-read --allow-write Main.ts"),
     ("Julia", "julia", "", "julia Main.jl"),
+    ("Ruby", "ruby", "", "ruby Main.rb"),
 
     ("Rust", "rust", "rustc Main.rs -o results/programrust", "./results/programrust"),
     ("Go", "go", "", "go run Main.go"),
