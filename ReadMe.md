@@ -86,6 +86,10 @@ Run Fortran code:
 
     gfortran -o results/programfortran Main.f90 ; ./results/programfortran
 
+Run Wolfram Script code:
+
+    wolframscript -f Main.wls
+
 Notice:
 
     You may need to manually create the `results` directory.

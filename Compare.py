@@ -36,7 +36,12 @@ command_sets = [
     ("OCaml", "ocaml", "ocamlopt -c -o results/Main.cmx -I results Main.ml && ocamlopt -o results/programocaml -I results results/Main.cmx", "./results/programocaml "),
     ("Lua", "lua", "", "lua Main.lua"),
 
+    # The following langauges take to long to be included in the default command set
     # ("Bash", "bash", "", "bash Main.sh"),
+    # ("Wolfram", "wolfram", "", "wolframscript -f Main.wls"),
+
+
+
     # old commands and commands which might not work
     # ("C2", "c2", "gcc Main2.c -o results/programc2", "./results/programc2"),
     # ("Haskell**", "ghc -odir results -hidir results MainC.hs -o results/programhaskell_C", "./results/programhaskell_C"),
