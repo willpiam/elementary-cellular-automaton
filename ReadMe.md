@@ -135,9 +135,9 @@ Output File format:
 - [ ] COBOL
 - [ ] Swift
 - [ ] Objective C
-- [ ] Ruby
+- [x] Ruby
 - [ ] Lisp (common lisp)
-- [ ] Wolfram Language
+- [x] Wolfram Language
 - [ ] Lean (??)
 - [ ] Agda (??)
 - [ ] Idris (??)
