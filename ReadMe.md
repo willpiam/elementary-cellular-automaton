@@ -243,6 +243,37 @@ The program will either print "same" or "different" to the terminal.
 
 4. The C++ version of the program is the third fastest, but it's still significantly slower than the C and Rust versions. If my old prof Garth Santor were here he'd say it's because my C++ code is lacking, and he'd remind me that C++ should be able to out perform C. 
 
+## Todo
+
+### Move list of implementations to json
+
+Create a json file holding a list of implementations, how to build them, and how to run them. Each item in the list should take the following form:
+
+```json
+    [
+        {
+            "label": "C",
+            "version_indicator" : "c",
+            "commands": {
+                "build" : "gcc Main.c -o results/programc",
+                "run" : "./results/programc",
+            },
+            "enabled" : 1,
+        },
+        {
+            "label": "Python",
+            "version_indicator" : "python",
+            "commands": {
+                "build" : "",
+                "run" : "python3 Main.py",
+            },
+            "enabled" : 1,
+        }
+    ]
+```
+
+Notice the enabled field is either 0 or 1, which is easier to change than true or false. 
+
 ## The Author
 
 Cardano [$wildoy](https://handle.me/wildoy)

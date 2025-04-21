@@ -11,6 +11,8 @@ import numpy as np
 import argparse
 import os
 import shutil
+import platform
+import psutil
 
 command_sets = [
     ("C", "c", "gcc Main.c -o results/programc", "./results/programc"),
@@ -223,7 +225,33 @@ def generate_and_save_bar_graph(existing_runs, sort):
     plt.savefig(os.path.join("results", "configurations_vs_runtime.png"))
     print("Bar graph has been saved.")
 
+def display_system_info():
+    print("\nSystem Information:")
+    print(f"Operating System: {platform.system()} {platform.release()}")
+    print(f"Machine: {platform.machine()}")
+    
+    # Enhanced CPU Information
+    print("\nCPU Information:")
+    with open('/proc/cpuinfo', 'r') as f:
+        cpu_info = f.read()
+        model_name = next((line.split(':')[1].strip() for line in cpu_info.split('\n') if 'model name' in line), 'Unknown')
+        print(f"Model: {model_name}")
+    
+    print(f"CPU Cores: {psutil.cpu_count(logical=False)} physical, {psutil.cpu_count(logical=True)} logical")
+    print(f"CPU Frequency: {psutil.cpu_freq().current:.2f} MHz (Min: {psutil.cpu_freq().min:.2f} MHz, Max: {psutil.cpu_freq().max:.2f} MHz)")
+    print(f"CPU Usage: {psutil.cpu_percent()}%")
+    
+    # Memory Information
+    print("\nMemory Information:")
+    memory = psutil.virtual_memory()
+    print(f"Total RAM: {memory.total / (1024**3):.2f} GB")
+    print(f"Available RAM: {memory.available / (1024**3):.2f} GB")
+    print(f"Used RAM: {memory.used / (1024**3):.2f} GB ({memory.percent}%)")
+    print("")
+    
+
 def main():
+    display_system_info()
     parser = argparse.ArgumentParser(description='Your program description.')
 
     parser.add_argument('--graph', '-g', action='store_true', help='Generate and save a graph')
