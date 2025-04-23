@@ -17,6 +17,7 @@ import psutil
 command_sets = [
     ("C", "c", "gcc Main.c -o results/programc", "./results/programc"),
     ("C#", "csharp", "mcs -out:results/programcsharp Main.cs", "mono results/programcsharp"),
+    ("Erlang", "erlang", "", "./Main.erl" ),
 
     ("Fortran", "fortran", "gfortran -o results/programfortran Main.f90", "./results/programfortran"),
     ("C++", "cpp", "g++ Main.cpp -o results/programcpp", "./results/programcpp"),

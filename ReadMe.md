@@ -90,6 +90,10 @@ Run Wolfram Script code:
 
     wolframscript -f Main.wls
 
+Run Erlang code:
+
+    ./Main.erl
+
 Notice:
 
     You may need to manually create the `results` directory.
@@ -129,7 +133,7 @@ Output File format:
 ## Languages To Add
 
 - [ ] Basic
-- [ ] Erlang
+- [x] Erlang
 - [ ] Pascal
 - [x] Fortran
 - [ ] COBOL
@@ -273,6 +277,10 @@ Create a json file holding a list of implementations, how to build them, and how
 ```
 
 Notice the enabled field is either 0 or 1, which is easier to change than true or false. 
+
+### Record CPU details with the runs
+
+Assume every run in `run_data.json` happened on the same machine. Make a field in that folder to log the OS and CPU model. 
 
 ## The Author
 
