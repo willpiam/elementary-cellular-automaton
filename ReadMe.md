@@ -92,7 +92,7 @@ Run Wolfram Script code:
 
 Run Erlang code:
 
-    escript Main.erl
+    erlc -o results Main.erl ; erl -noshell -pa results -run Main main -s init stop
 
 Notice:
 
