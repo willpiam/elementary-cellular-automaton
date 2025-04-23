@@ -55,6 +55,3 @@ file = StringTemplate[
 
 
 Export[file, pbm, "Text"];   (* ASCII text, Unix new‑lines *)
-
-(* optional confirmation *)
-Print["Wrote ", file];

@@ -154,6 +154,5 @@ int main() {
         return 1;
     }
     
-    printf("Cellular automaton successfully generated and saved.\n");
     return 0;
 }

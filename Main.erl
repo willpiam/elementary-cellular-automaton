@@ -37,7 +37,6 @@ run(Rule, InitStr, Gens) ->
     ensure_dir("results"),
     FileName      = filename(Rule, Gens, InitStr),
     write_pbm(FileName, Width, Gens, Rows),
-    io:format("Wrote ~s~n",[FileName]),
     ok.
 
 rule_bits(N) ->
