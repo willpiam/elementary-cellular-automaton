@@ -146,6 +146,20 @@ Output File format:
 - [ ] Agda (??)
 - [ ] Idris (??)
 - [ ] assembly
+- [ ] turing
+- [ ] small talk
+- [ ] PureScript
+- [ ] Zig
+- [ ] F#
+- [ ] Elm
+- [ ] Forth
+- [ ] Apl
+- [ ] PARI/GP
+- [ ] SQL
+- [ ] ALGOL
+- [ ] BCPL
+- [ ] B
+- [ ] Prolog
 
 ## Compare.py
 

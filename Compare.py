@@ -38,6 +38,7 @@ command_sets = [
     ("JavaScript", "javascript", "", "node Main.js"),
     ("OCaml", "ocaml", "ocamlopt -c -o results/Main.cmx -I results Main.ml && ocamlopt -o results/programocaml -I results results/Main.cmx", "./results/programocaml "),
     ("Lua", "lua", "", "lua Main.lua"),
+    ("R", "r", "", "Rscript Main.R"),
 
     # The following langauges take to long to be included in the default command set
     # ("Bash", "bash", "", "bash Main.sh"),
