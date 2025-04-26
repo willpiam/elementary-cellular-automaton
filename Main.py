@@ -2,18 +2,10 @@ def rule_to_binary_array(rule_number):
     binary_string = bin(rule_number)[2:].zfill(8)
     return [int(bit) for bit in binary_string]
 
-def calculate_cell(p_state, rule):
-    rule_map = {
-        "111": rule[0],
-        "110": rule[1],
-        "101": rule[2],
-        "100": rule[3],
-        "011": rule[4],
-        "010": rule[5],
-        "001": rule[6],
-        "000": rule[7]
-    }
-    return rule_map[p_state]
+def calculate_cell(left: int, center: int, right: int, rule: list[int]) -> int:
+    # Compute pattern index from left-center-right bits and index rule directly
+    pattern = (left << 2) | (center << 1) | right
+    return rule[7 - pattern]
 
 def run_cellular_automaton(rule: list[int], generations: int, initial_cells: list[int]) -> list[list[int]]:
     cells = initial_cells.copy()
@@ -24,10 +16,11 @@ def run_cellular_automaton(rule: list[int], generations: int, initial_cells: lis
         extended_cells = [0, 0] + cells + [0, 0]
         ca.append(cells)  # Store the current generation
 
-        next_generation = []
-        for j in range(1, len(extended_cells) - 1):
-            neighborhood = ''.join(str(extended_cells[j + k]) for k in range(-1, 2))
-            next_generation.append(calculate_cell(neighborhood, rule))
+        # Compute next generation using integer neighbors and a list comprehension
+        next_generation = [
+            calculate_cell(left, center, right, rule)
+            for left, center, right in zip(extended_cells, extended_cells[1:], extended_cells[2:])
+        ]
         cells = next_generation
     
     ca.append(cells) 
