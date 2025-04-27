@@ -101,7 +101,7 @@ def generate_and_save_graph(data ):
     plt.savefig(os.path.join("results", "generations_vs_runtime.png"))
     print("Graph has been saved.")
 
-def run_each_command_set(existing_runs, only_top=False):
+def run_each_command_set(existing_runs, only_top=False, only_version=None):
     rule_number, initial_conditions, generations = read_inputs_from_file("input.txt")
     hashes = defaultdict(list)
     command_sets = load_command_sets()
@@ -110,6 +110,8 @@ def run_each_command_set(existing_runs, only_top=False):
         if not implementation['enabled']:
             continue
         if only_top and not implementation['is_top']:
+            continue
+        if only_version and implementation['version_indicator'] != only_version:
             continue
 
         label = implementation['label']
@@ -245,6 +247,7 @@ def main():
     parser.add_argument('--runs', type=int, help='Specify the number of runs')
     parser.add_argument('--clear', action='store_true', help='Clear the results directory')
     parser.add_argument('--only-top', action='store_true', help='Only run implementations marked as top performers')
+    parser.add_argument('--only', type=str, help='Only run the implementation with the specified version indicator')
 
     args = parser.parse_args()
     # List to store all runs
@@ -270,7 +273,7 @@ def main():
         return
 
     for i in range(0, args.runs if args.runs is not None else 1):
-        run_each_command_set(existing_runs, args.only_top)
+        run_each_command_set(existing_runs, args.only_top, args.only)
 
     return
 
