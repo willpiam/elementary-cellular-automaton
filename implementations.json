@@ -1,0 +1,312 @@
+[
+    {
+        "label": "C",
+        "version_indicator": "c",
+        "commands": {
+            "build": "gcc Main.c -o results/programc",
+            "run": "./results/programc"
+        },
+        "enabled": 1,
+        "extra_data": [],
+        "is_top": 1
+    },
+    {
+        "label": "C#",
+        "version_indicator": "csharp",
+        "commands": {
+            "build": "mcs -out:results/programcsharp Main.cs",
+            "run": "mono results/programcsharp"
+        },
+        "enabled": 1,
+        "extra_data": [],
+        "is_top": 1
+    },
+    {
+        "label": "Erlang",
+        "version_indicator": "erlang",
+        "commands": {
+            "build": "erlc -o results Main.erl",
+            "run": "erl -noshell -pa results -run Main main -s init stop"
+        },
+        "enabled": 1,
+        "extra_data": [],
+        "is_top": 0
+    },
+    {
+        "label": "Fortran",
+        "version_indicator": "fortran",
+        "commands": {
+            "build": "gfortran -o results/programfortran Main.f90",
+            "run": "./results/programfortran"
+        },
+        "enabled": 1,
+        "extra_data": [],
+        "is_top": 0
+    },
+    {
+        "label": "C++",
+        "version_indicator": "cpp",
+        "commands": {
+            "build": "g++ Main.cpp -o results/programcpp",
+            "run": "./results/programcpp"
+        },
+        "enabled": 1,
+        "extra_data": [],
+        "is_top": 1
+    },
+    {
+        "label": "Java",
+        "version_indicator": "java",
+        "commands": {
+            "build": "javac -d results Main.java",
+            "run": "java -cp results Main"
+        },
+        "enabled": 1,
+        "extra_data": [],
+        "is_top": 0
+    },
+    {
+        "label": "Python",
+        "version_indicator": "python",
+        "commands": {
+            "build": "",
+            "run": "python3 Main.py"
+        },
+        "enabled": 1,
+        "extra_data": [],
+        "is_top": 0
+    },
+    {
+        "label": "TypeScript",
+        "version_indicator": "typescript",
+        "commands": {
+            "build": "",
+            "run": "deno run --allow-net --allow-read --allow-write Main.ts"
+        },
+        "enabled": 1,
+        "extra_data": [],
+        "is_top": 0
+    },
+    {
+        "label": "Julia",
+        "version_indicator": "julia",
+        "commands": {
+            "build": "",
+            "run": "julia Main.jl"
+        },
+        "enabled": 1,
+        "extra_data": [],
+        "is_top": 0
+    },
+    {
+        "label": "Ruby",
+        "version_indicator": "ruby",
+        "commands": {
+            "build": "",
+            "run": "ruby Main.rb"
+        },
+        "enabled": 1,
+        "extra_data": [],
+        "is_top": 0
+    },
+    {
+        "label": "Rust",
+        "version_indicator": "rust",
+        "commands": {
+            "build": "rustc Main.rs -o results/programrust",
+            "run": "./results/programrust"
+        },
+        "enabled": 1,
+        "extra_data": [],
+        "is_top": 1
+    },
+    {
+        "label": "Go",
+        "version_indicator": "go",
+        "commands": {
+            "build": "",
+            "run": "go run Main.go"
+        },
+        "enabled": 1,
+        "extra_data": [],
+        "is_top": 1
+    },
+    {
+        "label": "Haskell",
+        "version_indicator": "haskell",
+        "commands": {
+            "build": "ghc -odir haskellbuild -hidir haskellbuild Main.hs -o results/programhaskell",
+            "run": "./results/programhaskell"
+        },
+        "enabled": 1,
+        "extra_data": [],
+        "is_top": 0
+    },
+    {
+        "label": "Scala",
+        "version_indicator": "scala",
+        "commands": {
+            "build": "",
+            "run": "scala Main.scala --main-class CellularAutomaton"
+        },
+        "enabled": 1,
+        "extra_data": [],
+        "is_top": 0
+    },
+    {
+        "label": "Clojure",
+        "version_indicator": "clojure",
+        "commands": {
+            "build": "",
+            "run": "clojure -M Main.clj"
+        },
+        "enabled": 1,
+        "extra_data": [],
+        "is_top": 0
+    },
+    {
+        "label": "Perl",
+        "version_indicator": "perl",
+        "commands": {
+            "build": "",
+            "run": "./Main.pl"
+        },
+        "enabled": 1,
+        "extra_data": [],
+        "is_top": 0
+    },
+    {
+        "label": "PHP",
+        "version_indicator": "php",
+        "commands": {
+            "build": "",
+            "run": "php Main.php"
+        },
+        "enabled": 1,
+        "extra_data": [],
+        "is_top": 0
+    },
+    {
+        "label": "Kotlin",
+        "version_indicator": "kotlin",
+        "commands": {
+            "build": "kotlinc Main.kt -include-runtime -d results/MainKT.jar",
+            "run": "java -jar results/MainKT.jar"
+        },
+        "enabled": 1,
+        "extra_data": [],
+        "is_top": 0
+    },
+    {
+        "label": "JavaScript",
+        "version_indicator": "javascript",
+        "commands": {
+            "build": "",
+            "run": "node Main.js"
+        },
+        "enabled": 1,
+        "extra_data": [],
+        "is_top": 0
+    },
+    {
+        "label": "OCaml",
+        "version_indicator": "ocaml",
+        "commands": {
+            "build": "ocamlopt -c -o results/Main.cmx -I results Main.ml && ocamlopt -o results/programocaml -I results results/Main.cmx",
+            "run": "./results/programocaml"
+        },
+        "enabled": 1,
+        "extra_data": [],
+        "is_top": 0
+    },
+    {
+        "label": "Lua",
+        "version_indicator": "lua",
+        "commands": {
+            "build": "",
+            "run": "lua Main.lua"
+        },
+        "enabled": 1,
+        "extra_data": [],
+        "is_top": 0
+    },
+    {
+        "label": "R",
+        "version_indicator": "r",
+        "commands": {
+            "build": "",
+            "run": "Rscript Main.R"
+        },
+        "enabled": 1,
+        "extra_data": [],
+        "is_top": 0
+    },
+    {
+        "label": "Bash",
+        "version_indicator": "bash",
+        "commands": {
+            "build": "",
+            "run": "bash Main.sh"
+        },
+        "enabled": 0,
+        "extra_data": [
+            "Takes too long to be included in the default command set"
+        ],
+        "is_top": 0
+    },
+    {
+        "label": "Wolfram",
+        "version_indicator": "wolfram",
+        "commands": {
+            "build": "",
+            "run": "wolframscript -f Main.wls"
+        },
+        "enabled": 0,
+        "extra_data": [
+            "Takes too long to be included in the default command set"
+        ],
+        "is_top": 0
+    },
+    {
+        "label": "C2",
+        "version_indicator": "c2",
+        "commands": {
+            "build": "gcc Main2.c -o results/programc2",
+            "run": "./results/programc2"
+        },
+        "enabled": 0,
+        "extra_data": [
+            "Old version of C implementation",
+            "Kept for historical reference"
+        ],
+        "is_top": 0
+    },
+    {
+        "label": "Haskell**",
+        "version_indicator": "haskell_c",
+        "commands": {
+            "build": "ghc -odir results -hidir results MainC.hs -o results/programhaskell_C",
+            "run": "./results/programhaskell_C"
+        },
+        "enabled": 0,
+        "extra_data": [
+            "Alternative Haskell implementation",
+            "Kept for historical reference"
+        ],
+        "is_top": 0
+    },
+    {
+        "label": "Scala (old)",
+        "version_indicator": "scala_old",
+        "commands": {
+            "build": "scalac -d ./results Main.scala",
+            "run": "scala -cp ./results CellularAutomaton"
+        },
+        "enabled": 0,
+        "extra_data": [
+            "Old Scala implementation",
+            "Kept for historical reference"
+        ],
+        "is_top": 0
+    }
+] 

@@ -195,6 +195,35 @@ The *clear* flag will clear the results folder
 
     python3 Compare.py --clear
 
+### Implementation Configuration
+
+The program uses a JSON file called `implementations.json` to define which language implementations to run and how to run them. Each implementation in the file has the following structure:
+
+```json
+{
+    "label": "Language Name",
+    "version_indicator": "short_name",
+    "commands": {
+        "build": "build command",
+        "run": "run command"
+    },
+    "enabled": 1,
+    "extra_data": ["Additional information about the implementation"]
+}
+```
+
+- `label`: The display name of the implementation
+- `version_indicator`: A short identifier used in output filenames
+- `commands`: The build and run commands for the implementation
+- `enabled`: Set to 1 to include the implementation in runs, 0 to exclude it
+- `extra_data`: An array of strings containing additional information about the implementation
+
+You can modify this file to:
+- Enable/disable specific implementations
+- Add new language implementations
+- Modify build or run commands
+- Add notes about why an implementation is disabled
+
 ### Graphing
 
 To enable the graphing functionalities you must have matplotlib installed. You can install it with the following command:

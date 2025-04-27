@@ -14,45 +14,16 @@ import shutil
 import platform
 import psutil
 
-command_sets = [
-    ("C", "c", "gcc Main.c -o results/programc", "./results/programc"),
-    ("C#", "csharp", "mcs -out:results/programcsharp Main.cs", "mono results/programcsharp"),
-    ("Erlang", "erlang", "erlc -o results Main.erl", "erl -noshell -pa results -run Main main -s init stop" ),
-
-    ("Fortran", "fortran", "gfortran -o results/programfortran Main.f90", "./results/programfortran"),
-    ("C++", "cpp", "g++ Main.cpp -o results/programcpp", "./results/programcpp"),
-    ("Java", "java", "javac -d results Main.java", "java -cp results Main"),
-    ("Python", "python", "", "python3 Main.py"),
-    ("TypeScript", "typescript", "", "deno run --allow-net --allow-read --allow-write Main.ts"),
-    ("Julia", "julia", "", "julia Main.jl"),
-    ("Ruby", "ruby", "", "ruby Main.rb"),
-
-    ("Rust", "rust", "rustc Main.rs -o results/programrust", "./results/programrust"),
-    ("Go", "go", "", "go run Main.go"),
-    ("Haskell", "haskell", "ghc -odir haskellbuild -hidir haskellbuild Main.hs -o results/programhaskell", "./results/programhaskell"),
-    ("Scala", "scala", "", "scala Main.scala --main-class CellularAutomaton"),
-    ("Clojure", "clojure", "", "clojure -M Main.clj"),
-    ("Perl", "perl", "", "./Main.pl"),
-    ("PHP", "php", "", "php Main.php"),
-    ("Kotlin", "kotlin", "kotlinc Main.kt -include-runtime -d results/MainKT.jar", "java -jar results/MainKT.jar"),
-    ("JavaScript", "javascript", "", "node Main.js"),
-    ("OCaml", "ocaml", "ocamlopt -c -o results/Main.cmx -I results Main.ml && ocamlopt -o results/programocaml -I results results/Main.cmx", "./results/programocaml "),
-    ("Lua", "lua", "", "lua Main.lua"),
-    ("R", "r", "", "Rscript Main.R"),
-
-    # The following langauges take to long to be included in the default command set
-    # ("Bash", "bash", "", "bash Main.sh"),
-    # ("Wolfram", "wolfram", "", "wolframscript -f Main.wls"),
-
-
-
-    # old commands and commands which might not work
-    # ("C2", "c2", "gcc Main2.c -o results/programc2", "./results/programc2"),
-    # ("Haskell**", "ghc -odir results -hidir results MainC.hs -o results/programhaskell_C", "./results/programhaskell_C"),
-    # ("Scala", "scala", "scalac -d ./results Main.scala", "scala -cp ./results CellularAutomaton"),
-
-
-]
+def load_command_sets():
+    try:
+        with open('implementations.json', 'r') as f:
+            return json.load(f)
+    except FileNotFoundError:
+        print("Error: implementations.json not found")
+        return []
+    except json.JSONDecodeError:
+        print("Error: implementations.json is not valid JSON")
+        return []
 
 # Function to execute a command (no timing)
 def execute_command(command):
@@ -130,11 +101,22 @@ def generate_and_save_graph(data ):
     plt.savefig(os.path.join("results", "generations_vs_runtime.png"))
     print("Graph has been saved.")
 
-def run_each_command_set(existing_runs):
+def run_each_command_set(existing_runs, only_top=False):
     rule_number, initial_conditions, generations = read_inputs_from_file("input.txt")
     hashes = defaultdict(list)
+    command_sets = load_command_sets()
 
-    for label, version_indicator, compile_cmd, run_cmd in command_sets:
+    for implementation in command_sets:
+        if not implementation['enabled']:
+            continue
+        if only_top and not implementation['is_top']:
+            continue
+
+        label = implementation['label']
+        version_indicator = implementation['version_indicator']
+        compile_cmd = implementation['commands']['build']
+        run_cmd = implementation['commands']['run']
+
         print(f"Running {label}...")
         execute_command(compile_cmd)
         run_time = time_command(run_cmd)
@@ -262,6 +244,7 @@ def main():
     parser.add_argument('--sort', action='store_true', help='Sort the bar graph')
     parser.add_argument('--runs', type=int, help='Specify the number of runs')
     parser.add_argument('--clear', action='store_true', help='Clear the results directory')
+    parser.add_argument('--only-top', action='store_true', help='Only run implementations marked as top performers')
 
     args = parser.parse_args()
     # List to store all runs
@@ -287,7 +270,7 @@ def main():
         return
 
     for i in range(0, args.runs if args.runs is not None else 1):
-        run_each_command_set(existing_runs)
+        run_each_command_set(existing_runs, args.only_top)
 
     return
 
