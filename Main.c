@@ -28,7 +28,6 @@ bool calculateCell(bool left, bool center, bool right, bool* ruleBinary) {
 bool** runCellularAutomaton(int ruleNumber, int generations, const char* initialConditions) {
     int initialConditionsLength = strlen(initialConditions);
     int imageWidth = initialConditionsLength + 2 * generations;
-    bool** automatonData = NULL;
     bool* ruleBinary = ruleToBinaryArray(ruleNumber);
     
     if (!ruleBinary) {
@@ -36,27 +35,26 @@ bool** runCellularAutomaton(int ruleNumber, int generations, const char* initial
         return NULL;
     }
     
-    // Allocate memory for automaton data (2D array of bools)
-    automatonData = (bool**)malloc(generations * sizeof(bool*));
-    if (!automatonData) {
+    // Allocate a single contiguous block of memory for all generations
+    bool* memoryBlock = (bool*)calloc(generations * imageWidth, sizeof(bool));
+    if (!memoryBlock) {
         printf("Error allocating memory for automaton data!\n");
         free(ruleBinary);
         return NULL;
     }
     
-    // Allocate memory for each generation
+    // Create an array of pointers to each generation's start
+    bool** automatonData = (bool**)malloc(generations * sizeof(bool*));
+    if (!automatonData) {
+        printf("Error allocating memory for generation pointers!\n");
+        free(memoryBlock);
+        free(ruleBinary);
+        return NULL;
+    }
+    
+    // Set up pointers to each generation's start in the memory block
     for (int i = 0; i < generations; i++) {
-        automatonData[i] = (bool*)calloc(imageWidth, sizeof(bool));
-        if (!automatonData[i]) {
-            printf("Error allocating memory for generation %d!\n", i);
-            // Clean up already allocated memory
-            for (int j = 0; j < i; j++) {
-                free(automatonData[j]);
-            }
-            free(automatonData);
-            free(ruleBinary);
-            return NULL;
-        }
+        automatonData[i] = memoryBlock + (i * imageWidth);
     }
     
     // Initialize first generation with initial conditions
@@ -114,7 +112,6 @@ int outputToFile(bool** automatonData, int ruleNumber, int generations, const ch
 
 // Main function
 int main() {
-   
     FILE* inputFile = fopen("input.txt", "r");
     if (!inputFile) {
         printf("Error opening input file!\n");
@@ -144,10 +141,10 @@ int main() {
     int resultFlag = outputToFile(automatonData, ruleNumber, generations, initialConditions);
     
     // Clean up memory
-    for (int i = 0; i < generations; i++) {
-        free(automatonData[i]);
+    if (automatonData) {
+        free(automatonData[0]); // Free the single memory block
+        free(automatonData);    // Free the array of pointers
     }
-    free(automatonData);
     
     if (resultFlag != 0) {
         printf("Error writing to file!\n");
