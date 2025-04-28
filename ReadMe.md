@@ -245,6 +245,17 @@ This next graph increases the number of generations to 2000 and compares the run
 
 ![A bar graph comparing all run times but with new data](media/configurations_vs_runtime_2000gen.png)
 
+The fastest 5 implementations running 1000 generations of rule 30 starting at a single black cell. 
+
+![a bar graph showing the top 5 implementations. in order: C, C#, C++, Go, Rust](media/fast_five_1000.png)
+
+The same but running 2000 generations
+
+![a bar graph showing the top 5 implementations. in order: C#, C, Go, Rust, C++](media/fast_five_2000.png)
+
+
+Its important to remember that this only reflects the speed of the implementations. This should not be considered a measure of the speed of these languages themselves. The quality of the implementations here likely vary dramatically. These graphs are based on runs with the implementations as they were at commit:
+
 ## compareResults.sh
 
 This program takes two files and returns true if they hash to the same value. This is useful for comparing the output of two different implementations of the same cellular automaton program.
