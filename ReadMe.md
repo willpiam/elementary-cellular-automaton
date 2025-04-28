@@ -257,7 +257,7 @@ Now 10,000 generations.
 
 ![a bar graph showing the top 5 implementations. in order: C#, Go, C, C++, Rust ](media/fast_five_10000.png)
 
-Its important to remember that this only reflects the speed of the implementations. This should not be considered a measure of the speed of these languages themselves. The quality of the implementations here likely vary dramatically. These graphs are based on runs with the implementations as they were at commit:c26d71b8f55ff71e8583d6f29169401e287dd3d1 (April 28th 2025) and the implementations may have changed since then. 
+Its important to remember that this only reflects the speed of the implementations. This should not be considered a measure of the speed of these languages themselves. The quality of the implementations here likely vary dramatically. These last three graphs are based on runs with the implementations as they were at commit:c26d71b8f55ff71e8583d6f29169401e287dd3d1 (April 28th 2025) and the implementations may have changed since then. 
 
 ## compareResults.sh
 
