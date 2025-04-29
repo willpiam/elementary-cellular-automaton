@@ -1,155 +1,100 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdbool.h>
+#include <stdint.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
-#define MAX_LENGTH_INITIAL_CONDITIONS 1000
+#define MAX_INIT_LEN 1000
 
-// Convert rule number to binary representation
-bool* ruleToBinaryArray(int ruleNumber) {
-    bool* ruleBinary = (bool*)malloc(8 * sizeof(bool));
-    if (!ruleBinary) {
-        return NULL;
+// Inline rule application for one cell
+static inline uint8_t apply_rule(const uint8_t *restrict prev, int j, const uint8_t rule[8]) {
+    int idx = (prev[j-1] << 2) | (prev[j] << 1) | prev[j+1];
+    return rule[idx];
+}
+
+int main(void) {
+    // Read input values from file
+    FILE *input = fopen("input.txt", "r");
+    if (!input) {
+        perror("Error opening input.txt");
+        return 1;
     }
-    
+
+    int ruleNumber, generations;
+    char initial[MAX_INIT_LEN + 1];
+    if (fscanf(input, "%d %1000s %d", &ruleNumber, initial, &generations) != 3) {
+        fprintf(stderr, "Error: expected rule, initial string, and generations in input.txt\n");
+        fclose(input);
+        return 1;
+    }
+    fclose(input);
+
+    int initLen = strlen(initial);
+    int width = initLen + 2 * generations;
+
+    // Prepare rule array on stack
+    uint8_t ruleBinary[8];
     for (int i = 0; i < 8; i++) {
         ruleBinary[i] = (ruleNumber >> i) & 1;
     }
-    return ruleBinary;
-}
 
-// Calculate new cell state based on neighborhood and rule
-bool calculateCell(bool left, bool center, bool right, bool* ruleBinary) {
-    int index = (left ? 4 : 0) | (center ? 2 : 0) | (right ? 1 : 0);
-    return ruleBinary[index];
-}
-
-// Run cellular automaton simulation
-bool** runCellularAutomaton(int ruleNumber, int generations, const char* initialConditions) {
-    int initialConditionsLength = strlen(initialConditions);
-    int imageWidth = initialConditionsLength + 2 * generations;
-    bool* ruleBinary = ruleToBinaryArray(ruleNumber);
-    
-    if (!ruleBinary) {
-        printf("Error allocating memory for rule!\n");
-        return NULL;
-    }
-    
-    // Allocate a single contiguous block of memory for all generations
-    bool* memoryBlock = (bool*)calloc(generations * imageWidth, sizeof(bool));
-    if (!memoryBlock) {
-        printf("Error allocating memory for automaton data!\n");
-        free(ruleBinary);
-        return NULL;
-    }
-    
-    // Create an array of pointers to each generation's start
-    bool** automatonData = (bool**)malloc(generations * sizeof(bool*));
-    if (!automatonData) {
-        printf("Error allocating memory for generation pointers!\n");
-        free(memoryBlock);
-        free(ruleBinary);
-        return NULL;
-    }
-    
-    // Set up pointers to each generation's start in the memory block
-    for (int i = 0; i < generations; i++) {
-        automatonData[i] = memoryBlock + (i * imageWidth);
-    }
-    
-    // Initialize first generation with initial conditions
-    int initialOffset = (imageWidth - initialConditionsLength) / 2;
-    for (int j = 0; j < initialConditionsLength; j++) {
-        automatonData[0][j + initialOffset] = (initialConditions[j] == '1');
-    }
-    
-    // Generate subsequent generations
-    int length = initialConditionsLength + 2;
-    for (int i = 1; i < generations; i++) {
-        int paddingOffset = initialOffset - i;
-        for (int j = paddingOffset; j < paddingOffset + length; j++) {
-            bool left = automatonData[i-1][j-1];
-            bool center = automatonData[i-1][j];
-            bool right = automatonData[i-1][j+1];
-            automatonData[i][j] = calculateCell(left, center, right, ruleBinary);
-        }
-        length += 2;
-    }
-    
-    free(ruleBinary);
-    return automatonData;
-}
-
-// Write automaton data to PBM file
-int outputToFile(bool** automatonData, int ruleNumber, int generations, const char* initialConditions) {
-    int initialConditionsLength = strlen(initialConditions);
-    int imageWidth = initialConditionsLength + 2 * generations;
-    
-    char filename[MAX_LENGTH_INITIAL_CONDITIONS + 50];
-    sprintf(filename, "results/r%d_g%d_i%s_c.pbm", 
-            ruleNumber, generations, initialConditions);
-    
-    FILE* file = fopen(filename, "w");
-    if (!file) {
-        printf("Error creating output file!\n");
+    // Allocate two rows and a line buffer
+    uint8_t *prev = calloc(width, 1);
+    uint8_t *curr = calloc(width, 1);
+    char    *lineBuf = malloc(width + 1);
+    if (!prev || !curr || !lineBuf) {
+        perror("Memory allocation failed");
         return 1;
     }
-    
+
+    // Center initial pattern in the 'prev' buffer
+    int offset = generations;
+    for (int i = 0; i < initLen; i++) {
+        prev[offset + i] = (initial[i] == '1');
+    }
+
+    // Ensure output directory exists
+    mkdir("results", 0755);
+
+    // Open PBM output file
+    char filename[MAX_INIT_LEN + 50];
+    snprintf(filename, sizeof(filename), "results/r%d_g%d_i%s_c.pbm", ruleNumber, generations, initial);
+    FILE *out = fopen(filename, "w");
+    if (!out) {
+        perror("Error creating output file");
+        return 1;
+    }
+
     // Write PBM header
-    fprintf(file, "P1\n%d %d\n", imageWidth, generations);
-    
-    // Write automaton data
-    for (int i = 0; i < generations; i++) {
-        for (int j = 0; j < imageWidth; j++) {
-            fputc(automatonData[i][j] ? '1' : '0', file);
-        }
-        fputc('\n', file);
-    }
-    
-    fclose(file);
-    return 0;
-}
+    fprintf(out, "P1\n%d %d\n", width, generations);
 
-// Main function
-int main() {
-    FILE* inputFile = fopen("input.txt", "r");
-    if (!inputFile) {
-        printf("Error opening input file!\n");
-        return 1;
+    // Main generation loop: write each row then compute next
+    for (int g = 0; g < generations; ++g) {
+        // Serialize current row to ASCII in one buffer
+        for (int j = 0; j < width; ++j) {
+            lineBuf[j] = prev[j] ? '1' : '0';
+        }
+        lineBuf[width] = '\n';
+        fwrite(lineBuf, 1, width + 1, out);
+
+        // Compute next generation into 'curr'
+        for (int j = 1; j < width - 1; ++j) {
+            curr[j] = apply_rule(prev, j, ruleBinary);
+        }
+        // Edges remain zero
+
+        // Swap buffers
+        uint8_t *tmp = prev;
+        prev = curr;
+        curr = tmp;
     }
-    
-    int ruleNumber, generations;
-    char initialConditions[MAX_LENGTH_INITIAL_CONDITIONS];
-    
-    // Read input file
-    if (fscanf(inputFile, "%d %s %d", &ruleNumber, initialConditions, &generations) != 3) {
-        printf("Error reading input file! Expected 3 values.\n");
-        fclose(inputFile);
-        return 1;
-    }
-    
-    fclose(inputFile);
-    
-    // Run cellular automaton
-    bool** automatonData = runCellularAutomaton(ruleNumber, generations, initialConditions);
-    if (!automatonData) {
-        printf("Failed to run cellular automaton!\n");
-        return 1;
-    }
-    
-    // Output results to file
-    int resultFlag = outputToFile(automatonData, ruleNumber, generations, initialConditions);
-    
-    // Clean up memory
-    if (automatonData) {
-        free(automatonData[0]); // Free the single memory block
-        free(automatonData);    // Free the array of pointers
-    }
-    
-    if (resultFlag != 0) {
-        printf("Error writing to file!\n");
-        return 1;
-    }
-    
+
+    // Clean up
+    fclose(out);
+    free(prev);
+    free(curr);
+    free(lineBuf);
+
     return 0;
 }
