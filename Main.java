@@ -1,110 +1,74 @@
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.io.BufferedWriter;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.io.IOException;
+import java.nio.file.StandardOpenOption;
 
 public class Main {
 
-    public static List<Integer> ruleToBinaryArray(int ruleNumber) {
-        String binaryString = String.format("%8s", Integer.toBinaryString(ruleNumber)).replace(' ', '0');
-        List<Integer> binaryArray = new ArrayList<>();
-        for (char bit : binaryString.toCharArray()) {
-            binaryArray.add(Character.getNumericValue(bit));
+    public static int[] ruleToBinaryArray(int ruleNumber) {
+        int[] rule = new int[8];
+        for (int i = 0; i < 8; i++) {
+            rule[i] = (ruleNumber >> i) & 1;
         }
-        return binaryArray;
+        return rule;
     }
 
-    public static int calculateCell(String pState, List<Integer> rule) {
-        HashMap<String, Integer> ruleMap = new HashMap<>() {{
-            put("111", rule.get(0));
-            put("110", rule.get(1));
-            put("101", rule.get(2));
-            put("100", rule.get(3));
-            put("011", rule.get(4));
-            put("010", rule.get(5));
-            put("001", rule.get(6));
-            put("000", rule.get(7));
-        }};
-        return ruleMap.get(pState);
-    }
+    public static int[][] runCellularAutomaton(int[] rule, int generations, int[] initialCells) {
+        int width = initialCells.length + 2 * generations;
+        int[][] ca = new int[generations][width];
+        int[] curr = new int[width];
+        int[] next = new int[width];
+        int offset = generations;
+        System.arraycopy(initialCells, 0, curr, offset, initialCells.length);
 
-    public static List<List<Integer>> runCellularAutomaton(List<Integer> rule, int generations, List<Integer> initialCells) {
-        List<Integer> cells = new ArrayList<>(initialCells);
-        List<List<Integer>> ca = new ArrayList<>();
-
-        for (int i = 0; i < generations - 1; i++) {
-            List<Integer> extendedCells = new ArrayList<>();
-            extendedCells.add(0);
-            extendedCells.add(0);
-            extendedCells.addAll(cells); // Add all cells to the extended list here
-            extendedCells.add(0);
-            extendedCells.add(0);
-        
-            ca.add(new ArrayList<>(cells));
-
-            List<Integer> nextGeneration = new ArrayList<>();
-            for (int j = 1; j < extendedCells.size() - 1; j++) {
-                String neighborhood = "" + extendedCells.get(j - 1) + extendedCells.get(j) + extendedCells.get(j + 1);
-                nextGeneration.add(calculateCell(neighborhood, rule));
+        for (int gen = 0; gen < generations; gen++) {
+            System.arraycopy(curr, 0, ca[gen], 0, width);
+            for (int j = 1; j < width - 1; j++) {
+                int idx = (curr[j - 1] << 2) | (curr[j] << 1) | curr[j + 1];
+                next[j] = rule[idx];
             }
-            cells = nextGeneration;
+            next[0] = 0;
+            next[width - 1] = 0;
+            int[] temp = curr;
+            curr = next;
+            next = temp;
         }
 
-        ca.add(cells);
         return ca;
-    }
-
-    public static List<List<Integer>> padImageData(List<List<Integer>> imageData, int totalWidth) {
-        List<List<Integer>> paddedData = new ArrayList<>();
-        for (List<Integer> row : imageData) {
-            int paddingLength = (totalWidth - row.size()) / 2;
-            List<Integer> paddedRow = new ArrayList<>();
-            for (int i = 0; i < paddingLength; i++) {
-                paddedRow.add(0);
-            }
-            paddedRow.addAll(row);
-            for (int i = 0; i < paddingLength; i++) {
-                paddedRow.add(0);
-            }
-            paddedData.add(paddedRow);
-        }
-        return paddedData;
-    }
-
-    public static void readInputsFromFile(String filePath) throws IOException {
-        List<String> lines = Files.readAllLines(Paths.get(filePath));
-        int ruleNumber = Integer.parseInt(lines.get(0).trim());
-        String initialConditions = lines.get(1).trim();
-        int generations = Integer.parseInt(lines.get(2).trim());
-
-        List<Integer> ruleBinary = ruleToBinaryArray(ruleNumber);
-        List<Integer> cells = new ArrayList<>();
-        for (char bit : initialConditions.toCharArray()) {
-            cells.add(Character.getNumericValue(bit));
-        }
-
-        List<List<Integer>> ca = runCellularAutomaton(ruleBinary, generations, cells);
-
-        // Determine the total width for the final padding
-        int finalWidth = initialConditions.length() + 2 * generations;
-        List<List<Integer>> paddedCa = padImageData(ca, finalWidth);
-
-        StringBuilder imageData = new StringBuilder("P1\n" + finalWidth + " " + generations + "\n");
-        for (List<Integer> row : paddedCa) {
-            for (int num : row) {
-                imageData.append(num);
-            }
-            imageData.append("\n");
-        }
-
-        Files.write(Paths.get("results/r" + ruleNumber + "_g" + generations + "_i" + initialConditions + "_java.pbm"), imageData.toString().getBytes());
     }
 
     public static void main(String[] args) {
         try {
-            readInputsFromFile("input.txt");
+            java.util.List<String> lines = Files.readAllLines(Paths.get("input.txt"));
+            int ruleNumber = Integer.parseInt(lines.get(0).trim());
+            String initial = lines.get(1).trim();
+            int generations = Integer.parseInt(lines.get(2).trim());
+
+            int[] rule = ruleToBinaryArray(ruleNumber);
+            int[] initialCells = new int[initial.length()];
+            for (int i = 0; i < initial.length(); i++) {
+                initialCells[i] = initial.charAt(i) == '1' ? 1 : 0;
+            }
+
+            int[][] ca = runCellularAutomaton(rule, generations, initialCells);
+            int width = initialCells.length + 2 * generations;
+
+            Files.createDirectories(Paths.get("results"));
+            String filename = String.format("results/r%d_g%d_i%s_java.pbm", ruleNumber, generations, initial);
+            try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(filename),
+                    StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING)) {
+                writer.write("P1\n");
+                writer.write(width + " " + generations + "\n");
+                char[] row = new char[width + 1];
+                for (int gen = 0; gen < generations; gen++) {
+                    for (int j = 0; j < width; j++) {
+                        row[j] = ca[gen][j] == 1 ? '1' : '0';
+                    }
+                    row[width] = '\n';
+                    writer.write(row);
+                }
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
