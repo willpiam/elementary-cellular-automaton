@@ -22,33 +22,33 @@
         "is_top": 1
     },
     {
-        "label": "Erlang",
-        "version_indicator": "erlang",
-        "commands": {
-            "build": "erlc -o results Main.erl",
-            "run": "erl -noshell -pa results -run Main main -s init stop"
-        },
-        "enabled": 1,
-        "extra_data": [],
-        "is_top": 0
-    },
-    {
-        "label": "Fortran",
-        "version_indicator": "fortran",
-        "commands": {
-            "build": "gfortran -o results/programfortran Main.f90",
-            "run": "./results/programfortran"
-        },
-        "enabled": 1,
-        "extra_data": [],
-        "is_top": 0
-    },
-    {
         "label": "C++",
         "version_indicator": "cpp",
         "commands": {
             "build": "g++ Main.cpp -o results/programcpp",
             "run": "./results/programcpp"
+        },
+        "enabled": 1,
+        "extra_data": [],
+        "is_top": 1
+    },
+    {
+        "label": "Rust",
+        "version_indicator": "rust",
+        "commands": {
+            "build": "rustc Main.rs -o results/programrust",
+            "run": "./results/programrust"
+        },
+        "enabled": 1,
+        "extra_data": [],
+        "is_top": 1
+    },
+    {
+        "label": "Go",
+        "version_indicator": "go",
+        "commands": {
+            "build": "",
+            "run": "go run Main.go"
         },
         "enabled": 1,
         "extra_data": [],
@@ -110,33 +110,33 @@
         "is_top": 0
     },
     {
-        "label": "Rust",
-        "version_indicator": "rust",
-        "commands": {
-            "build": "rustc Main.rs -o results/programrust",
-            "run": "./results/programrust"
-        },
-        "enabled": 1,
-        "extra_data": [],
-        "is_top": 1
-    },
-    {
-        "label": "Go",
-        "version_indicator": "go",
-        "commands": {
-            "build": "",
-            "run": "go run Main.go"
-        },
-        "enabled": 1,
-        "extra_data": [],
-        "is_top": 1
-    },
-    {
         "label": "Haskell",
         "version_indicator": "haskell",
         "commands": {
             "build": "ghc -odir haskellbuild -hidir haskellbuild Main.hs -o results/programhaskell",
             "run": "./results/programhaskell"
+        },
+        "enabled": 1,
+        "extra_data": [],
+        "is_top": 0
+    },
+    {
+        "label": "Erlang",
+        "version_indicator": "erlang",
+        "commands": {
+            "build": "erlc -o results Main.erl",
+            "run": "erl -noshell -pa results -run Main main -s init stop"
+        },
+        "enabled": 1,
+        "extra_data": [],
+        "is_top": 0
+    },
+    {
+        "label": "Fortran",
+        "version_indicator": "fortran",
+        "commands": {
+            "build": "gfortran -o results/programfortran Main.f90",
+            "run": "./results/programfortran"
         },
         "enabled": 1,
         "extra_data": [],
@@ -309,4 +309,4 @@
         ],
         "is_top": 0
     }
-] 
+]
