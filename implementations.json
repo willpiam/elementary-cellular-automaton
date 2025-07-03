@@ -19,7 +19,7 @@
         },
         "enabled": 1,
         "extra_data": [],
-        "is_top": 1
+        "is_top": 0
     },
     {
         "label": "C++",
@@ -30,7 +30,7 @@
         },
         "enabled": 1,
         "extra_data": [],
-        "is_top": 1
+        "is_top": 0
     },
     {
         "label": "Rust",
