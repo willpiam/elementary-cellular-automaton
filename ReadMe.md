@@ -233,37 +233,37 @@ To enable the graphing functionalities you must have matplotlib installed. You c
 
 ### Run time analysis
 
-The following plot shows the relationship between the number of generations and the run time of the program. This plot was created with the *--graph* flag. Rule 30 was used with standard initial conditions (a single active cell) each run. The only varied parameter was the number of generations. All of the runs were created with the C version of the program as of February 2nd 2024.
+The charts below were measured on October 31, 2026. Every run is rule 30 from a single cell. Each bar or point is the median of three runs after one warmup. Compilation is left out of the measurement, and every enabled language wrote the same PBM. These times reflect these implementations, not the languages themselves.
 
-![A graph depicting the relationship between the number of generations and the run time of the program](media/generations_vs_runtime.png)
+The following plot shows how the C program's run time grows with the number of generations.
 
-The following bar graph compares the run times of different versions of the program, each with the same number of genrations (1000) and the same initial conditions. 
+![C run time against the number of generations](media/generations_vs_runtime.png)
 
-![A bar graph comparing all run times](media/configurations_vs_runtime.png)
+Every enabled implementation at 1000 generations, fastest first. C is ahead, and Rust, C++, Go, and Fortran are the next cluster.
 
-This next graph increases the number of generations to 2000 and compares the run times of different versions of the program again. 
+![All implementations at 1000 generations, sorted by median run time](media/configurations_vs_runtime.png)
 
-![A bar graph comparing all run times but with new data](media/configurations_vs_runtime_2000gen.png)
+The same comparison at 2000 generations.
 
-The fastest 5 implementations running 1000 generations of rule 30 starting at a single black cell. 
+![All implementations at 2000 generations, sorted by median run time](media/configurations_vs_runtime_2000gen.png)
 
-![a bar graph showing the top 5 implementations. in order: C, C#, C++, Go, Rust](media/fast_five_1000.png)
+The fastest five at 1000 generations. C is about half the time of the next four, which are bunched together: Rust, C++, Go, Fortran.
 
-The same but running 2000 generations
+![Fastest five at 1000 generations: C, then Rust, C++, Go, and Fortran](media/fast_five_1000.png)
 
-![a bar graph showing the top 5 implementations. in order: C#, C, Go, Rust, C++](media/fast_five_2000.png)
+At 2000 generations, C, Rust, and Fortran are tied, then C++ and Go.
 
-Now 10,000 generations. 
+![Fastest five at 2000 generations: C, Rust, and Fortran tied, then C++ and Go](media/fast_five_2000.png)
 
-![a bar graph showing the top 5 implementations. in order: C#, Go, C, C++, Rust ](media/fast_five_10000.png)
+At 10,000 generations the runs are long enough to separate. C and Fortran are tied, then Rust, C#, and C++. C# is ahead of C++. Go is sixth, just behind C++.
 
-Its important to remember that this only reflects the speed of the implementations. This should not be considered a measure of the speed of these languages themselves. The quality of the implementations here likely vary dramatically. These last three graphs are based on runs with the implementations as they were at commit:c26d71b8f55ff71e8583d6f29169401e287dd3d1 (April 28th 2025) and the implementations may have changed since then. 
+![Fastest five at 10000 generations: C and Fortran, then Rust, C#, and C++](media/fast_five_10000.png)
 
-![A bar graph showing that Go beats Rust (but C beats Go)](media/go_beats_rust.png)
+At 5000 generations, C is faster than Rust, and Rust is faster than Go.
 
-The Go implementation beats the Rust implementation when run for 5000 generations.
+![C, Rust, and Go at 5000 generations](media/c_rust_go_5000.png)
 
-The picture files for rule 30 did not change: every enabled language still hashes to the same PBM as the previous C and Python output, so the images above were left as they are. They record older generation counts, not today's code. The chart below is from October 31, 2026. Each bar is the median of three runs of rule 30 from a single cell for 500 generations. The time before is git HEAD, using that revision's run command. The time after is the current code, with compilation left out of the measurement.
+The chart below is the before-and-after of the October 31, 2026 revisions, measured separately at 500 generations. The time before is git HEAD, using that revision's run command. The time after is the current code, with compilation left out of the measurement.
 
 ![Speedup of each implementation after the October 31, 2026 revisions](media/speedup_2026-10-31.png)  
 
