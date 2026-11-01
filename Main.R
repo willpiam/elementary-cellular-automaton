@@ -1,88 +1,70 @@
-############################################
-# Elementary Cellular Automaton in R       #
-#                                          #
-# Reads:  input.txt                        #
-#   line 1: rule number (0-255)            #
-#   line 2: initial conditions as 0/1 string#
-#   line 3: number of generations          #
-#                                          #
-# Writes: results/r{rule}_g{gen}_i{init}_r.pbm
-############################################
+die <- function(msg) {
+  cat(msg, "\n", file = stderr())
+  quit(save = "no", status = 1)
+}
 
-# Convert rule number to binary vector (length 8, LSB first)
-rule_to_binary <- function(rule_number) {
-  bits <- integer(8)
-  for (i in 0:7) {
-    bits[i + 1] <- bitwAnd(bitwShiftR(rule_number, i), 1)
+parse_int <- function(text) {
+  t <- trimws(text)
+  sign <- 1L
+  digits <- t
+  if (startsWith(t, "-")) {
+    sign <- -1L
+    digits <- substring(t, 2)
   }
-  bits
+  if (!nzchar(digits) || grepl("[^0-9]", digits)) return(NA_integer_)
+  value <- suppressWarnings(as.integer(digits))
+  if (is.na(value)) return(NA_integer_)
+  if (format(value, scientific = FALSE, trim = TRUE) != sub("^0+", "", digits) &&
+      !(value == 0L && grepl("^0+$", digits))) return(NA_integer_)
+  as.integer(sign * value)
 }
 
-# Calculate next cell state from neighborhood
-calculate_cell <- function(left, center, right, rule_bits) {
-  idx <- left * 4 + center * 2 + right          # pattern encoded as integer 0-7
-  rule_bits[idx + 1]                            # R is 1-based
+if (!file.exists("input.txt")) die("cannot read input.txt")
+lines <- readLines("input.txt", warn = FALSE)
+if (length(lines) < 3) die("invalid input")
+rule <- parse_int(lines[1])
+seed <- sub("\r$", "", lines[2])
+generations <- parse_int(lines[3])
+if (is.na(rule) || rule < 0L || rule > 255L) die("invalid rule")
+if (!nzchar(seed) || grepl("[^01]", seed)) die("invalid initial conditions")
+if (is.na(generations) || generations < 1L) die("invalid generations")
+
+n <- nchar(seed)
+width <- n + 2L * generations
+if (width < n) die("invalid generations")
+bits <- integer(8)
+for (i in 0:7) bits[i + 1L] <- bitwAnd(bitwShiftR(rule, i), 1L)
+even <- bitwAnd(rule, 1L) == 0L
+prev <- integer(width)
+chars <- strsplit(seed, "", fixed = TRUE)[[1]]
+for (i in seq_len(n)) {
+  if (chars[i] == "1") prev[generations + i] <- 1L
 }
 
-# Run the cellular automaton, returning a matrix (generations x width)
-run_cellular_automaton <- function(rule_number, generations, initial_conditions) {
-  initial_cells <- as.integer(strsplit(initial_conditions, "")[[1]])
-  rule_bits <- rule_to_binary(rule_number)
+if (!dir.exists("results")) dir.create("results")
+path <- sprintf("results/r%d_g%d_i%s_r.pbm", rule, generations, seed)
+con <- file(path, open = "wb")
+on.exit(close(con), add = TRUE)
+cat(sprintf("P1\n%d %d\n", width, generations), file = con, sep = "")
 
-  image_width <- length(initial_cells) + 2 * generations
-  automaton <- matrix(0L, nrow = generations, ncol = image_width)
-
-  # Initialise first generation centred in the row
-  offset <- (image_width - length(initial_cells)) / 2
-  automaton[1, (offset + 1):(offset + length(initial_cells))] <- initial_cells
-
-  # Generate successive generations
-  for (gen in 2:generations) {
-    prev <- automaton[gen - 1, ]
-    curr <- integer(image_width)
-    for (j in seq_len(image_width)) {
-      left   <- if (j == 1) 0 else prev[j - 1]
-      center <- prev[j]
-      right  <- if (j == image_width) 0 else prev[j + 1]
-      curr[j] <- calculate_cell(left, center, right, rule_bits)
-    }
-    automaton[gen, ] <- curr
+for (gen in 0:(generations - 1L)) {
+  cat(paste0(prev, collapse = ""), "\n", file = con, sep = "")
+  if (gen + 1L == generations) break
+  nxt <- integer(width)
+  if (even) {
+    start_j <- generations - gen
+    end_j <- generations + n + gen + 1L
+  } else {
+    start_j <- 1L
+    end_j <- width
   }
-
-  automaton
+  idx <- start_j:end_j
+  left <- integer(length(idx))
+  right <- integer(length(idx))
+  inside_l <- idx > 1L
+  inside_r <- idx < width
+  left[inside_l] <- prev[idx[inside_l] - 1L]
+  right[inside_r] <- prev[idx[inside_r] + 1L]
+  nxt[idx] <- bits[left * 4L + prev[idx] * 2L + right + 1L]
+  prev <- nxt
 }
-
-# Write PBM file with results
-output_to_file <- function(automaton, rule_number, generations, initial_conditions) {
-  if (!dir.exists("results")) dir.create("results")
-  file_name <- sprintf("results/r%d_g%d_i%s_r.pbm", rule_number, generations, initial_conditions)
-  con <- file(file_name, open = "w")
-  on.exit(close(con))
-
-  width <- ncol(automaton)
-  height <- nrow(automaton)
-  cat(sprintf("P1\n%d %d\n", width, height), file = con)
-  apply(automaton, 1, function(row) {
-    cat(paste(row, collapse = ""), "\n", file = con, sep = "")
-  })
-}
-
-# ------------------- main ------------------
-
-main <- function() {
-  input <- readLines("input.txt")
-  if (length(input) < 3) {
-    stop("input.txt must contain at least 3 lines (rule, initial conditions, generations)")
-  }
-  rule_number <- as.integer(input[1])
-  initial_conditions <- gsub("\\s", "", input[2])  # remove whitespace
-  generations <- as.integer(input[3])
-
-  automaton <- run_cellular_automaton(rule_number, generations, initial_conditions)
-  output_to_file(automaton, rule_number, generations, initial_conditions)
-}
-
-# Execute when the script is run directly
-if (sys.nframe() == 0) {
-  main()
-} 

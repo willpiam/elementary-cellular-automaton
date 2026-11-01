@@ -1,77 +1,101 @@
-use std::fs::File;
-use std::io::{self, Write, BufRead};
-use std::path::Path;
+use std::fs::{self, File};
+use std::io::{self, Write};
+use std::process;
 
-fn rule_to_binary_array(rule_number: u8) -> Vec<u8> {
-    (0..8).map(|i| (rule_number >> i) & 1).collect()
+fn die(msg: &str) -> ! {
+    eprintln!("{msg}");
+    process::exit(1);
 }
 
-fn run_cellular_automaton(rule_number: u8, generations: usize, initial_conditions: &str) -> Vec<Vec<u8>> {
-    let mut cells: Vec<u8> = initial_conditions.chars().map(|c| if c == '1' { 1 } else { 0 }).collect();
-    let rule_binary = rule_to_binary_array(rule_number);
-    let image_width = cells.len() + 2 * generations;
-    let mut automaton_data = Vec::new();
+fn parse_i32(text: &str) -> Option<i32> {
+    let t = text.trim().trim_end_matches('\r');
+    let (neg, digits) = if let Some(rest) = t.strip_prefix('-') {
+        (true, rest)
+    } else {
+        (false, t)
+    };
+    if digits.is_empty() || !digits.bytes().all(|b| b.is_ascii_digit()) {
+        return None;
+    }
+    let value: i32 = digits.parse().ok()?;
+    Some(if neg { -value } else { value })
+}
 
-    for _ in 0..generations {
-        let padding_length = (image_width - cells.len()) / 2;
- 
-        let mut extended_cells = vec![0; image_width]; 
-        let start = padding_length;
-        let end = start + cells.len();
-        extended_cells[start..end].copy_from_slice(&cells);
-        automaton_data.push(extended_cells.clone());
+fn valid_seed(seed: &str) -> bool {
+    !seed.is_empty() && seed.bytes().all(|b| b == b'0' || b == b'1')
+}
 
-        let mut next_generation = vec![0; extended_cells.len()];
-        for j in 0..extended_cells.len() {
-            let left_neighbor = if j > 0 { extended_cells[j - 1] } else { 0 };
-            let current_cell = extended_cells[j];
-            let right_neighbor = if j < extended_cells.len() - 1 { extended_cells[j + 1] } else { 0 };
-            let neighborhood = (left_neighbor << 2) | (current_cell << 1) | right_neighbor;
-            next_generation[j] = rule_binary[neighborhood as usize];
+fn main() {
+    let text = fs::read_to_string("input.txt").unwrap_or_else(|_| die("cannot read input.txt"));
+    let mut lines = text.split('\n');
+    let rule_line = lines.next().unwrap_or("");
+    let mut seed = lines.next().unwrap_or("").to_string();
+    let gen_line = match lines.next() {
+        Some(line) => line,
+        None => die("invalid input"),
+    };
+    if seed.ends_with('\r') {
+        seed.pop();
+    }
+    if rule_line.is_empty() && seed.is_empty() && gen_line.is_empty() {
+        die("invalid input");
+    }
+
+    let rule_number = parse_i32(rule_line).unwrap_or_else(|| die("invalid rule"));
+    if !(0..=255).contains(&rule_number) {
+        die("invalid rule");
+    }
+    if !valid_seed(&seed) {
+        die("invalid initial conditions");
+    }
+    let generations = parse_i32(gen_line).unwrap_or_else(|| die("invalid generations"));
+    if generations < 1 {
+        die("invalid generations");
+    }
+
+    let g = generations as usize;
+    let n = seed.len();
+    let width = g.checked_mul(2).and_then(|v| v.checked_add(n)).unwrap_or_else(|| die("invalid generations"));
+    let even = rule_number & 1 == 0;
+    let rule: [u8; 8] = std::array::from_fn(|i| ((rule_number >> i) & 1) as u8);
+
+    let mut prev = vec![0u8; width];
+    let mut next = vec![0u8; width];
+    for (i, byte) in seed.bytes().enumerate() {
+        if byte == b'1' {
+            prev[g + i] = 1;
         }
-
-        cells = next_generation;
     }
 
-    automaton_data
-}
+    fs::create_dir_all("results").unwrap_or_else(|_| die("cannot create results"));
+    let path = format!("results/r{rule_number}_g{generations}_i{seed}_rust.pbm");
+    let mut out = io::BufWriter::new(File::create(&path).unwrap_or_else(|_| die("cannot write output")));
+    write!(out, "P1\n{width} {generations}\n").unwrap_or_else(|_| die("cannot write output"));
 
-fn output_to_file(automaton_data: &[Vec<u8>], rule_number: u8, generations: usize, initial_conditions: &str) -> io::Result<()> {
-    let image_width = automaton_data.first().map_or(0, Vec::len);
-    let path = format!("results/r{}_g{}_i{}_rust.pbm", rule_number, generations, initial_conditions);
-    let mut file = File::create(path)?;
+    let mut line = vec![b'0'; width + 1];
+    line[width] = b'\n';
 
-    // Start with the PBM header
-    let mut output = format!("P1\n{} {}\n", image_width, generations);
-
-    // Build the output for each row
-    for row in automaton_data {
-        let row_string: String = row.iter()
-            .map(|&cell| if cell == 1 { '1' } else { '0' })
-            .collect();
-        output.push_str(&row_string);
-        output.push('\n');
+    for gen in 0..g {
+        for j in 0..width {
+            line[j] = if prev[j] == 0 { b'0' } else { b'1' };
+        }
+        out.write_all(&line).unwrap_or_else(|_| die("cannot write output"));
+        if gen + 1 == g {
+            break;
+        }
+        next.fill(0);
+        let (lo, hi) = if even {
+            (g - (gen + 1), g + n + (gen + 1))
+        } else {
+            (0, width)
+        };
+        for j in lo..hi {
+            let left = if j > 0 { prev[j - 1] } else { 0 };
+            let right = if j + 1 < width { prev[j + 1] } else { 0 };
+            let idx = ((left << 2) | (prev[j] << 1) | right) as usize;
+            next[j] = rule[idx];
+        }
+        std::mem::swap(&mut prev, &mut next);
     }
-
-    // Write the entire output to the file in a single operation
-    file.write_all(output.as_bytes())?;
-
-    Ok(())
-}
-
-
-fn main() -> io::Result<()> {
-    let input_path = Path::new("input.txt");
-    let input_file = File::open(&input_path)?;
-    let mut lines = io::BufReader::new(input_file).lines();
-
-    let rule_number = lines.next().unwrap()?.parse().unwrap();
-    let initial_conditions = lines.next().unwrap()?;
-    let generations = lines.next().unwrap()?.parse().unwrap();
-
-    let automaton_data = run_cellular_automaton(rule_number, generations, &initial_conditions);
-    
-    output_to_file(&automaton_data, rule_number, generations, &initial_conditions)?;
-
-    Ok(())
+    out.flush().unwrap_or_else(|_| die("cannot write output"));
 }

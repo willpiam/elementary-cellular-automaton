@@ -1,83 +1,110 @@
 <?php
 
-function ruleToBinaryArray($ruleNumber) {
-    $binaryString = str_pad(decbin($ruleNumber), 8, "0", STR_PAD_LEFT);
-    return array_map('intval', str_split($binaryString));
+function die_msg($msg) {
+    fwrite(STDERR, $msg . "\n");
+    exit(1);
 }
 
-function calculateCell($pState, $rule) {
-    $ruleMap = [
-        "111" => $rule[0],
-        "110" => $rule[1],
-        "101" => $rule[2],
-        "100" => $rule[3],
-        "011" => $rule[4],
-        "010" => $rule[5],
-        "001" => $rule[6],
-        "000" => $rule[7]
-    ];
-    return $ruleMap[$pState];
-}
-
-function runCellularAutomaton($rule, $generations, $initialCells) {
-    $cells = $initialCells;
-    $ca = [];
-
-    for ($i = 0; $i < $generations - 1; $i++) {
-        $extendedCells = array_merge([0, 0], $cells, [0, 0]);
-        array_push($ca, $cells);
-
-        $nextGeneration = [];
-        for ($j = 1; $j < count($extendedCells) - 1; $j++) {
-            $neighborhood = implode('', array_slice($extendedCells, $j - 1, 3));
-            array_push($nextGeneration, calculateCell($neighborhood, $rule));
-        }
-        $cells = $nextGeneration;
+function parse_int_strict($text) {
+    $t = trim($text);
+    $sign = 1;
+    $digits = $t;
+    if (strlen($t) > 0 && $t[0] === '-') {
+        $sign = -1;
+        $digits = substr($t, 1);
     }
-
-    array_push($ca, $cells);
-    return $ca;
-}
-
-function padImageData($imageData, $totalWidth) {
-    $paddedData = [];
-    foreach ($imageData as $row) {
-        $paddingLength = intval(($totalWidth - count($row)) / 2);
-        $padding = array_fill(0, $paddingLength, 0);
-        $paddedRow = array_merge($padding, $row, $padding);
-        array_push($paddedData, $paddedRow);
+    if ($digits === '' || !ctype_digit($digits)) {
+        return null;
     }
-    return $paddedData;
-}
-
-function readInputsFromFile($filePath) {
-    $file = fopen($filePath, 'r');
-    $ruleNumber = intval(trim(fgets($file)));
-    $initialConditions = str_split(trim(fgets($file)));
-    $generations = intval(trim(fgets($file)));
-    fclose($file);
-    return array($ruleNumber, $initialConditions, $generations);
-}
-
-function main() {
-    list($ruleNumber, $initialConditions, $generations) = readInputsFromFile('input.txt');
-
-    $ruleBinary = ruleToBinaryArray($ruleNumber);
-    $cells = array_map('intval', $initialConditions);
-
-    $ca = runCellularAutomaton($ruleBinary, $generations, $cells);
-
-    $finalWidth = count($initialConditions) + 2 * $generations;
-    $paddedCa = padImageData($ca, $finalWidth);
-
-    $imageData = "P1\n$finalWidth $generations\n";
-    foreach ($paddedCa as $row) {
-        $imageData .= implode('', $row) . "\n";
+    $value = intval($digits, 10);
+    if ((string)$value !== ltrim($digits, '0') && !( $value === 0 && preg_match('/^0+$/', $digits))) {
+        return null;
     }
-
-    file_put_contents("results/r{$ruleNumber}_g{$generations}_i" . implode('', $initialConditions) . "_php.pbm", $imageData);
+    return $sign * $value;
 }
 
-main();
+function valid_seed($seed) {
+    return $seed !== '' && preg_match('/^[01]+$/', $seed) === 1;
+}
 
-?>
+$handle = fopen('input.txt', 'r');
+if ($handle === false) {
+    die_msg('cannot read input.txt');
+}
+$ruleLine = fgets($handle);
+$seed = fgets($handle);
+$genLine = fgets($handle);
+fclose($handle);
+if ($ruleLine === false || $seed === false || $genLine === false) {
+    die_msg('invalid input');
+}
+$seed = rtrim($seed, "\r\n");
+$rule = parse_int_strict($ruleLine);
+$generations = parse_int_strict($genLine);
+if ($rule === null || $rule < 0 || $rule > 255) {
+    die_msg('invalid rule');
+}
+if (!valid_seed($seed)) {
+    die_msg('invalid initial conditions');
+}
+if ($generations === null || $generations < 1) {
+    die_msg('invalid generations');
+}
+
+$n = strlen($seed);
+if ($generations > intdiv(PHP_INT_MAX - $n, 2)) {
+    die_msg('invalid generations');
+}
+$width = $n + 2 * $generations;
+$ruleTable = [];
+for ($i = 0; $i < 8; $i++) {
+    $ruleTable[$i] = ($rule >> $i) & 1;
+}
+$even = ($rule & 1) === 0;
+$prev = array_fill(0, $width, 0);
+$next = array_fill(0, $width, 0);
+for ($i = 0; $i < $n; $i++) {
+    if ($seed[$i] === '1') {
+        $prev[$generations + $i] = 1;
+    }
+}
+
+if (!is_dir('results') && !mkdir('results', 0755, true)) {
+    die_msg('cannot create results');
+}
+$path = "results/r{$rule}_g{$generations}_i{$seed}_php.pbm";
+$out = fopen($path, 'wb');
+if ($out === false) {
+    die_msg('cannot write output');
+}
+fwrite($out, "P1\n{$width} {$generations}\n");
+for ($gen = 0; $gen < $generations; $gen++) {
+    $line = '';
+    for ($j = 0; $j < $width; $j++) {
+        $line .= $prev[$j] === 0 ? '0' : '1';
+    }
+    fwrite($out, $line . "\n");
+    if ($gen + 1 === $generations) {
+        break;
+    }
+    for ($j = 0; $j < $width; $j++) {
+        $next[$j] = 0;
+    }
+    if ($even) {
+        $lo = $generations - ($gen + 1);
+        $hi = $generations + $n + ($gen + 1);
+    } else {
+        $lo = 0;
+        $hi = $width;
+    }
+    for ($j = $lo; $j < $hi; $j++) {
+        $left = $j > 0 ? $prev[$j - 1] : 0;
+        $right = $j + 1 < $width ? $prev[$j + 1] : 0;
+        $idx = ($left << 2) | ($prev[$j] << 1) | $right;
+        $next[$j] = $ruleTable[$idx];
+    }
+    $tmp = $prev;
+    $prev = $next;
+    $next = $tmp;
+}
+fclose($out);

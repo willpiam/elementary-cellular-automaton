@@ -1,136 +1,201 @@
-program CellularAutomaton
+program cellular_automaton
+    use iso_fortran_env, only: error_unit, iostat_eor, iostat_end
     implicit none
-    
-    ! Constants
-    integer, parameter :: MAX_LENGTH_INITIAL_CONDITIONS = 1000
-    
-    ! Variables
-    integer :: rule_number, generations, initial_length, image_width
-    character(len=MAX_LENGTH_INITIAL_CONDITIONS) :: initial_conditions
-    integer, dimension(:,:), allocatable :: automaton_data
-    integer, dimension(8) :: rule_binary
-    
-    ! Read input from file
-    call read_inputs_from_file(rule_number, initial_conditions, generations)
-    
-    ! Convert rule number to binary array
-    call rule_to_binary_array(rule_number, rule_binary)
-    
-    ! Run cellular automaton
-    initial_length = len_trim(initial_conditions)
-    image_width = initial_length + 2 * generations
-    allocate(automaton_data(generations, image_width))
-    call run_cellular_automaton(rule_binary, generations, initial_conditions, automaton_data)
-    
-    ! Output results to file
-    call output_to_file(automaton_data, rule_number, generations, initial_conditions)
-    
-    ! Clean up
-    deallocate(automaton_data)
-    
-contains
-    
-    subroutine read_inputs_from_file(rule_number, initial_conditions, generations)
-        integer, intent(out) :: rule_number, generations
-        character(len=*), intent(out) :: initial_conditions
-        integer :: io_status
-        
-        open(unit=10, file='input.txt', status='old', action='read', iostat=io_status)
-        if (io_status /= 0) then
-            print *, "Error opening input file!"
-            stop
-        end if
-        
-        read(10, *, iostat=io_status) rule_number
-        read(10, *, iostat=io_status) initial_conditions
-        read(10, *, iostat=io_status) generations
-        
-        close(10)
-    end subroutine read_inputs_from_file
-    
-    subroutine rule_to_binary_array(rule_number, rule_binary)
-        integer, intent(in) :: rule_number
-        integer, dimension(8), intent(out) :: rule_binary
-        integer :: i
-        
-        do i = 0, 7
-            rule_binary(i+1) = iand(ishft(rule_number, -i), 1)
-        end do
-    end subroutine rule_to_binary_array
-    
-    subroutine run_cellular_automaton(rule_binary, generations, initial_conditions, automaton_data)
-        integer, dimension(8), intent(in) :: rule_binary
-        integer, intent(in) :: generations
-        character(len=*), intent(in) :: initial_conditions
-        integer, dimension(:,:), intent(out) :: automaton_data
-        integer :: i, j, initial_length, image_width, padding_length
-        
-        initial_length = len_trim(initial_conditions)
-        image_width = size(automaton_data, 2)
-        padding_length = (image_width - initial_length) / 2
-        
-        ! Initialize first generation
-        automaton_data = 0
-        do i = 1, initial_length
-            if (initial_conditions(i:i) == '1') then
-                automaton_data(1, padding_length + i) = 1
+
+    character(len=:), allocatable :: rule_line, seed, gen_line, filename, row
+    character(len=32) :: rule_s, gen_s
+    integer :: rule, generations, n, width, g, ios, out_unit, gen, j
+    integer :: start_j, end_j, left, center, right, idx
+    integer :: rule_table(0:7)
+    integer(kind=1), allocatable :: prev(:), next(:)
+    logical :: even
+
+    call read_record(10, 'input.txt', rule_line, seed, gen_line)
+
+    rule = parse_int(trim_text(rule_line), 'invalid rule')
+    if (rule < 0 .or. rule > 255) call die('invalid rule')
+    seed = strip_cr(seed)
+    n = len(seed)
+    if (n < 1 .or. .not. valid_seed(seed)) call die('invalid initial conditions')
+    generations = parse_int(trim_text(gen_line), 'invalid generations')
+    if (generations < 1) call die('invalid generations')
+    if (generations > (huge(generations) - n) / 2) call die('invalid generations')
+
+    g = generations
+    width = n + 2 * g
+    even = iand(rule, 1) == 0
+    do j = 0, 7
+        rule_table(j) = iand(ishft(rule, -j), 1)
+    end do
+
+    allocate(prev(width), next(width))
+    prev = 0
+    next = 0
+    do j = 1, n
+        if (seed(j:j) == '1') prev(g + j) = 1
+    end do
+
+    call execute_command_line('mkdir -p results', exitstat=ios)
+    if (ios /= 0) call die('cannot create results')
+
+    write(rule_s, '(I0)') rule
+    write(gen_s, '(I0)') generations
+    filename = 'results/r' // trim(rule_s) // '_g' // trim(gen_s) // '_i' // seed // '_fortran.pbm'
+    open(newunit=out_unit, file=filename, status='replace', action='write', iostat=ios)
+    if (ios /= 0) call die('cannot write output')
+
+    write(out_unit, '(A)') 'P1'
+    write(out_unit, '(I0,1X,I0)') width, generations
+    allocate(character(len=width) :: row)
+
+    do gen = 0, generations - 1
+        do j = 1, width
+            if (prev(j) == 0) then
+                row(j:j) = '0'
+            else
+                row(j:j) = '1'
             end if
         end do
-        
-        ! Generate subsequent generations
-        do i = 2, generations
-            do j = 2, image_width - 1
-                automaton_data(i, j) = calculate_cell(automaton_data(i-1, j-1), &
-                                                    automaton_data(i-1, j), &
-                                                    automaton_data(i-1, j+1), &
-                                                    rule_binary)
-            end do
-        end do
-    end subroutine run_cellular_automaton
-    
-    integer function calculate_cell(left, center, right, rule_binary)
-        integer, intent(in) :: left, center, right
-        integer, dimension(8), intent(in) :: rule_binary
-        integer :: index
-        
-        index = ishft(left, 2) + ishft(center, 1) + right
-        calculate_cell = rule_binary(index + 1)
-    end function calculate_cell
-    
-    subroutine output_to_file(automaton_data, rule_number, generations, initial_conditions)
-        integer, dimension(:,:), intent(in) :: automaton_data
-        integer, intent(in) :: rule_number, generations
-        character(len=*), intent(in) :: initial_conditions
-        integer :: i, j, io_status
-        character(len=200) :: filename
-        
-        ! Create results directory if it doesn't exist
-        call system('mkdir -p results')
-        
-        ! Create filename
-        write(filename, '(a,i0,a,i0,a,a,a)') 'results/r', rule_number, '_g', generations, '_i', &
-            trim(initial_conditions), '_fortran.pbm'
-        
-        ! Open file
-        open(unit=20, file=trim(filename), status='replace', action='write', iostat=io_status)
-        if (io_status /= 0) then
-            print *, "Error creating output file!"
-            stop
+        write(out_unit, '(A)') row
+        if (gen + 1 == generations) exit
+
+        next = 0
+        if (even) then
+            start_j = generations - gen
+            end_j = generations + n + gen + 1
+        else
+            start_j = 1
+            end_j = width
         end if
-        
-        ! Write PBM header
-        write(20, '(a)') 'P1'
-        write(20, '(i0,1x,i0)') size(automaton_data, 2), generations
-        
-        ! Write automaton data
-        do i = 1, generations
-            do j = 1, size(automaton_data, 2)
-                write(20, '(i1)', advance='no') automaton_data(i, j)
-            end do
-            write(20, *)
+        do j = start_j, end_j
+            if (j == 1) then
+                left = 0
+            else
+                left = prev(j - 1)
+            end if
+            center = prev(j)
+            if (j == width) then
+                right = 0
+            else
+                right = prev(j + 1)
+            end if
+            idx = left * 4 + center * 2 + right
+            next(j) = int(rule_table(idx), kind=1)
         end do
-        
-        close(20)
-    end subroutine output_to_file
-    
-end program CellularAutomaton 
+        prev = next
+    end do
+
+    close(out_unit)
+
+contains
+
+    subroutine die(msg)
+        character(len=*), intent(in) :: msg
+        write(error_unit, '(A)') msg
+        error stop 1
+    end subroutine die
+
+    function trim_text(text) result(out)
+        character(len=*), intent(in) :: text
+        character(len=:), allocatable :: out
+        integer :: a, b
+        a = 1
+        b = len(text)
+        do while (a <= b .and. (text(a:a) == ' ' .or. text(a:a) == achar(9)))
+            a = a + 1
+        end do
+        do while (b >= a .and. (text(b:b) == ' ' .or. text(b:b) == achar(9) .or. text(b:b) == achar(13)))
+            b = b - 1
+        end do
+        if (b < a) then
+            out = ''
+        else
+            out = text(a:b)
+        end if
+    end function trim_text
+
+    function strip_cr(text) result(out)
+        character(len=*), intent(in) :: text
+        character(len=:), allocatable :: out
+        integer :: n
+        n = len(text)
+        if (n > 0 .and. text(n:n) == achar(13)) then
+            out = text(1:n-1)
+        else
+            out = text
+        end if
+    end function strip_cr
+
+    integer function parse_int(text, errmsg)
+        character(len=*), intent(in) :: text, errmsg
+        integer :: sign, i, ios
+        character(len=:), allocatable :: digits
+        parse_int = -1
+        if (len(text) == 0) call die(errmsg)
+        sign = 1
+        digits = text
+        if (text(1:1) == '-') then
+            sign = -1
+            if (len(text) == 1) call die(errmsg)
+            digits = text(2:)
+        end if
+        do i = 1, len(digits)
+            if (digits(i:i) < '0' .or. digits(i:i) > '9') call die(errmsg)
+        end do
+        read(digits, *, iostat=ios) parse_int
+        if (ios /= 0) call die(errmsg)
+        parse_int = sign * parse_int
+    end function parse_int
+
+    logical function valid_seed(text)
+        character(len=*), intent(in) :: text
+        integer :: i
+        valid_seed = .true.
+        do i = 1, len(text)
+            if (text(i:i) /= '0' .and. text(i:i) /= '1') then
+                valid_seed = .false.
+                return
+            end if
+        end do
+    end function valid_seed
+
+    subroutine read_record(unit, path, line1, line2, line3)
+        integer, intent(in) :: unit
+        character(len=*), intent(in) :: path
+        character(len=:), allocatable, intent(out) :: line1, line2, line3
+        integer :: ios
+        open(unit=unit, file=path, status='old', action='read', iostat=ios)
+        if (ios /= 0) call die('cannot read input.txt')
+        call read_line(unit, line1, ios)
+        if (ios /= 0) call die('invalid input')
+        call read_line(unit, line2, ios)
+        if (ios /= 0) call die('invalid input')
+        call read_line(unit, line3, ios)
+        if (ios /= 0) call die('invalid input')
+        close(unit)
+    end subroutine read_record
+
+    subroutine read_line(unit, line, status)
+        integer, intent(in) :: unit
+        character(len=:), allocatable, intent(out) :: line
+        integer, intent(out) :: status
+        character(len=1024) :: buf
+        integer :: n, ios
+        line = ''
+        status = 0
+        do
+            read(unit, '(A)', advance='no', iostat=ios, size=n) buf
+            if (ios == iostat_eor .or. ios == iostat_end) then
+                if (n > 0) line = line // buf(1:n)
+                if (ios == iostat_end .and. len(line) == 0 .and. n == 0) status = ios
+                return
+            else if (ios /= 0) then
+                status = ios
+                return
+            else
+                line = line // buf(1:n)
+            end if
+        end do
+    end subroutine read_line
+
+end program cellular_automaton

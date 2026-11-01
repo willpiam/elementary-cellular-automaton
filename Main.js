@@ -1,76 +1,73 @@
-const fs = require('fs').promises;
+const fs = require('fs');
 
-function ruleToBinaryArray(ruleNumber) {
-    return ruleNumber.toString(2).padStart(8, '0').split('').map(bit => parseInt(bit, 10));
+function die(msg) {
+    console.error(msg);
+    process.exit(1);
 }
 
-function calculateCell(pState, rule) {
-    const ruleMap = {
-        "111": rule[0],
-        "110": rule[1],
-        "101": rule[2],
-        "100": rule[3],
-        "011": rule[4],
-        "010": rule[5],
-        "001": rule[6],
-        "000": rule[7]
-    };
-    return ruleMap[pState];
+function parseIntStrict(text) {
+    const t = text.trim();
+    const neg = t.startsWith('-');
+    const digits = neg ? t.slice(1) : t;
+    if (!/^\d+$/.test(digits)) return null;
+    const value = Number(digits);
+    if (!Number.isSafeInteger(value)) return null;
+    return neg ? -value : value;
 }
 
-async function runCellularAutomaton(rule, generations, initialCells) {
-    let cells = JSON.parse(JSON.stringify(initialCells));
+function validSeed(seed) {
+    return /^[01]+$/.test(seed);
+}
 
-    let ca = [];
-    const padding = Array(2).fill(0);
+let text;
+try {
+    text = fs.readFileSync('input.txt', 'utf8');
+} catch (err) {
+    die('cannot read input.txt');
+}
+const lines = text.split(/\r?\n/);
+if (lines.length < 3) die('invalid input');
 
-    for (let i = 0; i < generations - 1; i++) {
-        const extendedCells = [...padding, ...cells, ...padding];
-        ca.push(extendedCells);
+const rule = parseIntStrict(lines[0]);
+if (rule === null || rule < 0 || rule > 255) die('invalid rule');
+const seed = lines[1];
+if (!validSeed(seed)) die('invalid initial conditions');
+const generations = parseIntStrict(lines[2]);
+if (generations === null || generations < 1) die('invalid generations');
 
-        const nextGeneration = [];
+const n = seed.length;
+const width = n + 2 * generations;
+if (!Number.isSafeInteger(width)) die('invalid generations');
+const table = new Uint8Array(8);
+for (let i = 0; i < 8; i++) table[i] = (rule >> i) & 1;
+const even = (rule & 1) === 0;
+let prev = new Uint8Array(width);
+let next = new Uint8Array(width);
+for (let i = 0; i < n; i++) {
+    if (seed[i] === '1') prev[generations + i] = 1;
+}
 
-        for (let j = 1; j < extendedCells.length - 1; j++) {
-            const neighborhood = '' + extendedCells[j - 1] + extendedCells[j] + extendedCells[j + 1];
-            nextGeneration.push(calculateCell(neighborhood, rule));
-        }
-        cells = nextGeneration;
+fs.mkdirSync('results', { recursive: true });
+const path = `results/r${rule}_g${generations}_i${seed}_javascript.pbm`;
+const fd = fs.openSync(path, 'w');
+fs.writeSync(fd, `P1\n${width} ${generations}\n`);
+const line = Buffer.alloc(width + 1);
+line[width] = 10;
+for (let gen = 0; gen < generations; gen++) {
+    for (let j = 0; j < width; j++) line[j] = prev[j] === 0 ? 48 : 49;
+    fs.writeSync(fd, line);
+    if (gen + 1 === generations) break;
+    next.fill(0);
+    const lo = even ? generations - (gen + 1) : 0;
+    const hi = even ? generations + n + (gen + 1) : width;
+    for (let j = lo; j < hi; j++) {
+        const left = j > 0 ? prev[j - 1] : 0;
+        const right = j + 1 < width ? prev[j + 1] : 0;
+        const idx = (left << 2) | (prev[j] << 1) | right;
+        next[j] = table[idx];
     }
-
-    ca.push(cells);
-    return ca;
+    const tmp = prev;
+    prev = next;
+    next = tmp;
 }
-
-async function readInputsFromFile(filePath) {
-    const text = await fs.readFile(filePath, 'utf8');
-    const lines = text.split('\n');
-    const ruleNumber = parseInt(lines[0].trim(), 10);
-    const initialConditions = lines[1].trim();
-    const generations = parseInt(lines[2].trim(), 10);
-    return [ruleNumber, initialConditions, generations];
-}
-
-const padCellularAutomaton = (ca, totalWidth) => ca.map(row => {
-    const paddingLength = Math.floor((totalWidth - row.length) / 2);
-    const padding = Array(paddingLength).fill(0);
-    return [...padding, ...row, ...padding];
-});
-
-// Main function to run the program
-async function main() {
-    const [ruleNumber, initialConditions, generations] = await readInputsFromFile('input.txt');
-
-    const initialCells = initialConditions.split('').map(bit => parseInt(bit, 10));
-    const rule = ruleToBinaryArray(ruleNumber);
-
-    const ca = await runCellularAutomaton(rule, generations, initialCells);
-
-    const finalWidth = initialConditions.length + 2 * generations;
-    const paddedCA = padCellularAutomaton(ca, finalWidth);
-    const ca_body = paddedCA.map(row => row.join('')).join('\n');
-    const imageData = `P1\n${finalWidth} ${generations}\n${ca_body}\n`;
-    
-    await fs.writeFile(`results/r${ruleNumber}_g${generations}_i${initialConditions}_javascript.pbm`, imageData);
-}
-
-main();
+fs.closeSync(fd);

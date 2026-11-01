@@ -1,81 +1,76 @@
-(* Convert rule number to binary array *)
-let rule_to_binary_array rule_number =
-  let binary = Bytes.make 8 '0' in
-  for i = 0 to 7 do
-    if (rule_number lsr i) land 1 = 1 then
-      Bytes.set binary (7-i) '1'
-  done;
-  Array.init 8 (fun i -> int_of_char (Bytes.get binary i) - int_of_char '0')
+let die msg =
+  prerr_endline msg;
+  exit 1
 
-(* Calculate next cell state *)
-let calculate_cell neighborhood rule =
-  let pattern_to_index = function
-    | "111" -> 0
-    | "110" -> 1
-    | "101" -> 2
-    | "100" -> 3
-    | "011" -> 4
-    | "010" -> 5
-    | "001" -> 6
-    | "000" -> 7
-    | _ -> failwith "Invalid neighborhood pattern"
+let parse_int text =
+  let t = String.trim text in
+  let neg, digits =
+    if t <> "" && t.[0] = '-' then true, String.sub t 1 (String.length t - 1)
+    else false, t
   in
-  rule.(pattern_to_index neighborhood)
+  if digits = "" || not (String.for_all (fun c -> c >= '0' && c <= '9') digits) then None
+  else
+    try
+      let value = int_of_string digits in
+      Some (if neg then -value else value)
+    with Failure _ -> None
 
-(* Run the cellular automaton *)
-let run_cellular_automaton rule generations initial_cells =
-  let cells = Array.copy initial_cells in
-  let image_width = Array.length cells + 2 * generations in
-  let ca = Array.make_matrix generations image_width 0 in
-  
-  (* Initialize first generation *)
-  let padding_length = (image_width - Array.length cells) / 2 in
-  Array.blit cells 0 ca.(0) padding_length (Array.length cells);
-  
-  (* Generate subsequent generations *)
-  for i = 1 to generations - 1 do
-    for j = 1 to image_width - 2 do
-      let neighborhood = Printf.sprintf "%d%d%d" 
-        ca.(i-1).(j-1) ca.(i-1).(j) ca.(i-1).(j+1) in
-      ca.(i).(j) <- calculate_cell neighborhood rule
-    done
-  done;
-  ca
+let valid_seed seed =
+  seed <> "" && String.for_all (fun c -> c = '0' || c = '1') seed
 
-(* Read input from file *)
-let read_inputs_from_file file_path =
-  let ic = open_in file_path in
-  let rule_number = int_of_string (input_line ic) in
-  let initial_conditions = input_line ic in
-  let generations = int_of_string (input_line ic) in
+let read_inputs path =
+  let ic = try open_in path with Sys_error _ -> die "cannot read input.txt" in
+  let line () = try Some (input_line ic) with End_of_file -> None in
+  let rule_line = line () in
+  let seed = line () in
+  let gen_line = line () in
   close_in ic;
-  (rule_number, initial_conditions, generations)
+  match rule_line, seed, gen_line with
+  | Some a, Some b, Some c -> (a, b, c)
+  | _ -> die "invalid input"
 
-(* Main program *)
 let () =
-  try
-    (* Read input *)
-    let rule_number, initial_conditions, generations = read_inputs_from_file "input.txt" in
-
-    (* Convert initial conditions to array *)
-    let initial_cells = Array.init (String.length initial_conditions)
-      (fun i -> int_of_char initial_conditions.[i] - int_of_char '0') in
-
-    (* Run automaton *)
-    let rule = rule_to_binary_array rule_number in
-    let ca = run_cellular_automaton rule generations initial_cells in
-
-    (* Write output *)
-    let oc = open_out (Printf.sprintf "results/r%d_g%d_i%s_ocaml.pbm" 
-      rule_number generations initial_conditions) in
-    Printf.fprintf oc "P1\n%d %d\n" 
-      (Array.length ca.(0)) generations;
-    Array.iter (fun row ->
-      Array.iter (Printf.fprintf oc "%d") row;
-      Printf.fprintf oc "\n"
-    ) ca;
-    close_out oc
-  with
-  | Sys_error msg -> Printf.eprintf "Error: %s\n" msg
-  | Failure msg -> Printf.eprintf "Error: %s\n" msg
-  | _ -> Printf.eprintf "An unexpected error occurred\n" 
+  let rule_line, seed, gen_line = read_inputs "input.txt" in
+  let rule = match parse_int rule_line with Some v when v >= 0 && v <= 255 -> v | _ -> die "invalid rule" in
+  if not (valid_seed seed) then die "invalid initial conditions";
+  let generations = match parse_int gen_line with Some v when v >= 1 -> v | _ -> die "invalid generations" in
+  let n = String.length seed in
+  let width =
+    try
+      let w = n + 2 * generations in
+      if w < n then die "invalid generations" else w
+    with Invalid_argument _ -> die "invalid generations"
+  in
+  let table = Array.init 8 (fun i -> (rule lsr i) land 1) in
+  let even = rule land 1 = 0 in
+  let prev = Array.make width 0 in
+  let next_row = Array.make width 0 in
+  for i = 0 to n - 1 do
+    if seed.[i] = '1' then prev.(generations + i) <- 1
+  done;
+  let (_ : int) = Sys.command "mkdir -p results" in
+  let path = Printf.sprintf "results/r%d_g%d_i%s_ocaml.pbm" rule generations seed in
+  let oc = try open_out_bin path with Sys_error _ -> die "cannot write output" in
+  Printf.fprintf oc "P1\n%d %d\n" width generations;
+  for gen = 0 to generations - 1 do
+    for j = 0 to width - 1 do
+      output_char oc (if prev.(j) = 0 then '0' else '1')
+    done;
+    output_char oc '\n';
+    if gen + 1 = generations then ()
+    else begin
+      Array.fill next_row 0 width 0;
+      let lo, hi =
+        if even then (generations - (gen + 1), generations + n + (gen + 1))
+        else (0, width)
+      in
+      for j = lo to hi - 1 do
+        let left = if j > 0 then prev.(j - 1) else 0 in
+        let right = if j + 1 < width then prev.(j + 1) else 0 in
+        let idx = (left lsl 2) lor (prev.(j) lsl 1) lor right in
+        next_row.(j) <- table.(idx)
+      done;
+      Array.blit next_row 0 prev 0 width
+    end
+  done;
+  close_out oc

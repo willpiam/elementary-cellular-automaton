@@ -2,99 +2,217 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
+#include <errno.h>
+#include <limits.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 
-#define MAX_INIT_LEN 1000
+static void die(const char *msg) {
+    fprintf(stderr, "%s\n", msg);
+    exit(1);
+}
 
-// Inline rule application for one cell
-static inline uint8_t apply_rule(const uint8_t *restrict prev, int j, const uint8_t rule[8]) {
-    int idx = (prev[j-1] << 2) | (prev[j] << 1) | prev[j+1];
-    return rule[idx];
+static char *read_line(FILE *fp) {
+    char *line = NULL;
+    size_t cap = 0;
+    ssize_t n = getline(&line, &cap, fp);
+    if (n < 0) {
+        free(line);
+        return NULL;
+    }
+    while (n > 0 && (line[n - 1] == '\n' || line[n - 1] == '\r'))
+        line[--n] = '\0';
+    return line;
+}
+
+static void trim(char *s) {
+    char *start = s;
+    size_t n;
+    while (*start == ' ' || *start == '\t')
+        start++;
+    if (start != s)
+        memmove(s, start, strlen(start) + 1);
+    n = strlen(s);
+    while (n > 0 && (s[n - 1] == ' ' || s[n - 1] == '\t'))
+        s[--n] = '\0';
+}
+
+static int parse_long(const char *s, long *out) {
+    char *end = NULL;
+    long v;
+    if (s == NULL || *s == '\0')
+        return -1;
+    errno = 0;
+    v = strtol(s, &end, 10);
+    if (errno != 0 || end == s || *end != '\0')
+        return -1;
+    *out = v;
+    return 0;
+}
+
+static int valid_seed(const char *s) {
+    const char *p;
+    if (s == NULL || *s == '\0')
+        return 0;
+    for (p = s; *p; ++p) {
+        if (*p != '0' && *p != '1')
+            return 0;
+    }
+    return 1;
 }
 
 int main(void) {
-    // Read input values from file
     FILE *input = fopen("input.txt", "r");
-    if (!input) {
-        perror("Error opening input.txt");
-        return 1;
-    }
+    char *rule_line, *seed, *gen_line, *line, *filename;
+    long rule_number, generations;
+    size_t n, name_len;
+    int width, g, init_len, even, gen, lo, hi, j;
+    uint8_t rule[8];
+    uint8_t *prev, *next, *tmp;
+    FILE *out;
 
-    int ruleNumber, generations;
-    char initial[MAX_INIT_LEN + 1];
-    if (fscanf(input, "%d %1000s %d", &ruleNumber, initial, &generations) != 3) {
-        fprintf(stderr, "Error: expected rule, initial string, and generations in input.txt\n");
-        fclose(input);
-        return 1;
-    }
+    if (!input)
+        die("cannot read input.txt");
+
+    rule_line = read_line(input);
+    seed = read_line(input);
+    gen_line = read_line(input);
     fclose(input);
+    if (!rule_line || !seed || !gen_line) {
+        free(rule_line);
+        free(seed);
+        free(gen_line);
+        die("invalid input");
+    }
+    trim(rule_line);
+    trim(gen_line);
 
-    int initLen = strlen(initial);
-    int width = initLen + 2 * generations;
-
-    // Prepare rule array on stack
-    uint8_t ruleBinary[8];
-    for (int i = 0; i < 8; i++) {
-        ruleBinary[i] = (ruleNumber >> i) & 1;
+    if (parse_long(rule_line, &rule_number) != 0 || rule_number < 0 || rule_number > 255) {
+        free(rule_line);
+        free(seed);
+        free(gen_line);
+        die("invalid rule");
+    }
+    if (!valid_seed(seed)) {
+        free(rule_line);
+        free(seed);
+        free(gen_line);
+        die("invalid initial conditions");
+    }
+    if (parse_long(gen_line, &generations) != 0 || generations < 1) {
+        free(rule_line);
+        free(seed);
+        free(gen_line);
+        die("invalid generations");
     }
 
-    // Allocate two rows and a line buffer
-    uint8_t *prev = calloc(width, 1);
-    uint8_t *curr = calloc(width, 1);
-    char    *lineBuf = malloc(width + 1);
-    if (!prev || !curr || !lineBuf) {
-        perror("Memory allocation failed");
-        return 1;
+    n = strlen(seed);
+    if (n > (size_t)INT_MAX || generations > (INT_MAX - (long)n) / 2) {
+        free(rule_line);
+        free(seed);
+        free(gen_line);
+        die("invalid generations");
     }
 
-    // Center initial pattern in the 'prev' buffer
-    int offset = generations;
-    for (int i = 0; i < initLen; i++) {
-        prev[offset + i] = (initial[i] == '1');
+    width = (int)n + 2 * (int)generations;
+    g = (int)generations;
+    init_len = (int)n;
+    even = (rule_number & 1) == 0;
+    for (j = 0; j < 8; j++)
+        rule[j] = (uint8_t)((rule_number >> j) & 1);
+
+    prev = calloc((size_t)width, 1);
+    next = calloc((size_t)width, 1);
+    line = malloc((size_t)width + 1);
+    if (!prev || !next || !line) {
+        free(prev);
+        free(next);
+        free(line);
+        free(rule_line);
+        free(seed);
+        free(gen_line);
+        die("out of memory");
+    }
+    for (j = 0; j < init_len; j++)
+        prev[g + j] = (uint8_t)(seed[j] == '1');
+
+    if (mkdir("results", 0755) != 0 && errno != EEXIST) {
+        free(prev);
+        free(next);
+        free(line);
+        free(rule_line);
+        free(seed);
+        free(gen_line);
+        die("cannot create results");
     }
 
-    // Ensure output directory exists
-    mkdir("results", 0755);
-
-    // Open PBM output file
-    char filename[MAX_INIT_LEN + 50];
-    snprintf(filename, sizeof(filename), "results/r%d_g%d_i%s_c.pbm", ruleNumber, generations, initial);
-    FILE *out = fopen(filename, "w");
+    name_len = n + 64;
+    filename = malloc(name_len);
+    if (!filename) {
+        free(prev);
+        free(next);
+        free(line);
+        free(rule_line);
+        free(seed);
+        free(gen_line);
+        die("out of memory");
+    }
+    snprintf(filename, name_len, "results/r%ld_g%ld_i%s_c.pbm", rule_number, generations, seed);
+    out = fopen(filename, "w");
+    free(filename);
     if (!out) {
-        perror("Error creating output file");
-        return 1;
+        free(prev);
+        free(next);
+        free(line);
+        free(rule_line);
+        free(seed);
+        free(gen_line);
+        die("cannot write output");
     }
 
-    // Write PBM header
-    fprintf(out, "P1\n%d %d\n", width, generations);
-
-    // Main generation loop: write each row then compute next
-    for (int g = 0; g < generations; ++g) {
-        // Serialize current row to ASCII in one buffer
-        for (int j = 0; j < width; ++j) {
-            lineBuf[j] = prev[j] ? '1' : '0';
+    fprintf(out, "P1\n%d %d\n", width, g);
+    for (gen = 0; gen < g; gen++) {
+        for (j = 0; j < width; j++)
+            line[j] = prev[j] ? '1' : '0';
+        line[width] = '\n';
+        if (fwrite(line, 1, (size_t)width + 1, out) != (size_t)width + 1) {
+            fclose(out);
+            free(prev);
+            free(next);
+            free(line);
+            free(rule_line);
+            free(seed);
+            free(gen_line);
+            die("cannot write output");
         }
-        lineBuf[width] = '\n';
-        fwrite(lineBuf, 1, width + 1, out);
+        if (gen + 1 == g)
+            break;
 
-        // Compute next generation into 'curr'
-        for (int j = 1; j < width - 1; ++j) {
-            curr[j] = apply_rule(prev, j, ruleBinary);
+        memset(next, 0, (size_t)width);
+        if (even) {
+            lo = g - (gen + 1);
+            hi = g + init_len + (gen + 1);
+        } else {
+            lo = 0;
+            hi = width;
         }
-        // Edges remain zero
-
-        // Swap buffers
-        uint8_t *tmp = prev;
-        prev = curr;
-        curr = tmp;
+        for (j = lo; j < hi; j++) {
+            int left = j > 0 ? prev[j - 1] : 0;
+            int right = j + 1 < width ? prev[j + 1] : 0;
+            int idx = (left << 2) | (prev[j] << 1) | right;
+            next[j] = rule[idx];
+        }
+        tmp = prev;
+        prev = next;
+        next = tmp;
     }
 
-    // Clean up
     fclose(out);
     free(prev);
-    free(curr);
-    free(lineBuf);
-
+    free(next);
+    free(line);
+    free(rule_line);
+    free(seed);
+    free(gen_line);
     return 0;
 }

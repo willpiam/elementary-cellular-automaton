@@ -3,7 +3,7 @@
         "label": "C",
         "version_indicator": "c",
         "commands": {
-            "build": "gcc Main.c -o results/programc",
+            "build": "gcc -O3 Main.c -o results/programc",
             "run": "./results/programc"
         },
         "enabled": 1,
@@ -14,7 +14,7 @@
         "label": "C#",
         "version_indicator": "csharp",
         "commands": {
-            "build": "mcs -out:results/programcsharp Main.cs",
+            "build": "mcs -optimize+ -out:results/programcsharp Main.cs",
             "run": "mono results/programcsharp"
         },
         "enabled": 1,
@@ -25,7 +25,7 @@
         "label": "C++",
         "version_indicator": "cpp",
         "commands": {
-            "build": "g++ Main.cpp -o results/programcpp",
+            "build": "g++ -O3 Main.cpp -o results/programcpp",
             "run": "./results/programcpp"
         },
         "enabled": 1,
@@ -36,7 +36,7 @@
         "label": "Rust",
         "version_indicator": "rust",
         "commands": {
-            "build": "rustc Main.rs -o results/programrust",
+            "build": "rustc -C opt-level=3 Main.rs -o results/programrust",
             "run": "./results/programrust"
         },
         "enabled": 1,
@@ -47,8 +47,8 @@
         "label": "Go",
         "version_indicator": "go",
         "commands": {
-            "build": "",
-            "run": "go run Main.go"
+            "build": "go build -o results/programgo Main.go",
+            "run": "./results/programgo"
         },
         "enabled": 1,
         "extra_data": [],
@@ -113,7 +113,7 @@
         "label": "Haskell",
         "version_indicator": "haskell",
         "commands": {
-            "build": "ghc -odir haskellbuild -hidir haskellbuild Main.hs -o results/programhaskell",
+            "build": "ghc -O2 -odir haskellbuild -hidir haskellbuild Main.hs -o results/programhaskell",
             "run": "./results/programhaskell"
         },
         "enabled": 1,
@@ -135,7 +135,7 @@
         "label": "Fortran",
         "version_indicator": "fortran",
         "commands": {
-            "build": "gfortran -o results/programfortran Main.f90",
+            "build": "gfortran -O3 -o results/programfortran Main.f90",
             "run": "./results/programfortran"
         },
         "enabled": 1,
@@ -146,8 +146,8 @@
         "label": "Scala",
         "version_indicator": "scala",
         "commands": {
-            "build": "",
-            "run": "scala Main.scala --main-class CellularAutomaton"
+            "build": "mkdir -p results/scala && scalac -d results/scala Main.scala",
+            "run": "scala run --main-class CellularAutomaton --classpath results/scala"
         },
         "enabled": 1,
         "extra_data": [],

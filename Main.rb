@@ -1,77 +1,70 @@
-def rule_to_binary_array(rule_number)
-  (0..7).map { |i| (rule_number >> i) & 1 }
+def die(msg)
+  warn msg
+  exit 1
 end
 
-def calculate_cell(left, center, right, rule)
-  index = (left << 2) | (center << 1) | right
-  rule[index]
+def parse_int(text)
+  t = text.strip
+  sign = 1
+  digits = t
+  if t.start_with?('-')
+    sign = -1
+    digits = t[1..]
+  end
+  return nil if digits.nil? || digits.empty? || digits !~ /\A\d+\z/
+  sign * digits.to_i
 end
 
-def run_cellular_automaton(rule, generations, initial_cells)
-  cells = initial_cells.dup
-  ca = []
+def read_inputs(path)
+  lines = File.readlines(path, chomp: true)
+  die('invalid input') if lines.length < 3
+  rule = parse_int(lines[0])
+  seed = lines[1]
+  generations = parse_int(lines[2])
+  die('invalid rule') if rule.nil? || rule < 0 || rule > 255
+  die('invalid initial conditions') if seed.empty? || seed !~ /\A[01]+\z/
+  die('invalid generations') if generations.nil? || generations < 1
+  [rule, seed, generations]
+rescue Errno::ENOENT
+  die('cannot read input.txt')
+end
 
-  (generations - 1).times do
-    # Add limited padding of 2 zeros to each side
-    extended_cells = [0, 0] + cells + [0, 0]
-    ca << cells.dup  # Store the current generation
+def run(rule, generations, seed, file)
+  n = seed.length
+  width = n + 2 * generations
+  table = (0..7).map { |i| (rule >> i) & 1 }
+  even = rule.even?
+  prev = Array.new(width, 0)
+  nxt = Array.new(width, 0)
+  seed.each_char.with_index do |ch, i|
+    prev[generations + i] = 1 if ch == '1'
+  end
+  file.write("P1\n#{width} #{generations}\n")
+  generations.times do |gen|
+    file.write(prev.map { |cell| cell == 0 ? '0' : '1' }.join)
+    file.write("\n")
+    break if gen + 1 == generations
 
-    next_generation = []
-    (1...extended_cells.length - 1).each do |j|
-      neighborhood = extended_cells[j-1..j+1].join
-      next_generation << calculate_cell(
-        extended_cells[j-1],
-        extended_cells[j],
-        extended_cells[j+1],
-        rule
-      )
+    nxt.fill(0)
+    lo, hi = if even
+               [generations - (gen + 1), generations + n + (gen + 1)]
+             else
+               [0, width]
+             end
+    (lo...hi).each do |j|
+      left = j > 0 ? prev[j - 1] : 0
+      right = j + 1 < width ? prev[j + 1] : 0
+      nxt[j] = table[(left << 2) | (prev[j] << 1) | right]
     end
-    cells = next_generation
+    prev, nxt = nxt, prev
   end
-
-  ca << cells
-  ca
-end
-
-def pad_image_data(image_data, total_width)
-  image_data.map do |row|
-    padding_length = (total_width - row.length) / 2
-    padding = [0] * padding_length
-    padding + row + padding
-  end
-end
-
-def read_inputs_from_file(file_path)
-  lines = File.readlines(file_path)
-  rule_number = lines[0].strip.to_i
-  initial_conditions = lines[1].strip
-  generations = lines[2].strip.to_i
-  [rule_number, initial_conditions, generations]
 end
 
 def main
-  rule_number, initial_conditions, generations = read_inputs_from_file('input.txt')
-
-  rule_binary = rule_to_binary_array(rule_number)
-  cells = initial_conditions.chars.map(&:to_i)
-
-  ca = run_cellular_automaton(rule_binary, generations, cells)
-
-  # Determine the total width for the final padding
-  final_width = initial_conditions.length + 2 * generations
-  padded_ca = pad_image_data(ca, final_width)
-
-  # Create results directory if it doesn't exist
+  rule, seed, generations = read_inputs('input.txt')
   Dir.mkdir('results') unless Dir.exist?('results')
-
-  # Write to file
-  File.open("results/r#{rule_number}_g#{generations}_i#{initial_conditions}_ruby.pbm", 'w') do |file|
-    file.puts "P1"
-    file.puts "#{final_width} #{generations}"
-    padded_ca.each do |row|
-      file.puts row.join
-    end
-  end
+  path = "results/r#{rule}_g#{generations}_i#{seed}_ruby.pbm"
+  File.open(path, 'wb') { |file| run(rule, generations, seed, file) }
 end
 
-main 
+main

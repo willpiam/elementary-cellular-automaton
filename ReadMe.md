@@ -4,7 +4,7 @@
 ## Run a specific version
 Run C code:
 
-    gcc Main.c -o results/programc ; ./results/programc
+    gcc -O3 Main.c -o results/programc ; ./results/programc
 
 Run TypeScript code:
 
@@ -12,11 +12,11 @@ Run TypeScript code:
 
 Run C++ code:
 
-    g++ Main.cpp -o results/programcpp ; ./results/programcpp
+    g++ -O3 Main.cpp -o results/programcpp ; ./results/programcpp
 
 Run Haskell code:
     
-    ghc -odir haskellbuild -hidir haskellbuild Main.hs -o results/programhaskell ; ./results/programhaskell 
+    ghc -O2 -odir haskellbuild -hidir haskellbuild Main.hs -o results/programhaskell ; ./results/programhaskell 
 
 Run Python code: 
 
@@ -24,19 +24,19 @@ Run Python code:
 
 Run C# code:
 
-    mcs -out:results/programcsharp Main.cs ; mono results/programcsharp
+    mcs -optimize+ -out:results/programcsharp Main.cs ; mono results/programcsharp
 
 Run Rust code:
 
-    rustc Main.rs -o results/programrust ; ./results/programrust 
+    rustc -C opt-level=3 Main.rs -o results/programrust ; ./results/programrust 
 
 Run Scala 3 code:
 
-    scalac -d ./results Main.scala ; scala -cp ./results CellularAutomaton
+    mkdir -p results/scala && scalac -d results/scala Main.scala ; scala run --main-class CellularAutomaton --classpath results/scala
 
 Run Go code:
 
-    go run Main.go
+    go build -o results/programgo Main.go ; ./results/programgo
 
 Run Clojure code:
 
@@ -84,7 +84,7 @@ Run Lua code:
 
 Run Fortran code:
 
-    gfortran -o results/programfortran Main.f90 ; ./results/programfortran
+    gfortran -O3 -o results/programfortran Main.f90 ; ./results/programfortran
 
 Run Wolfram Script code:
 
@@ -261,7 +261,12 @@ Its important to remember that this only reflects the speed of the implementatio
 
 ![A bar graph showing that Go beats Rust (but C beats Go)](media/go_beats_rust.png)
 
-The Go implementation beats the Rust implementation when run for 5000 generations.  
+The Go implementation beats the Rust implementation when run for 5000 generations.
+
+The picture files for rule 30 did not change: every enabled language still hashes to the same PBM as the previous C and Python output, so the images above were left as they are. They record older generation counts, not today's code. The chart below is from October 31, 2026. Each bar is the median of three runs of rule 30 from a single cell for 500 generations. The time before is git HEAD, using that revision's run command. The time after is the current code, with compilation left out of the measurement.
+
+![Speedup of each implementation after the October 31, 2026 revisions](media/speedup_2026-10-31.png)  
+
 ## compareResults.sh
 
 This program takes two files and returns true if they hash to the same value. This is useful for comparing the output of two different implementations of the same cellular automaton program.
@@ -286,26 +291,11 @@ The program will either print "same" or "different" to the terminal.
 2. A multi-threaded version written in C would be cool
 
 ## Improvements 
-1. Some versions of the program are doing more computations than necessary as they are computing cells which are unaffected by the initial conditions. The current python implementation does not have the flaw. Because of this all other versions need to be updated to reflect the logic of the python implementation. 
+The enabled implementations write the same P1 image.
 
-    A checklist of languages to update:
-    - [x] Python
-    - [x] C++
-    - [x] TypeScript
-    - [x] C
-    - [ ] Haskell
-    - [ ] Go
-    - [ ] Scala
-    - [ ] Rust
-    - [x] Java
-    - [ ] Clojure
-    - [x] C#
+The picture is `seed length + 2 * generations` cells wide and `generations` rows tall. The seed is centered on the first row. Every cell is the rule applied to its three parents, and a parent outside the frame is 0. When the rule is even, neighborhood `000` stays 0, so cells outside the light cone are left 0 and are not updated. When the rule is odd, `000` becomes 1 and the whole frame is updated, including the edges. A rule outside 0..255, a generation count below 1, or a seed that is empty or contains anything other than `0` and `1` is rejected.
 
-2. The C version of the program calls malloc in a loop to construct essentially a 2D array. runCellularAutomaton returns char\*\*. This can potentually be reduced to a single malloc call. This solution would involve changing the return type of runCellularAutomaton to char\* and using pointer arithmetic to access the elements of the array.
-
-3. The clojure version of the image does not hash to the same value as the other versions when the initial conditions are longer than a single cell.
-
-4. The C++ version of the program is the third fastest, but it's still significantly slower than the C and Rust versions. If my old prof Garth Santor were here he'd say it's because my C++ code is lacking, and he'd remind me that C++ should be able to out perform C. 
+`Compare.py` times only the run command. C, C++, Rust, Fortran, and Haskell are built with optimizations (`-O3`, `-C opt-level=3`, or `-O2`). Go is built with `go build` before the timed run, and Scala is compiled with `scalac` into `results/scala` before `scala run` loads those classes. The C program keeps two byte rows rather than allocating the whole image. 
 
 ## Todo
 

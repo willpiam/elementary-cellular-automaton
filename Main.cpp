@@ -1,76 +1,121 @@
-#include <iostream>
+#include <cstdint>
+#include <cstdlib>
 #include <fstream>
-#include <vector>
+#include <iostream>
 #include <string>
-#include <array> 
+#include <vector>
 
-std::array<int, 8> rule_to_binary_array(const int rule_number) {
-    std::array<int, 8> result;
-    for (int i = 0; i < 8; ++i)
-        result[i] = (rule_number >> i) & 1;
-    return result;
+static void die(const char *msg) {
+    std::cerr << msg << '\n';
+    std::exit(1);
 }
 
-int calculate_cell(const int left, const int center, const int right, const std::array<int, 8>& rule) {
-    int pattern = (left << 2) | (center << 1) | right;
-    return rule[pattern];
+static void trim(std::string &s) {
+    size_t start = 0;
+    while (start < s.size() && (s[start] == ' ' || s[start] == '\t'))
+        start++;
+    size_t end = s.size();
+    while (end > start && (s[end - 1] == ' ' || s[end - 1] == '\t' || s[end - 1] == '\r'))
+        end--;
+    s = s.substr(start, end - start);
 }
 
-std::vector<std::vector<int>> run_cellular_automaton(const std::array<int, 8>& rule, const int generations, const std::vector<int>& initial_cells) {
-    int width = static_cast<int>(initial_cells.size()) + 2 * generations;
-    std::vector<std::vector<int>> ca(generations, std::vector<int>(width, 0));
-    int offset = generations;
-    // initialize first generation
-    for (size_t i = 0; i < initial_cells.size(); ++i)
-        ca[0][offset + i] = initial_cells[i];
-    // compute subsequent generations
-    for (int g = 1; g < generations; ++g) {
-        const auto& prev = ca[g - 1];
-        auto& curr = ca[g];
-        for (int j = 0; j < width; ++j) {
-            int left = (j > 0) ? prev[j - 1] : 0;
-            int center = prev[j];
-            int right = (j + 1 < width) ? prev[j + 1] : 0;
-            curr[j] = rule[(left << 2) | (center << 1) | right];
-        }
+static bool parse_long(const std::string &s, long &out) {
+    if (s.empty())
+        return false;
+    char *end = nullptr;
+    long v = std::strtol(s.c_str(), &end, 10);
+    if (end == s.c_str() || *end != '\0')
+        return false;
+    out = v;
+    return true;
+}
+
+static bool valid_seed(const std::string &s) {
+    if (s.empty())
+        return false;
+    for (char c : s) {
+        if (c != '0' && c != '1')
+            return false;
     }
-    return ca;
-}
-
-void read_inputs_from_file(const std::string& file_path, int& rule_number, std::string& initial_conditions, int& generations) {
-    std::ifstream file(file_path);
-    if (file.is_open()) {
-        file >> rule_number;
-        file.ignore();
-        std::getline(file, initial_conditions);
-        file >> generations;
-    }
+    return true;
 }
 
 int main() {
-    int rule_number;
-    std::string initial_conditions;
-    int generations;
-    read_inputs_from_file("input.txt", rule_number, initial_conditions, generations);
+    std::ifstream input("input.txt");
+    if (!input)
+        die("cannot read input.txt");
 
-    auto rule_binary = rule_to_binary_array(rule_number);
-    std::vector<int> cells;
-    for (char c : initial_conditions) {
-        cells.push_back(c - '0');
-    }
+    std::string rule_line, seed, gen_line;
+    if (!std::getline(input, rule_line) || !std::getline(input, seed) || !std::getline(input, gen_line))
+        die("invalid input");
+    if (!seed.empty() && seed.back() == '\r')
+        seed.pop_back();
+    trim(rule_line);
+    trim(gen_line);
 
-    auto ca = run_cellular_automaton(rule_binary, generations, cells);
-    int final_width = static_cast<int>(initial_conditions.size()) + 2 * generations;
-    std::ofstream file("results/r" + std::to_string(rule_number) + "_g" + std::to_string(generations) + "_i" + initial_conditions + "_cpp.pbm");
-    if (file.is_open()) {
-        file << "P1\n" << final_width << " " << generations << "\n";
-        for (const auto& row : ca) {
-            for (int cell : row) {
-                file << cell;
-            }
-            file << "\n";
+    long rule_number = 0, generations = 0;
+    if (!parse_long(rule_line, rule_number) || rule_number < 0 || rule_number > 255)
+        die("invalid rule");
+    if (!valid_seed(seed))
+        die("invalid initial conditions");
+    if (!parse_long(gen_line, generations) || generations < 1)
+        die("invalid generations");
+
+    const long n = static_cast<long>(seed.size());
+    if (generations > (INT32_MAX - n) / 2)
+        die("invalid generations");
+
+    const int width = static_cast<int>(n + 2 * generations);
+    const int g = static_cast<int>(generations);
+    const int init_len = static_cast<int>(n);
+    const bool even = (rule_number & 1) == 0;
+
+    uint8_t rule[8];
+    for (int i = 0; i < 8; i++)
+        rule[i] = static_cast<uint8_t>((rule_number >> i) & 1);
+
+    std::vector<uint8_t> prev(width, 0), next(width, 0);
+    for (int i = 0; i < init_len; i++)
+        prev[g + i] = seed[i] == '1' ? 1 : 0;
+
+    if (std::system("mkdir -p results") != 0)
+        die("cannot create results");
+
+    const std::string path = "results/r" + std::to_string(rule_number) + "_g" + std::to_string(generations) + "_i" + seed + "_cpp.pbm";
+    std::ofstream out(path, std::ios::binary);
+    if (!out)
+        die("cannot write output");
+
+    out << "P1\n" << width << ' ' << g << '\n';
+    std::string line(static_cast<size_t>(width) + 1, '0');
+    line[width] = '\n';
+
+    for (int gen = 0; gen < g; gen++) {
+        for (int j = 0; j < width; j++)
+            line[j] = prev[j] ? '1' : '0';
+        out.write(line.data(), line.size());
+        if (!out)
+            die("cannot write output");
+        if (gen + 1 == g)
+            break;
+
+        std::fill(next.begin(), next.end(), 0);
+        int lo, hi;
+        if (even) {
+            lo = g - (gen + 1);
+            hi = g + init_len + (gen + 1);
+        } else {
+            lo = 0;
+            hi = width;
         }
+        for (int j = lo; j < hi; j++) {
+            int left = j > 0 ? prev[j - 1] : 0;
+            int right = j + 1 < width ? prev[j + 1] : 0;
+            int idx = (left << 2) | (prev[j] << 1) | right;
+            next[j] = rule[idx];
+        }
+        std::swap(prev, next);
     }
-
     return 0;
 }

@@ -1,78 +1,110 @@
 module Main where
 
-import Numeric -- (showIntAtBase)
-import Data.Char -- (intToDigit)
+import Control.Exception (catch)
+import Control.Monad (forM_, when)
+import Data.Array.MArray (newArray, writeArray)
+import Data.Array.ST (runSTUArray)
+import Data.Array.Unboxed (UArray, (!))
+import Data.Bits ((.&.), shiftR)
+import Data.Char (isDigit, isSpace)
+import qualified Data.ByteString as BS
 import qualified Data.ByteString.Char8 as BC
+import System.Directory (createDirectoryIfMissing)
+import System.Exit (exitFailure)
+import System.IO (IOMode (WriteMode), hPutStrLn, stderr, withBinaryFile)
 
-calculateCell :: BC.ByteString -> BC.ByteString -> Char
-calculateCell pState rule =
-  case BC.unpack pState of
-    "111" -> BC.head rule
-    "110" -> rule `BC.index` 1
-    "101" -> rule `BC.index` 2
-    "100" -> rule `BC.index` 3
-    "011" -> rule `BC.index` 4
-    "010" -> rule `BC.index` 5
-    "001" -> rule `BC.index` 6
-    "000" -> rule `BC.index` 7
-    
-padZeros :: Int -> BC.ByteString 
-padZeros n = BC.concat [BC.pack "0" | _ <- [1..n]]
+die :: String -> IO a
+die msg = hPutStrLn stderr msg >> exitFailure
 
-binaryString :: Int -> BC.ByteString
-binaryString x = do
-  let bs = BC.pack $ showIntAtBase 2 intToDigit x ""
-  if BC.length bs >= 8 then bs
-    else do
-      let missingZeros = 8 - BC.length bs
-      BC.append (padZeros missingZeros) bs
+ioFailed :: IOError -> IO BC.ByteString
+ioFailed _ = die "cannot read input.txt"
 
-ensureLengthThree :: BC.ByteString -> BC.ByteString
-ensureLengthThree s 
- | BC.length s == 3 = s
- | otherwise = BC.append s (padZeros (3 - BC.length s))
+trim :: BC.ByteString -> BC.ByteString
+trim bs = BC.dropWhile isSpace (BC.reverse (BC.dropWhile isSpace (BC.reverse bs)))
 
-padGen :: BC.ByteString -> Int -> BC.ByteString
-padGen gen padTo = do
-  let missingZeros = padTo - (BC.length gen `quot` 2)
-  let zeros = padZeros missingZeros
-  BC.concat [zeros, gen, zeros]
+stripCR :: BC.ByteString -> BC.ByteString
+stripCR bs
+  | not (BC.null bs) && BC.last bs == '\r' = BC.init bs
+  | otherwise = bs
 
-generateLine :: BC.ByteString -> BC.ByteString -> BC.ByteString -> Int -> Int -> BC.ByteString
-generateLine previousLine rule currentLine numberOfGenerations initialConditionLength 
-  -- | BC.length currentLine == BC.length previousLine = padGen currentLine (numberOfGenerations - 1 + initialConditionLength)
-  | BC.length currentLine == BC.length previousLine = currentLine
-  | otherwise = do
-      let substr = BC.drop (BC.length currentLine - 1) (BC.take ((BC.length currentLine - 1)+3) previousLine) -- get substring of previous state
-      let psubstr = ensureLengthThree substr-- pad if needed to ensure length of three
-      let calulatedCell = calculateCell psubstr rule
-      let currentLineExtended = BC.append currentLine (BC.singleton calulatedCell)
-      generateLine previousLine rule currentLineExtended numberOfGenerations initialConditionLength
+parseInt :: BC.ByteString -> Maybe Int
+parseInt raw =
+  let t = trim raw
+      (neg, digits) = case BC.uncons t of
+        Just ('-', rest) -> (True, rest)
+        _ -> (False, t)
+  in if BC.null digits || not (BC.all isDigit digits)
+       then Nothing
+       else case reads (BC.unpack digits) of
+         [(value, "")] -> Just (if neg then -value else value)
+         _ -> Nothing
 
-generate :: BC.ByteString -> BC.ByteString -> Int -> Int -> BC.ByteString -> Int -> BC.ByteString
-generate previousLine rule generationCounter numberOfGenerations cellularAutomaton initialConditionLength 
-  | generationCounter >= numberOfGenerations = cellularAutomaton
-  | otherwise = do
-    let thisLine = generateLine previousLine rule BC.empty numberOfGenerations initialConditionLength
-    generate thisLine rule (generationCounter + 1) numberOfGenerations (BC.append cellularAutomaton (BC.append (BC.pack "\n") thisLine)) initialConditionLength
+validSeed :: BC.ByteString -> Bool
+validSeed bs = not (BC.null bs) && BC.all (\c -> c == '0' || c == '1') bs
+
+ruleTable :: Int -> UArray Int Int
+ruleTable rule = runSTUArray $ do
+  arr <- newArray (0, 7) 0
+  forM_ [0 .. 7] $ \i -> writeArray arr i ((rule `shiftR` i) .&. 1)
+  return arr
+
+initialRow :: Int -> Int -> BC.ByteString -> UArray Int Int
+initialRow width g seed = runSTUArray $ do
+  arr <- newArray (0, width - 1) 0
+  forM_ [0 .. BC.length seed - 1] $ \i ->
+    when (BC.index seed i == '1') $ writeArray arr (g + i) 1
+  return arr
+
+step :: UArray Int Int -> UArray Int Int -> Int -> Int -> Int -> Int -> Bool -> UArray Int Int
+step rule prev width n g gen even = runSTUArray $ do
+  next <- newArray (0, width - 1) 0
+  let (lo, hi) =
+        if even
+          then (g - (gen + 1), g + n + (gen + 1))
+          else (0, width)
+  forM_ [lo .. hi - 1] $ \j -> do
+    let left = if j > 0 then prev ! (j - 1) else 0
+        center = prev ! j
+        right = if j + 1 < width then prev ! (j + 1) else 0
+        idx = left * 4 + center * 2 + right
+    writeArray next j (rule ! idx)
+  return next
+
+rowBytes :: UArray Int Int -> Int -> BS.ByteString
+rowBytes arr width = BS.pack [if arr ! j /= 0 then 49 else 48 | j <- [0 .. width - 1]]
 
 main :: IO ()
 main = do
-  contents <- BC.readFile "input.txt"
-  let [sRule, initialConditionsRaw, slines] = BC.lines contents 
-
-  let rule = read (BC.unpack sRule) :: Int
-  let initialLength = BC.length initialConditionsRaw
-  let nlines = read (BC.unpack slines) :: Int
-
-  let initialConditions = padGen initialConditionsRaw (nlines + (initialLength `div` 2))
-  -- let initialConditions = padGen initialConditionsRaw (nlines + initialLength -1)
-
-  let lines = generate initialConditions (binaryString rule) 0 (nlines -1) initialConditions initialLength
-
-  let fileNamePrefix = BC.concat [BC.pack "results/r", BC.pack $ show rule, BC.pack "_g", slines, BC.pack "_i", initialConditionsRaw, BC.pack "_haskell"]
-
-  -- WRITE TO FILE SYSTEM AS IMAGE
-  let pbmText = BC.concat [BC.pack "P1\n", BC.pack $ show (BC.length initialConditions), BC.pack " ", BC.pack $ show nlines, BC.pack "\n", lines, BC.pack "\n"]
-
-  BC.writeFile (BC.unpack (BC.append fileNamePrefix (BC.pack ".pbm"))) pbmText
+  contents <- BC.readFile "input.txt" `catch` ioFailed
+  let ls = BC.split '\n' contents
+  when (length ls < 3) $ die "invalid input"
+  let ruleLine = head ls
+      seed = stripCR (ls !! 1)
+      genLine = ls !! 2
+  rule <- case parseInt ruleLine of
+    Just v | v >= 0 && v <= 255 -> return v
+    _ -> die "invalid rule"
+  when (not (validSeed seed)) $ die "invalid initial conditions"
+  generations <- case parseInt genLine of
+    Just v | v >= 1 -> return v
+    _ -> die "invalid generations"
+  let n = BC.length seed
+      g = generations
+  when (toInteger g > (toInteger (maxBound :: Int) - toInteger n) `div` 2) $ die "invalid generations"
+  let width = n + 2 * g
+      even = (rule .&. 1) == 0
+      ruleBits = ruleTable rule
+      start = initialRow width g seed
+      path = "results/r" ++ show rule ++ "_g" ++ show generations ++ "_i" ++ BC.unpack seed ++ "_haskell.pbm"
+      header = BC.pack ("P1\n" ++ show width ++ " " ++ show generations ++ "\n")
+      go handle prev gen
+        | gen >= g = return ()
+        | otherwise = do
+            BS.hPut handle (BS.snoc (rowBytes prev width) 10)
+            if gen + 1 == g
+              then return ()
+              else go handle (step ruleBits prev width n g gen even) (gen + 1)
+  createDirectoryIfMissing True "results"
+  withBinaryFile path WriteMode $ \handle -> do
+    BS.hPut handle header
+    go handle start 0
