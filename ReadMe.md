@@ -86,6 +86,10 @@ Run Fortran code:
 
     gfortran -O3 -o results/programfortran Main.f90 ; ./results/programfortran
 
+Run x86-64 Linux assembly:
+
+    gcc -nostdlib -static -o results/programasm Main.s ; ./results/programasm
+
 Run Wolfram Script code:
 
     wolframscript -f Main.wls
@@ -145,7 +149,7 @@ Output File format:
 - [ ] Lean (??)
 - [ ] Agda (??)
 - [ ] Idris (??)
-- [ ] assembly
+- [x] assembly
 - [ ] turing
 - [ ] small talk
 - [ ] PureScript
@@ -233,13 +237,13 @@ To enable the graphing functionalities you must have matplotlib installed. You c
 
 ### Run time analysis
 
-The charts below were measured on October 31, 2026. Every run is rule 30 from a single cell. Each bar or point is the median of three runs after one warmup. Compilation is left out of the measurement, and every enabled language wrote the same PBM. These times reflect these implementations, not the languages themselves.
+The charts below were measured on November 2, 2026. Every run is rule 30 from a single cell. Each bar or point is the median of three runs after one warmup. Compilation is left out of the measurement, and every enabled language wrote the same PBM. These times reflect these implementations, not the languages themselves.
 
-The following plot shows how the C program's run time grows with the number of generations.
+The following plot shows how the C and assembly programs' run times grow with the number of generations. The two stay together from 500 generations upward. At 100 and 250 generations the assembly program finishes sooner.
 
-![C run time against the number of generations](media/generations_vs_runtime.png)
+![C and assembly run time against the number of generations](media/generations_vs_runtime.png)
 
-Every enabled implementation at 1000 generations, fastest first. C is ahead, and Rust, C++, Go, and Fortran are the next cluster.
+Every enabled implementation at 1000 generations, fastest first. Assembly, Rust, and C are tied, and C++, Go, and Fortran are the next cluster.
 
 ![All implementations at 1000 generations, sorted by median run time](media/configurations_vs_runtime.png)
 
@@ -247,21 +251,21 @@ The same comparison at 2000 generations.
 
 ![All implementations at 2000 generations, sorted by median run time](media/configurations_vs_runtime_2000gen.png)
 
-The fastest five at 1000 generations. C is about half the time of the next four, which are bunched together: Rust, C++, Go, Fortran.
+The fastest five at 1000 generations. Assembly, Rust, and C are tied, then C++ and Go at about twice that time.
 
-![Fastest five at 1000 generations: C, then Rust, C++, Go, and Fortran](media/fast_five_1000.png)
+![Fastest five at 1000 generations: Assembly, Rust, and C, then C++ and Go](media/fast_five_1000.png)
 
-At 2000 generations, C, Rust, and Fortran are tied, then C++ and Go.
+At 2000 generations, Fortran, Assembly, and C are tied, then Go and C++.
 
-![Fastest five at 2000 generations: C, Rust, and Fortran tied, then C++ and Go](media/fast_five_2000.png)
+![Fastest five at 2000 generations: Fortran, Assembly, and C, then Go and C++](media/fast_five_2000.png)
 
-At 10,000 generations the runs are long enough to separate. C and Fortran are tied, then Rust, C#, and C++. C# is ahead of C++. Go is sixth, just behind C++.
+At 10,000 generations the runs are long enough to separate. C, Assembly, and Fortran are tied, then Rust and C#. C++ is sixth, just ahead of Go.
 
-![Fastest five at 10000 generations: C and Fortran, then Rust, C#, and C++](media/fast_five_10000.png)
+![Fastest five at 10000 generations: C, Assembly, and Fortran, then Rust and C#](media/fast_five_10000.png)
 
-At 5000 generations, C is faster than Rust, and Rust is faster than Go.
+At 5000 generations, Assembly and C are tied, then Rust, then Go.
 
-![C, Rust, and Go at 5000 generations](media/c_rust_go_5000.png)
+![Assembly, C, Rust, and Go at 5000 generations](media/c_rust_go_5000.png)
 
 The chart below is the before-and-after of the October 31, 2026 revisions, measured separately at 500 generations. The time before is git HEAD, using that revision's run command. The time after is the current code, with compilation left out of the measurement.
 

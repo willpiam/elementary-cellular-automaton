@@ -11,6 +11,19 @@
         "is_top": 1
     },
     {
+        "label": "Assembly",
+        "version_indicator": "asm",
+        "commands": {
+            "build": "gcc -nostdlib -static -o results/programasm Main.s",
+            "run": "./results/programasm"
+        },
+        "enabled": 1,
+        "extra_data": [
+            "x86-64 Linux"
+        ],
+        "is_top": 0
+    },
+    {
         "label": "C#",
         "version_indicator": "csharp",
         "commands": {
